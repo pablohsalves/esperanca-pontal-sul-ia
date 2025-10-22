@@ -3,29 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Esperança - Assistente de IA</title>
+    <title>Hope - Assistente de IA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
+    </head>
 <body>
     
-    <div id="chat-container">
-        <div id="chat-box">
-            <div class="mensagem ia">
-                {{ saudacao | safe }}
-            </div>
+    <div id="chat-box">
+        <div class="mensagem ia">
+            {{ saudacao | safe }}
+        </div>
+    </div>
+    
+    <div id="fixed-bottom-area">
+        <div id="input-area-wrapper">
+            <input type="text" id="pergunta-input" placeholder="Digite sua pergunta aqui..." autofocus>
+            
+            <button id="enviar-btn" aria-label="Enviar Mensagem">
+                &#10148; </button>
         </div>
         
-        <div id="fixed-bottom-area">
-            <div id="input-area">
-                <input type="text" id="pergunta-input" placeholder="Digite sua pergunta aqui..." autofocus>
-                <button id="enviar-btn">Enviar</button>
-            </div>
-            
-            <div id="aviso-ia">
-                O Hope pode cometer erros. Por isso, é bom checar as respostas.
-            </div>
+        <div id="aviso-ia">
+            O Hope pode cometer erros.<br>Por isso, é bom checar as respostas.
         </div>
-
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

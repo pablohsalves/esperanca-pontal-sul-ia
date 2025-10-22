@@ -2,12 +2,20 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input');
-    const enviarBtn = document.getElementById('enviar-btn');
+    // Agora capturamos o novo botão (que contém o ícone de seta)
+    const enviarBtn = document.getElementById('enviar-btn'); 
     const chatBox = document.getElementById('chat-box');
+
+    // Inicializa a rolagem para a mensagem inicial (saudação)
+    rolarParaBaixo(); 
 
     // Função para rolar para a mensagem mais recente
     function rolarParaBaixo() {
-        chatBox.scrollTop = chatBox.scrollHeight;
+        // Usa smooth scroll para fluidez na interação
+        chatBox.scrollTo({
+            top: chatBox.scrollHeight,
+            behavior: 'smooth'
+        });
     }
 
     // Função para adicionar uma nova bolha de mensagem ao chat
@@ -35,6 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Exibe a mensagem do usuário imediatamente
         adicionarMensagem(pergunta, 'usuario');
         input.value = ''; // Limpa o input
+        
+        // Desabilita o input e o botão para evitar envio duplicado enquanto a IA processa
         input.disabled = true;
         enviarBtn.disabled = true;
 
@@ -53,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 4. Verifica se a resposta foi bem-sucedida (código 200-299)
             if (!response.ok) {
-                // Se o status for 500 ou 400, lança um erro
+                // Se o status for erro, tenta pegar o JSON de erro do backend
                 const errorData = await response.json().catch(() => ({ erro: 'Erro de comunicação desconhecido.' }));
                 throw new Error(errorData.erro || `Erro HTTP: ${response.status}`);
             }
