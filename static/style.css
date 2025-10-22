@@ -113,7 +113,7 @@ body {
 }
 
 .usuario {
-    /* CORREÇÃO: Aplica a bolha SOMENTE ao usuário */
+    /* Aplica a bolha SOMENTE ao usuário */
     margin-left: auto; 
     margin-right: 0;
     background-color: var(--color-user-bubble);
@@ -124,7 +124,7 @@ body {
 }
 
 .ia {
-    /* CORREÇÃO: Remove a bolha da IA - Apenas texto */
+    /* Remove a bolha da IA - Apenas texto */
     margin-right: auto; 
     margin-left: 0;
     background-color: transparent; 
@@ -259,13 +259,14 @@ body {
     }
 
     #input-area-wrapper {
-        /* CORREÇÃO FINAL: Aumenta o respiro lateral para 15px */
-        padding: 0 15px; 
+        /* AJUSTE FINAL CRÍTICO: 20px de respiro lateral para não encostar nas bordas */
+        padding: 0 20px; 
     }
 
     /* ÍCONES MOBILE (Ajusta a posição de acordo com o novo padding do wrapper) */
-    #microphone-btn { left: 25px; }
-    #enviar-btn { right: 25px; }
+    /* 20px (wrapper padding) + 8px (icon padding) = 28px. Ajustando para 30px no CSS */
+    #microphone-btn { left: 30px; } 
+    #enviar-btn { right: 30px; }
     
     #pergunta-input {
         padding: 12px 50px 12px 45px; 
