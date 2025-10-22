@@ -22,21 +22,25 @@
             
             <div class="chip-container suggestion-chips">
                 {% for key, link in links.items() %}
-                    <span class="chip {{ link.classe }} suggestion-chip" data-url="{{ link.url }}" data-text="{{ link.texto }}">
-                        {{ link.texto }}
-                    </span>
+                    {% if key != 'instagram' %} 
+                        <span class="chip {{ link.classe }} suggestion-chip" data-url="{{ link.url }}" data-text="{{ link.texto }}">
+                            {{ link.texto }}
+                        </span>
+                    {% endif %}
                 {% endfor %}
             </div>
             
         </div>
-        </div>
+    </div>
     
     <div id="fixed-bottom-area">
         <div id="input-area-wrapper">
             <button id="microphone-btn" aria-label="Falar com a Esperança">
                 <i class="fas fa-microphone"></i>
             </button>
+            
             <textarea id="pergunta-input" placeholder="Peça à Esperança" rows="1" autofocus></textarea>
+            
             <button id="enviar-btn" aria-label="Enviar Mensagem">
                 <i class="fas fa-paper-plane"></i>
             </button>

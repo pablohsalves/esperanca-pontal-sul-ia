@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL com Chips Dinâmicos e Correção de Rolagem
+// static/script.js - Versão FINAL com Chips Dinâmicos, Microfone e Correção de Rolagem
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -9,9 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let singleRowHeight = 0; 
     let recognition = null; 
 
-    // O ROLAMENTO AGORA É FEITO NO BODY/HTML, NÃO NA CHAT-BOX
+    // O ROLAMENTO É FEITO NO BODY/HTML
     function rolarParaBaixo() {
-        // Rola o corpo da página até o final
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
     
@@ -24,20 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.height = 'auto'; 
         input.style.height = input.scrollHeight + 'px';
         
-        // Rolagem após expandir o input
         rolarParaBaixo();
     }
     
     input.addEventListener('input', autoExpand);
-    // Chama para garantir o tamanho inicial correto
     autoExpand(); 
-    rolarParaBaixo(); // Garante que a tela carregue no fim
+    rolarParaBaixo(); 
 
     function adicionarMensagem(texto, remetente) {
         const div = document.createElement('div');
         div.className = `mensagem ${remetente}`;
-        const htmlContent = texto.replace(/\n/g, '<br>');
-        div.innerHTML = htmlContent;
+        // CRÍTICO: A resposta da IA já contém tags HTML de chips e <br>
+        div.innerHTML = texto; 
         chatBox.appendChild(div);
         rolarParaBaixo();
         return div;
@@ -51,11 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Remove os chips de sugestão do topo após a primeira interação
         const suggestionChipsContainer = document.querySelector('.suggestion-chips');
         if (suggestionChipsContainer) {
-            suggestionChipsContainer.style.display = 'none';
+            // Garante que a primeira interação remova os botões de boas-vindas
+            suggestionChipsContainer.style.display = 'none'; 
         }
 
         // 1. Exibe a mensagem do usuário
-        adicionarMensagem(pergunta, 'usuario');
+        adicionarMensagem(pergunta, 'usuario'); 
         
         // 2. Reseta o input e desabilita
         input.value = ''; 
@@ -63,12 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         input.disabled = true;
         enviarBtn.disabled = true;
+        microphoneBtn.disabled = true;
 
-        // 3. Adiciona o indicador de carregamento (Pensando...)
+        // 3. Adiciona o indicador de carregamento
         const loadingDiv = adicionarMensagem('<span class="loading-indicator"></span>Esperança está processando...', 'ia');
 
         try {
-            // 4. Envia a requisição para o endpoint /api/chat
+            // 4. Envia a requisição
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -88,7 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // 6. Exibe a resposta final da IA
-            adicionarMensagem(data.resposta, 'ia');
+            // O texto retornado da IA já contém a formatação HTML com os chips
+            adicionarMensagem(data.resposta, 'ia'); 
 
         } catch (error) {
             if(loadingDiv.parentNode) {
@@ -101,21 +101,73 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (erroDisplay.includes('Failed to fetch')) {
                 erroDisplay = "Erro de conexão: Não foi possível alcançar o servidor.";
             }
-            adicionarMensagem(`Erro: ${erroDisplay}`, 'ia');
+            // Usa o texto de erro dentro da tag <p>
+            adicionarMensagem(`<p>Erro: ${erroDisplay}</p>`, 'ia'); 
             
         } finally {
             // 7. Reabilita e foca
             input.disabled = false;
             enviarBtn.disabled = false;
+            microphoneBtn.disabled = false;
             input.focus();
             rolarParaBaixo();
         }
     }
     
-    // --- Lógica de Reconhecimento de Fala (Omitida por brevidade, mas mantida no arquivo) ---
-    // ... (Código de Voz) ...
+    // --- LÓGICA DE RECONHECIMENTO DE FALA (MICROFONE) ---
 
-    // --- Ativar o envio por Enter e Clique (Campo de texto) ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'pt-BR'; 
+        recognition.interimResults = false; 
+        recognition.maxAlternatives = 1;
+
+        microphoneBtn.addEventListener('click', () => {
+            if (microphoneBtn.classList.contains('recording')) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+
+        recognition.onstart = () => {
+            microphoneBtn.classList.add('recording');
+            microphoneBtn.style.color = '#ff5555'; 
+            input.placeholder = 'Escutando... Fale agora.';
+            input.disabled = true;
+            enviarBtn.disabled = true;
+        };
+
+        recognition.onresult = (event) => {
+            const speechResult = event.results[0][0].transcript;
+            input.value = speechResult;
+            enviarMensagem(); 
+        };
+
+        recognition.onend = () => {
+            microphoneBtn.classList.remove('recording');
+            microphoneBtn.style.color = 'var(--color-highlight)'; 
+            input.placeholder = 'Peça à Esperança';
+            input.disabled = false;
+            enviarBtn.disabled = false;
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Erro no reconhecimento de voz:', event.error);
+            // Mensagem de erro visível para o usuário
+            if (event.error === 'not-allowed') {
+                 alert('Acesso ao microfone negado. Verifique as permissões do seu navegador.');
+            } 
+            recognition.onend(); 
+        };
+
+    } else {
+        microphoneBtn.style.display = 'none';
+    }
+    
+    // --- Lógica de Envio (Enter e Clique) ---
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) { 
             e.preventDefault(); 
@@ -125,9 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     enviarBtn.addEventListener('click', enviarMensagem);
     
-    // --- Lógica para Chips/Botões Clicáveis (Chat Box e Sugestões) ---
+    // --- Lógica para Chips/Botões Clicáveis (Abre URL ou Envia Pergunta) ---
     chatBox.addEventListener('click', (e) => {
-        const chip = e.target.closest('.chip');
+        // Encontra o chip mais próximo do clique
+        const chip = e.target.closest('.chip'); 
         if (chip) {
             const url = chip.getAttribute('data-url');
             const isSuggestion = chip.classList.contains('suggestion-chip');
@@ -140,13 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Chip de Sugestão (Botão de Boas-vindas)
                     const text = chip.getAttribute('data-text');
                     
-                    // Se for um link de navegação interno, apenas navega (ex: Horários)
                     if (url.startsWith('/')) {
+                        // Navegação interna (ex: /#horarios)
                         window.location.href = url;
                     } else {
-                        // Para todos os outros, preenche o input e envia
+                        // Chips que devem enviar uma pergunta ao chat
                         let perguntaSugerida;
                         
+                        // Lógica para criar uma pergunta a partir do texto do chip
                         if (text.includes("WhatsApp")) {
                              perguntaSugerida = "Qual é o número de WhatsApp da igreja?";
                         } else if (text.includes("Mapa")) {
@@ -154,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else if (text.includes("Horários")) {
                              perguntaSugerida = "Quais são os horários dos cultos?";
                         } else {
-                             // Fallback
                              perguntaSugerida = `Gostaria de saber mais sobre ${text.toLowerCase()}.`;
                         }
 

@@ -1,4 +1,4 @@
-# assistente_avancada.py (v3.0 - REVISADO)
+# assistente_avancada.py (v4.0 - FINAL)
 
 from google import genai
 from google.genai import types
@@ -6,7 +6,6 @@ import os
 import json
 
 class ParceiroDeFeAvancado:
-    # Adicionamos o parâmetro 'contatos'
     def __init__(self, modelo='gemini-2.5-flash', arquivo_conhecimento='conhecimento_esperancapontalsul.txt', contatos=None):
         self.modelo = modelo
         self.client = self._iniciar_cliente()
@@ -19,7 +18,6 @@ class ParceiroDeFeAvancado:
         """Inicializa o cliente Gemini usando a chave de ambiente."""
         api_key = os.getenv('GEMINI_API_KEY')
         if not api_key:
-            # Lançamos o ValueError para que o app_web_avancada.py possa capturar
             raise ValueError("A variável de ambiente 'GEMINI_API_KEY' não está configurada.")
         return genai.Client(api_key=api_key)
 
@@ -35,24 +33,22 @@ class ParceiroDeFeAvancado:
     def _criar_configuracao_gemini(self):
         """Cria as configurações de sistema e safety_settings."""
         
-        # Gera a lista de instruções de chips dinamicamente
+        # 1. Geração das instruções de chips dinamicamente a partir do JSON
         instrucoes_chips = []
         for chave, dados in self.contatos.items():
-            # Usa o template de chip baseado no JSON de contatos
+            # Sintaxe do chip HTML que o modelo DEVE usar
             instrucoes_chips.append(f" - Para '{chave}' (ex: número, endereço): use <span class=\"chip {dados['classe']}\" data-url=\"{dados['url']}\">{dados['texto']}</span>")
             
         chips_str = "\n".join(instrucoes_chips)
         
-        # 1. Instrução de Sistema (Persona e Grounding) - REVISADA
+        # 2. Instrução de Sistema (Persona, Regras e Grounding)
         instrucao_sistema = (
             "Você é a Esperança, uma assistente virtual e parceira de fé da Igreja Esperança Pontal Sul."
             "Seu principal objetivo é fornecer respostas que refletem os ensinamentos cristãos e a doutrina da igreja."
-            "Use o contexto fornecido sobre a igreja para responder a perguntas específicas sobre a Igreja Esperança Pontal Sul."
             "Mantenha um tom acolhedor, inspirador e respeitoso. Seja concisa, mas completa."
             
-            "**FORMATO DE LINKS/AÇÕES:** Sempre que citar informações de contato ou localização, você DEVE usar a formatação HTML de CHIP/BOTÃO CLICÁVEL."
-            "**SINTAXE DEVE SER:** <span class=\"chip [tipo]\" data-url=\"https://www.collinsdictionary.com/dictionary/spanish-english/completa\">Texto do Botão</span>"
-            "Use quebras de linha (<br>) ou espaços para separar os chips do texto."
+            "**FORMATO DE LINKS/AÇÕES (CRÍTICO):** Sempre que citar informações de contato ou localização que estejam listadas abaixo, você DEVE usar a formatação HTML de CHIP/BOTÃO CLICÁVEL."
+            "Use quebras de linha (br) ou espaços para separar os chips do texto."
             
             f"\n**Instruções Específicas de Chips (Baseado em contatos_igreja.json):**\n{chips_str}\n"
             
@@ -62,7 +58,7 @@ class ParceiroDeFeAvancado:
             f"Contexto da Igreja: {self.conhecimento_texto}" 
         )
         
-        # 2. Safety Settings 
+        # 3. Safety Settings (Configurações de Segurança)
         safety_settings = [
             types.SafetySetting(
                 category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -108,7 +104,6 @@ class ParceiroDeFeAvancado:
                 for item in historico_serializado
             ]
         except Exception:
-            # Em caso de erro, inicia um histórico vazio para tentar continuar
             historico_objetos = []
             
         # 2. Criar a sessão de chat com as configurações

@@ -1,4 +1,4 @@
-# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v3.0 - REVISADO)
+# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v4.0 - FINAL)
 
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import json
@@ -14,12 +14,13 @@ load_dotenv()
 
 # --- CONFIGURAÇÃO DE SEGURANÇA E AMBIENTE ---
 app = Flask(__name__)
-# Certifique-se de que esta chave está definida no seu .env
+# CRÍTICO: Chave secreta carregada do .env ou Render
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'chave_padrao_muito_segura_troque_isso') 
 
 # Credenciais de Admin carregadas do ambiente
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
-# Carrega o HASH da senha como string
+# Carrega o HASH da senha como string, convertendo para bytes
+# O VALOR NO RENDER DEVE SER O HASH PURO, SEM ASPAS!
 ADMIN_PASSWORD_HASH = os.getenv('ADMIN_PASSWORD_HASH', '').encode('utf-8') 
 
 # --- CONFIGURAÇÃO DE LOGS ---
@@ -43,7 +44,8 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get('logged_in') != True:
-            return redirect(url_for('login', next=request.url))
+            # Redireciona para o login, passando a URL atual como 'next'
+            return redirect(url_for('login', next=request.url)) 
         return f(*args, **kwargs)
     return decorated_function
 
@@ -55,8 +57,6 @@ def ler_conhecimento_atual():
             return f.read()
     except FileNotFoundError:
         return "# Arquivo de conhecimento não encontrado. Conteúdo padrão de fallback."
-    except Exception as e:
-        return f"ERRO ao ler o arquivo: {e}"
 
 def salvar_novo_conhecimento(novo_conteudo):
     """Sobrescreve o arquivo de conhecimento com o novo conteúdo."""
@@ -77,25 +77,23 @@ def carregar_links_contatos():
             return json.load(f)
     except Exception as e:
         logger.error(f"ERRO ao carregar links de contatos: {e}")
-        # Retorna um dicionário vazio em caso de erro para não quebrar a aplicação
         return {}
 
 
 # --- 2. INICIALIZAÇÃO DA ASSISTENTE ---
 
 try:
-    # Passamos os links e contatos para a assistente
+    # A assistente é inicializada uma única vez na inicialização do Flask
     assistente = ParceiroDeFeAvancado(contatos=carregar_links_contatos())
 except ValueError as e:
     logger.critical(f"ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. {e}")
-    # Se a IA não iniciar, as rotas de chat darão erro, mas o admin e index devem carregar.
 
 
 # ----------------------------------------------------
 # 3. ROTAS DO FLASK
 # ----------------------------------------------------
 
-# --- Rotas de Autenticação ---
+# --- Rotas de Autenticação (CORRIGIDA) ---
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def login():
@@ -103,25 +101,38 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # O password é do formulário (string), o hash é do ambiente (bytes)
+        if not ADMIN_USERNAME or not ADMIN_PASSWORD_HASH:
+             return render_template('login.html', mensagem="Erro de Configuração: O nome de usuário ou HASH da senha não estão definidos no ambiente do servidor (Render).")
+
         try:
+            # CRÍTICO: Verifica se o HASH tem tamanho razoável antes de tentar decodificar/comparar
+            if len(ADMIN_PASSWORD_HASH) < 60:
+                 raise TypeError("HASH da senha muito curto. Verifique se o valor da variável de ambiente no Render está correto e sem aspas.")
+
             if (username == ADMIN_USERNAME and 
                 bcrypt.checkpw(password.encode('utf-8'), ADMIN_PASSWORD_HASH)):
                 
                 session['logged_in'] = True
                 next_url = request.args.get('next') or url_for('admin_conhecimento')
-                return redirect(next_url)
+                
+                return redirect(next_url) 
             else:
                 return render_template('login.html', mensagem="Nome de usuário ou senha incorretos.")
-        except Exception:
-            # Caso o ADMIN_PASSWORD_HASH não esteja configurado corretamente (erro de bytes/tipo)
-            return render_template('login.html', mensagem="Erro de configuração. Verifique as variáveis de ambiente (HASH).")
-            
+                
+        except (TypeError, ValueError) as e:
+            logger.error(f"Erro ao checar a senha (bcrypt): {e}")
+            return render_template('login.html', mensagem=f"Erro de Configuração CRÍTICO: O ADMIN_PASSWORD_HASH está mal formado. Erro: {e}. Verifique a variável de ambiente no Render.")
+        except Exception as e:
+            logger.error(f"Erro desconhecido durante o login: {e}")
+            return render_template('login.html', mensagem="Erro desconhecido durante o login.")
+
     return render_template('login.html')
 
 @app.route('/admin/logout')
 def logout():
     session.pop('logged_in', None)
+    # Limpa o histórico de chat para começar uma nova conversa
+    session.pop('historico', None) 
     return redirect(url_for('login'))
 
 
@@ -130,12 +141,14 @@ def logout():
 @app.route('/')
 def index():
     if 'historico' not in session:
-        session['historico'] = assistente.iniciar_novo_chat()
+        # Garante que a primeira mensagem da IA esteja no histórico
+        session['historico'] = assistente.iniciar_novo_chat() 
     
-    # Carrega os links para os chips dinâmicos
+    # Carrega os links para os chips de sugestão (botões iniciais)
     links = carregar_links_contatos()
     
     saudacao_html = assistente.enviar_saudacao()
+    # Usa o template CORRETO
     return render_template('chat_interface.html', saudacao=saudacao_html, links=links)
 
 
@@ -173,7 +186,6 @@ def chat():
     except Exception as e:
         # 4. Tratamento de Erros: Loga o erro
         logger.error(f"Erro na API Gemini para a pergunta '{pergunta[:50]}...': {e}", exc_info=True)
-        # Mantém a resposta padrão de erro definida acima
         pass 
     finally:
         # 5. Log de Conversa (Pergunta e Resposta)
@@ -193,11 +205,11 @@ def admin_conhecimento():
     if request.method == 'POST':
         novo_conteudo = request.form['novo_conhecimento']
         
-        # Tenta recarregar os contatos caso tenham sido alterados
+        # Recarrega os contatos e salva o novo conhecimento
         assistente.contatos = carregar_links_contatos()
         
         if salvar_novo_conhecimento(novo_conteudo):
-            # Recarrega o conhecimento e a configuração da IA com o novo texto
+            # CRÍTICO: Recarrega o conhecimento da assistente com o novo texto
             assistente.conhecimento_texto = ler_conhecimento_atual()
             mensagem = "Conhecimento atualizado com sucesso! (A IA recarregou o novo texto.)"
         else:
@@ -207,11 +219,13 @@ def admin_conhecimento():
     else:
         conteudo_atual = ler_conhecimento_atual()
 
+    # Usa o template CORRETO
     return render_template('admin_conhecimento.html', 
                            conteudo_atual=conteudo_atual, 
                            mensagem=mensagem)
 
 
 if __name__ == '__main__':
-    # Use '0.0.0.0' para garantir que funcione corretamente no Render
-    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5000), debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    # Usar '0.0.0.0' para garantir que funcione corretamente no Render
+    app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_ENV') == 'development')
