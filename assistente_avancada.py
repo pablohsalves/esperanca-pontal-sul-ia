@@ -42,7 +42,6 @@ class ParceiroDeFeAvancado:
             "Sempre que possível, use trechos da Bíblia ou do conhecimento fornecido para dar suporte às suas respostas."
             "Se a pergunta for de natureza complexa ou pessoal, incentive o usuário a buscar a liderança ou pastores."
             
-            # CORREÇÃO: Variável CORRETA
             f"Contexto da Igreja: {self.conhecimento_texto}" 
         )
         
@@ -74,7 +73,6 @@ class ParceiroDeFeAvancado:
         """Retorna o histórico inicial serializado com a saudação da IA."""
         primeira_mensagem_ia = types.Content(
             role="model",
-            # CORREÇÃO: Sintaxe correta do Gemini SDK
             parts=[types.Part.from_text(text=self.enviar_saudacao())] 
         )
         

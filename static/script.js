@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL com Textarea Auto-Expansível, Ícones e Envio Automático de Voz
+// static/script.js - Versão FINAL CORRIGIDA
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function autoExpand() {
         if (singleRowHeight === 0) {
             input.style.height = 'auto';
+            // Calcula a altura da primeira linha ao carregar
             singleRowHeight = input.scrollHeight;
         }
         
@@ -42,8 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function enviarMensagem() {
-        // Lógica de envio da mensagem (mantida igual)
         const pergunta = input.value.trim();
+        
+        // Garante que o input não esteja vazio
         if (pergunta === '') { return; }
 
         adicionarMensagem(pergunta, 'usuario');
@@ -74,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
             adicionarMensagem(data.resposta, 'ia');
 
         } catch (error) {
-            // ... (Lógica de erro) ...
             chatBox.removeChild(loadingDiv);
             console.error('Erro ao enviar mensagem:', error);
             let erroDisplay = error.message;
@@ -111,21 +112,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const transcript = event.results[0][0].transcript;
             input.value = transcript;
             autoExpand(); 
-            // NOVO AJUSTE: Envia a mensagem automaticamente após capturar o áudio
+            // AÇÃO CRÍTICA: Envia a mensagem automaticamente após capturar
             enviarMensagem(); 
         };
 
         recognition.onstart = () => {
             microphoneBtn.style.color = 'red'; 
-            microphoneBtn.innerHTML = '<i class="fas fa-dot-circle"></i>'; // Ícone de escuta (ponto)
+            microphoneBtn.innerHTML = '<i class="fas fa-dot-circle"></i>'; // Ponto de escuta
             input.placeholder = 'Escutando... Fale agora.';
         };
         
         recognition.onend = () => {
             microphoneBtn.style.color = varToCSS('--color-highlight'); 
-            microphoneBtn.innerHTML = '<i class="fas fa-microphone"></i>'; // Ícone de microfone
+            microphoneBtn.innerHTML = '<i class="fas fa-microphone"></i>'; // Microfone
             input.placeholder = 'Peça à Esperança';
-            // Se o envio for automático, não precisamos do input.focus() aqui.
         };
         
         recognition.onerror = (event) => {
@@ -139,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Evento de clique para iniciar/parar o reconhecimento
         microphoneBtn.addEventListener('click', () => {
             try {
                 if (input.disabled) return; 
@@ -147,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (recognition.recognizing) {
                     recognition.stop();
                 } else {
-                    // Limpa o input antes de começar a falar
                     input.value = '';
                     autoExpand();
                     recognition.start();
@@ -158,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     } else {
-        // Se o navegador não suportar, esconde o microfone e ajusta o padding
+        // Se não suportar voz, esconde o microfone e ajusta o padding do input
         microphoneBtn.style.display = 'none';
         input.style.paddingLeft = '20px'; 
     }

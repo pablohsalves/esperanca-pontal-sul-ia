@@ -1,13 +1,13 @@
 /* static/style.css - TEMA GEMINI DARK MODE (FINAL) */
 
 :root {
-    --color-bg-main: #000000;         
-    --color-bg-container: #0a0a0a;    
-    --color-text-main: #e0e0e0;       
+    --color-bg-main: #000000;         /* Preto Puro */
+    --color-bg-container: #0a0a0a;    /* Preto muito escuro para o container */
+    --color-text-main: #e0e0e0;       /* Texto branco/claro */
     --color-highlight: #a8c7fa;       /* Cinza/Azul Claro (Estilo Gemini) */
-    --color-user-bubble: #171720;     
-    --color-user-text: #a8c7fa;       
-    --color-aviso: #555555;           
+    --color-user-bubble: #171720;     /* Fundo da bolha do usuário */
+    --color-user-text: #a8c7fa;       /* Texto da bolha do usuário (Cinza/Azul) */
+    --color-aviso: #555555;           /* Cinza para o aviso */
     --header-height: 55px; /* Altura do novo cabeçalho */
 }
 
@@ -28,7 +28,7 @@ body {
     align-items: center; 
 }
 
-/* --- NOVO: Cabeçalho Fixo --- */
+/* --- Cabeçalho Fixo --- */
 #header-fixed {
     position: fixed;
     top: 0;
@@ -76,9 +76,21 @@ body {
     overflow-y: auto; 
     scroll-behavior: smooth;
     
-    /* MODIFICADO: Adiciona padding superior para o header fixo */
+    /* Padding para acomodar o header e o rodapé fixos */
     padding-top: calc(var(--header-height) + 20px); 
     padding-bottom: 120px; 
+}
+
+/* Scrollbar (Minimalista Dark) */
+#chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+#chat-box::-webkit-scrollbar-thumb {
+    background: #444444;
+    border-radius: 3px;
+}
+#chat-box::-webkit-scrollbar-track {
+    background: var(--color-bg-main);
 }
 
 /* --- Estilo das Mensagens (Bolhas) --- */
@@ -95,8 +107,32 @@ body {
     animation: fadeIn 0.5s forwards;
 }
 
-/* ... (o restante das regras .usuario, .ia, .ia strong permanecem) ... */
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
 
+.usuario {
+    margin-left: auto; 
+    margin-right: 0;
+    background-color: var(--color-user-bubble);
+    color: var(--color-user-text); 
+    border-bottom-right-radius: 6px;
+    border: 1px solid #2a2a2a;
+}
+
+.ia {
+    margin-right: auto; 
+    margin-left: 0;
+    background-color: #1a1a1a; 
+    color: var(--color-text-main);
+    border-bottom-left-radius: 6px;
+    border: 1px solid #2a2a2a;
+}
+
+.ia strong {
+    color: var(--color-highlight); 
+    font-weight: 600;
+}
 
 /* --- Área de Input FIXADA no Rodapé --- */
 #fixed-bottom-area {
@@ -119,7 +155,6 @@ body {
     display: flex;
     align-items: flex-end; 
     position: relative;
-    /* AJUSTE FINAL: Adiciona um pouco mais de respiro lateral no desktop */
     padding: 0 20px; 
 }
 
@@ -141,7 +176,6 @@ body {
 #microphone-btn { left: 30px; }
 #enviar-btn { 
     right: 30px; 
-    /* Remove a rotação para o ícone de avião (fas fa-paper-plane) */
     transform: none; 
 }
 
@@ -151,7 +185,6 @@ body {
 /* Textarea Dinâmica */
 #pergunta-input {
     flex-grow: 1;
-    /* Padding para acomodar o microfone (esquerda) e a seta (direita) */
     padding: 15px 50px 15px 50px; 
     background-color: var(--color-bg-container);
     color: var(--color-text-main);
@@ -186,26 +219,25 @@ body {
 @media (max-width: 600px) {
     
     #header-content {
-        padding: 0 10px; /* Menor padding lateral */
+        padding: 0 10px; 
     }
 
     #chat-box {
         padding: 10px 10px;
-        padding-top: calc(var(--header-height) + 10px); /* Ajusta padding para o header */
+        padding-top: calc(var(--header-height) + 10px); 
         padding-bottom: 120px; 
     }
 
     #input-area-wrapper {
-        /* AJUSTE FINAL: Mais respiro nas bordas do mobile */
-        padding: 0 5px; 
+        /* Correção Final: Ajusta o respiro lateral para não encostar nas bordas */
+        padding: 0 10px; 
     }
 
     /* ÍCONES MOBILE */
-    #microphone-btn { left: 15px; }
-    #enviar-btn { right: 15px; }
+    #microphone-btn { left: 18px; }
+    #enviar-btn { right: 18px; }
     
     #pergunta-input {
-        /* PADDING AJUSTADO PARA O RESPIRO DO WRAPPER */
         padding: 12px 50px 12px 45px; 
         font-size: 15px;
         border-radius: 22px;
