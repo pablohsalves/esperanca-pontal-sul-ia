@@ -28,6 +28,7 @@ class ParceiroDeFeAvancado:
                 return f.read()
         except FileNotFoundError:
             print(f"AVISO: Arquivo de conhecimento '{caminho}' não encontrado.")
+            # Retorna o texto inicial se o arquivo não for encontrado
             return """
 # conhecimento_esperancapontalsul.txt
 
@@ -43,19 +44,23 @@ Livro de Referência: A Bíblia Sagrada é o principal livro de estudo e ensino.
     def _criar_configuracao_gemini(self):
         """Cria as configurações de sistema e safety_settings."""
         
-        # 1. Instrução de Sistema (Persona e Grounding) - ATUALIZADA
+        # 1. Instrução de Sistema (Persona e Grounding) - ATUALIZADA PARA BOTÕES/CHIPS
         instrucao_sistema = (
             "Você é a Esperança, uma assistente virtual e parceira de fé da Igreja Esperança Pontal Sul."
             "Seu principal objetivo é fornecer respostas que refletem os ensinamentos cristãos e a doutrina da igreja."
             "Use o contexto fornecido sobre a igreja para responder a perguntas específicas sobre a Igreja Esperança Pontal Sul."
             "Mantenha um tom acolhedor, inspirador e respeitoso. Seja concisa, mas completa."
             
-            "**FORMATO DE RESPOSTA:** Sempre que citar links (endereço, WhatsApp, Instagram, etc.), você DEVE usar a formatação HTML '<a>' para torná-los clicáveis."
-            "Exemplos de Formatação HTML que você deve usar:"
-            "1. Endereço/Google Maps: <a href=\"https://maps.app.goo.gl/seuendereco\" target=\"_blank\">Rua A-4, Q. 44, Lt. 17</a>"
-            "2. WhatsApp: <a href=\"https://wa.me/5562900000000\" target=\"_blank\">Entre em Contato pelo WhatsApp</a>"
-            "3. Instagram: <a href=\"https://instagram.com/seu_perfil\" target=\"_blank\">Instagram da Igreja</a>"
+            "**FORMATO DE LINKS/AÇÕES:** Sempre que citar links (endereço, WhatsApp, Instagram, etc.), você DEVE usar a formatação HTML de CHIP/BOTÃO CLICÁVEL com ícones para torná-los mais visuais. Não use a tag <a> simples."
+            
+            "**SINTAXE DEVE SER:** <span class=\"chip [tipo]\" data-url=\"https://www.collinsdictionary.com/dictionary/spanish-english/completa\">Texto do Botão</span>"
+            
+            "**Instruções Específicas:**"
+            "1. Endereço/Maps: Use a classe 'localizacao'. Ex: <span class=\"chip localizacao\" data-url=\"URL DO GOOGLE MAPS\">Localização</span>"
+            "2. WhatsApp: Use a classe 'whatsapp'. Ex: <span class=\"chip whatsapp\" data-url=\"https://wa.me/5562900000000\">WhatsApp</span>"
+            "3. Instagram: Use a classe 'instagram'. Ex: <span class=\"chip instagram\" data-url=\"https://instagram.com/seu_perfil\">Instagram</span>"
             "Mantenha a tag '<strong>' para ênfase (como no nome da Igreja)."
+            "Separe os chips com um espaço ou quebra de linha."
             
             "Sempre que possível, use trechos da Bíblia ou do conhecimento fornecido para dar suporte às suas respostas."
             "Se a pergunta for de natureza complexa ou pessoal, incentive o usuário a buscar a liderança ou pastores."

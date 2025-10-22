@@ -20,7 +20,6 @@ try:
     assistente = ParceiroDeFeAvancado()
 except ValueError as e:
     print(f"ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. {e}")
-    # Nota: Em um ambiente de produção real, você pode querer sair do programa aqui (exit(1))
 
 
 # ----------------------------------------------------
@@ -48,6 +47,11 @@ Missão da Igreja: Levar a mensagem de Jesus Cristo a todas as famílias e forma
 Visão Principal: Uma comunidade vibrante, centrada na Palavra de Deus (a Bíblia Sagrada), focada em missões urbanas e no discipulado.
 Base Doutrinária: Ênfase na Bíblia Sagrada como a única regra de fé e prática, o Batismo nas águas por imersão, a Santa Ceia e o Poder do Espírito Santo.
 Livro de Referência: A Bíblia Sagrada é o principal livro de estudo e ensino.
+
+# NOVOS DADOS PARA LINKS CLICÁVEIS (Atualize-os no Painel Admin!):
+Contato WhatsApp: 5562998765432
+Instagram Oficial: @esperancapontalsul
+Link do Google Maps (Endereço): https://maps.app.goo.gl/exemplo
 """
     except Exception as e:
         return f"ERRO ao ler o arquivo: {e}"
@@ -74,6 +78,7 @@ def index():
         session['historico'] = assistente.iniciar_novo_chat()
     
     saudacao_html = assistente.enviar_saudacao()
+    # O filtro | safe está correto para renderizar o HTML da IA
     return render_template('chat_interface.html', saudacao=saudacao_html)
 
 

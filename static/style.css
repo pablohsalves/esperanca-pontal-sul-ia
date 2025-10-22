@@ -296,3 +296,80 @@ body {
         font-size: 12px;
     }
 }
+
+
+/* --- NOVOS ESTILOS PARA CHIP/BOTÃO CLICÁVEL DA IA --- */
+
+/* Container para agrupar os chips */
+.chip-container {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+    gap: 8px; /* Espaço entre os chips */
+}
+
+/* Estilo Base do Chip/Botão */
+.chip {
+    display: inline-flex; /* Permite o ícone e o texto lado a lado */
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 20px;
+    background-color: #2a2a2a; /* Fundo escuro */
+    color: var(--color-highlight); /* Texto na cor de destaque */
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    user-select: none; /* Não permite selecionar o texto */
+    border: 1px solid #3c3c3c;
+}
+
+.chip:hover {
+    background-color: #3c3c3c;
+    box-shadow: 0 0 5px rgba(168, 199, 250, 0.4);
+}
+
+/* Ícone dentro do Chip (Font Awesome) - O ícone é inserido via ::before */
+
+/* Classes Modificadoras para Cores/Ícones */
+
+/* 1. Localização (Mapa) */
+.chip.localizacao:before {
+    content: "\f3c5"; /* Ícone de mapa (fa-map-marker-alt) */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    margin-right: 6px;
+}
+.chip.localizacao {
+    color: #4ac994; /* Verde sutil */
+    border-color: #4ac994;
+}
+
+/* 2. WhatsApp */
+.chip.whatsapp:before {
+    content: "\f232"; /* Ícone do WhatsApp (fa-whatsapp) */
+    font-family: "Font Awesome 6 Brands";
+    font-weight: 400; 
+    margin-right: 6px;
+}
+.chip.whatsapp {
+    color: #25d366; /* Verde WhatsApp */
+    border-color: #25d366;
+}
+
+/* 3. Instagram */
+.chip.instagram:before {
+    content: "\f16d"; /* Ícone do Instagram (fa-instagram) */
+    font-family: "Font Awesome 6 Brands";
+    font-weight: 400; 
+    margin-right: 6px;
+}
+.chip.instagram {
+    color: #e4405f; /* Vermelho/Rosa Instagram */
+    border-color: #e4405f;
+}
+
+/* Garantir que o texto do chip na mensagem IA seja exibido em bloco separado */
+.mensagem.ia > .chip {
+    margin-top: 5px; /* Pequeno espaçamento se estiver sozinho */
+}

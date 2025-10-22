@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL CORRIGIDA com Pensando... e Envio Automático
+// static/script.js - Versão FINAL CORRIGIDA com Pensando... e Botões/Chips
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // --- Ativar o envio por Enter e Clique ---
+    // --- Ativar o envio por Enter e Clique (Campo de texto) ---
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) { 
             e.preventDefault(); 
@@ -181,4 +181,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     enviarBtn.addEventListener('click', enviarMensagem);
+    
+    // --- Lógica para Chips/Botões Clicáveis (Chat Box) ---
+    chatBox.addEventListener('click', (e) => {
+        // Encontra o chip mais próximo do clique
+        const chip = e.target.closest('.chip');
+        if (chip) {
+            const url = chip.getAttribute('data-url');
+            if (url) {
+                // Abre o link em uma nova aba
+                window.open(url, '_blank');
+            }
+        }
+    });
 });
