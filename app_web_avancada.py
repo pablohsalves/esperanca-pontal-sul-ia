@@ -1,8 +1,8 @@
-# app_web_avancada.py
+# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK
 
-from flask import Flask, request, jsonify, render_template, session
-import os
+from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import json
+import os
 from assistente_avancada import ParceiroDeFeAvancado
 from dotenv import load_dotenv
 
@@ -10,90 +10,128 @@ from dotenv import load_dotenv
 # Isso é essencial para o Render carregar as chaves secretas e API
 load_dotenv() 
 
-
 # --- 1. CONFIGURAÇÃO INICIAL DO FLASK ---
 app = Flask(__name__)
 # A chave secreta é carregada do ambiente (Render) ou usa o padrão para segurança
-app.secret_key = os.getenv('FLASK_SECRET_KEY', 'chave_secreta_super_segura_padrao_mude_isso') 
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'sua_chave_secreta_padrao_muito_segura') 
 
 try:
     # Inicializa a assistente UMA VEZ ao iniciar o servidor
     assistente = ParceiroDeFeAvancado()
 except ValueError as e:
     print(f"ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. {e}")
-    assistente = None 
-    # Em produção, um erro de inicialização deve ser logado, mas não deve parar o Gunicorn
+    # Nota: Em um ambiente de produção real, você pode querer sair do programa aqui (exit(1))
 
 
-# --- FUNÇÃO AUXILIAR PARA SERIALIZAÇÃO (MEMÓRIA) ---
-# Necessário para salvar o histórico de objetos do Gemini na sessão (que usa JSON)
-def serialize_history(history: list) -> list:
-    """
-    Converte a lista de objetos Content do Gemini em lista de dicionários (JSON serializável).
-    """
-    # A verificação de tipo ajuda a lidar com diferentes estruturas de objeto do SDK
-    serialized_list = []
-    for message in history:
-        try:
-            # Tenta usar o model_dump_json (Pydantic/SDK mais novo)
-            serialized_list.append(json.loads(message.model_dump_json()))
-        except AttributeError:
-            # Fallback (para compatibilidade ou outros objetos)
-            serialized_list.append(message.to_dict())
-            
-    return serialized_list
+# ----------------------------------------------------
+# CONFIGURAÇÕES E FUNÇÕES DO PAINEL ADMIN
+# ----------------------------------------------------
 
+CONHECIMENTO_PATH = 'conhecimento_esperancapontalsul.txt'
 
-# --- 2. ROTAS DA APLICAÇÃO ---
+def ler_conhecimento_atual():
+    """Lê o conteúdo atual do arquivo de conhecimento."""
+    # Garante que o caminho é absoluto, crucial no ambiente Render
+    caminho_completo = os.path.join(os.path.dirname(os.path.abspath(__file__)), CONHECIMENTO_PATH)
+    try:
+        with open(caminho_completo, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        # Retorna o texto inicial se o arquivo não for encontrado (para evitar quebrar o admin)
+        return """
+# conhecimento_esperancapontalsul.txt
 
-@app.route('/', methods=['GET'])
+Pastor Líder: Pastor Daniel Rodrigues
+Localização da Sede: Rua A-4, Quadra 44, Lote 17, Setor Garavelo, Aparecida de Goiânia - GO.
+Horário de Cultos: Domingos às 19:00h e Terças-feiras (Culto da Vitória) às 19:30h.
+Missão da Igreja: Levar a mensagem de Jesus Cristo a todas as famílias e formar discípulos que impactem sua comunidade com amor e esperança.
+Visão Principal: Uma comunidade vibrante, centrada na Palavra de Deus (a Bíblia Sagrada), focada em missões urbanas e no discipulado.
+Base Doutrinária: Ênfase na Bíblia Sagrada como a única regra de fé e prática, o Batismo nas águas por imersão, a Santa Ceia e o Poder do Espírito Santo.
+Livro de Referência: A Bíblia Sagrada é o principal livro de estudo e ensino.
+"""
+    except Exception as e:
+        return f"ERRO ao ler o arquivo: {e}"
+
+def salvar_novo_conhecimento(novo_conteudo):
+    """Sobrescreve o arquivo de conhecimento com o novo conteúdo."""
+    caminho_completo = os.path.join(os.path.dirname(os.path.abspath(__file__)), CONHECIMENTO_PATH)
+    try:
+        with open(caminho_completo, 'w', encoding='utf-8') as f:
+            f.write(novo_conteudo)
+        return True
+    except Exception as e:
+        print(f"ERRO ao salvar o arquivo: {e}")
+        return False
+
+# ----------------------------------------------------
+# ROTAS DO FLASK
+# ----------------------------------------------------
+
+@app.route('/')
 def index():
-    # Inicializa ou recupera o histórico de chat da sessão
-    if 'chat_history' not in session:
-        print("Iniciando novo histórico vazio para o usuário.")
-        # Cria um histórico com a mensagem inicial (saudação)
-        if assistente:
-             session['chat_history'] = assistente.iniciar_novo_chat() 
-        else:
-             session['chat_history'] = []
-            
-    # A saudação é usada para preencher a primeira mensagem no HTML
-    return render_template('chat_interface.html', saudacao=assistente.enviar_saudacao() if assistente else "Serviço de IA Indisponível.")
+    # Inicia um novo histórico de chat se não existir
+    if 'historico' not in session:
+        session['historico'] = assistente.iniciar_novo_chat()
+    
+    saudacao_html = assistente.enviar_saudacao()
+    return render_template('chat_interface.html', saudacao=saudacao_html)
+
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    # Verifica se a assistente falhou na inicialização (erro na chave API, etc.)
-    if assistente is None:
-         return jsonify({"erro": "O serviço de IA está inoperante. Verifique a chave API."}), 503
+    data = request.get_json()
+    pergunta = data.get('pergunta')
+    historico_serializado = session.get('historico', [])
+    
+    if not pergunta:
+        return jsonify({'erro': 'Pergunta vazia.'}), 400
 
-    dados = request.get_json()
-    
-    if not dados or 'pergunta' not in dados:
-        return jsonify({"erro": "Requisição inválida. É necessário fornecer a chave 'pergunta'."}), 400
-
-    pergunta_usuario = dados.get('pergunta')
-    
-    # --- 2.1. Recuperar o Histórico ---
-    # Se a sessão expirou ou não existe, usa um histórico vazio
-    historico_mensagens_serializado = session.get('chat_history', []) 
-
-    # --- 2.2. Processamento com Memória e Grounding ---
-    resposta_assistente, novo_historico_objetos = assistente.obter_resposta_com_memoria(
-        historico_mensagens_serializado, 
-        pergunta_usuario
-    )
-    
-    # --- 2.3. Serializar e Atualizar a Sessão ---
-    # Salva o novo histórico (incluindo a pergunta e a resposta) na sessão
-    session['chat_history'] = serialize_history(novo_historico_objetos)
-    
-    return jsonify({
-        "pergunta": pergunta_usuario,
-        "resposta": resposta_assistente,
-        "status": "sucesso"
+    # Adiciona a pergunta do usuário ao histórico ANTES de enviar
+    historico_serializado.append({
+        "role": "user",
+        "parts": [{"text": pergunta}]
     })
 
-# --- 3. EXECUÇÃO DO SERVIDOR ---
-# Em produção (Render), o Gunicorn executa o 'app'. A linha abaixo é ignorada.
-# if __name__ == '__main__':
-#     app.run(debug=True)
+    # Obtém a resposta e o histórico atualizado (incluindo a resposta da IA)
+    resposta_ia, novo_historico_gemini = assistente.obter_resposta_com_memoria(
+        historico_serializado, 
+        pergunta
+    )
+    
+    # Atualiza o histórico na sessão (serializando novamente)
+    novo_historico_serializado = [
+        json.loads(item.model_dump_json()) 
+        for item in novo_historico_gemini
+    ]
+    session['historico'] = novo_historico_serializado
+    
+    return jsonify({'resposta': resposta_ia})
+
+
+@app.route('/admin/conhecimento', methods=['GET', 'POST'])
+def admin_conhecimento():
+    """Painel de administração para editar o arquivo de conhecimento."""
+    mensagem = ""
+    
+    if request.method == 'POST':
+        novo_conteudo = request.form['novo_conhecimento']
+        
+        if salvar_novo_conhecimento(novo_conteudo):
+            # Recarrega a instância do assistente para forçar a leitura do novo arquivo
+            assistente.conhecimento_texto = ler_conhecimento_atual()
+            mensagem = "Conhecimento atualizado com sucesso! (A IA recarregou o novo texto.)"
+        else:
+            mensagem = "Erro ao salvar o novo conhecimento. Verifique as permissões."
+            
+        conteudo_atual = novo_conteudo
+    else:
+        conteudo_atual = ler_conhecimento_atual()
+
+    return render_template('admin_conhecimento.html', 
+                           conteudo_atual=conteudo_atual, 
+                           mensagem=mensagem)
+
+
+if __name__ == '__main__':
+    # Rodar em ambiente local
+    app.run(debug=True)

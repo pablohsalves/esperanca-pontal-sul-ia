@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN: Atualizar Conhecimento da Esperança</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #0d0d0d;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #a8c7fa;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 400px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            background-color: #222;
+            color: #e0e0e0;
+            font-size: 16px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        button {
+            background-color: #a8c7fa;
+            color: #000000;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #8bb2f0;
+        }
+        .mensagem {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #4CAF50; /* Verde para sucesso */
+            color: white;
+            font-weight: bold;
+        }
+        .aviso {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Painel Admin: Conhecimento da Esperança</h1>
+        
+        {% if mensagem %}
+            <div class="mensagem">{{ mensagem }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <label for="novo_conhecimento">Edite o conteúdo do arquivo 'conhecimento_esperancapontalsul.txt':</label>
+            <textarea id="novo_conhecimento" name="novo_conhecimento">{{ conteudo_atual }}</textarea>
+            
+            <button type="submit">Salvar Novo Conhecimento</button>
+        </form>
+
+        <div class="aviso">
+            ATENÇÃO: Este painel sobrescreve o arquivo de conhecimento. Use o formato de lista simples (como a lista de culto) para facilitar a leitura pela IA.
+        </div>
+        <div class="aviso">
+            *No ambiente Render, salvar arquivos pode causar o reinício do servidor ou a perda de dados após o próximo deploy. Esta ferramenta é para uso interno e rápido.
+        </div>
+    </div>
+</body>
+</html>

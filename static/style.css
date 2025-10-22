@@ -258,7 +258,7 @@ body {
         padding-bottom: 120px; 
     }
     
-    /* NOVO AJUSTE CRÍTICO: Aplica margem externa ao container principal do rodapé */
+    /* RESOLUÇÃO DEFINITIVA: Margem externa para afastar TODO o bloco da tela */
     #fixed-bottom-area {
         /* Remove o padding lateral do elemento pai */
         padding-left: 0;

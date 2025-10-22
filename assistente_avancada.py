@@ -28,7 +28,18 @@ class ParceiroDeFeAvancado:
                 return f.read()
         except FileNotFoundError:
             print(f"AVISO: Arquivo de conhecimento '{caminho}' não encontrado.")
-            return "Nenhum conhecimento extra carregado."
+            # Retorna o texto inicial se o arquivo não for encontrado
+            return """
+# conhecimento_esperancapontalsul.txt
+
+Pastor Líder: Pastor Daniel Rodrigues
+Localização da Sede: Rua A-4, Quadra 44, Lote 17, Setor Garavelo, Aparecida de Goiânia - GO.
+Horário de Cultos: Domingos às 19:00h e Terças-feiras (Culto da Vitória) às 19:30h.
+Missão da Igreja: Levar a mensagem de Jesus Cristo a todas as famílias e formar discípulos que impactem sua comunidade com amor e esperança.
+Visão Principal: Uma comunidade vibrante, centrada na Palavra de Deus (a Bíblia Sagrada), focada em missões urbanas e no discipulado.
+Base Doutrinária: Ênfase na Bíblia Sagrada como a única regra de fé e prática, o Batismo nas águas por imersão, a Santa Ceia e o Poder do Espírito Santo.
+Livro de Referência: A Bíblia Sagrada é o principal livro de estudo e ensino.
+"""
         
     def _criar_configuracao_gemini(self):
         """Cria as configurações de sistema e safety_settings."""

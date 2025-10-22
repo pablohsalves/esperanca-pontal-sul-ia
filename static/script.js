@@ -83,7 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             // Trata erros de servidor ou conexão
-            chatBox.removeChild(loadingDiv);
+            if(loadingDiv.parentNode) {
+                chatBox.removeChild(loadingDiv);
+            }
             console.error('Erro ao enviar mensagem:', error);
             let erroDisplay = error.message;
             if (erroDisplay.includes('Erro HTTP: 500')) {
