@@ -1,135 +1,143 @@
 # assistente_avancada.py
 
-import os
-import random
-import time 
-from dotenv import load_dotenv 
-
 from google import genai
-from google.genai.errors import APIError
-
-# Importamos a lógica de dados bíblicos local
-from dados_biblicos import carregar_versiculos, versiculo_aleatorio
-
-
-# --- CARREGAMENTO DE CONHECIMENTO E CHAVE API ---
-load_dotenv() 
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY') 
-
-def carregar_conhecimento_igreja(caminho_arquivo: str = 'conhecimento_esperancapontalsul.txt') -> str:
-    """
-    Carrega o conteúdo completo do arquivo de conhecimento da igreja.
-    """
-    try:
-        with open(caminho_arquivo, 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        print(f"AVISO: Arquivo de conhecimento '{caminho_arquivo}' não encontrado. A assistente não terá informações da igreja.")
-        return "" 
-    except Exception as e:
-        print(f"ERRO ao ler o arquivo de conhecimento: {e}")
-        return ""
-
-# Instância Global do Cliente Gemini
-try:
-    if not GEMINI_API_KEY:
-        raise ValueError("Chave API não configurada.")
-    GEMINI_CLIENT = genai.Client(api_key=GEMINI_API_KEY)
-except ValueError as e:
-    print(f"ERRO DE INICIALIZAÇÃO DO GEMINI: {e}")
-    GEMINI_CLIENT = None
-    
-# Definição das instruções do sistema (SYSTEM INSTRUCTION)
-INSTRUCAO_SISTEMA = (
-    "Você é 'Esperança', a assistente virtual da Igreja Esperança Pontal Sul. "
-    "SUA ÚNICA FONTE DE INFORMAÇÃO SOBRE A IGREJA SÃO AS DIRETRIZES ABAIXO E O BANCO DE CONHECIMENTO ANEXADO À PERGUNTA. Nunca busque na internet por dados da igreja."
-    "Suas respostas devem ser sempre positivas, didáticas, e baseadas em princípios bíblicos. "
-    "Se a informação for sobre a igreja, use APENAS o 'BANCO DE CONHECIMENTO' fornecido. Se a resposta sobre um assunto de fé não estiver lá, use seu conhecimento bíblico, mas evite buscar na web."
-)
-
+from google.genai import types
+import os
+import json
 
 class ParceiroDeFeAvancado:
-    """
-    Assistente de Atendimento que gerencia o histórico de conversação via lista de mensagens e usa Grounding.
-    """
-    
-    def __init__(self):
-        """Inicializa a assistente, carrega versículos e o conhecimento da igreja."""
+    def __init__(self, modelo='gemini-2.5-flash', arquivo_conhecimento='conhecimento_esperancapontalsul.txt'):
+        self.modelo = modelo
+        self.client = self._iniciar_cliente()
+        self.conhecimento_texto = self._carregar_conhecimento(arquivo_conhecimento)
         
-        if GEMINI_CLIENT is None:
-            raise ValueError("Cliente Gemini não pôde ser inicializado. Verifique a chave API.")
-            
-        self.cliente = GEMINI_CLIENT
-        self.modelo = 'gemini-2.5-flash' 
-        self.versiculos = carregar_versiculos()
-        # Carrega o Banco de Conhecimento
-        self.conhecimento_igreja = carregar_conhecimento_igreja() 
+        # O histórico de chat é gerenciado pela sessão do Flask (fora desta classe)
+        # O chat_session é criado apenas quando a função de memória é chamada
+        print(f"Assistente Avançada inicializada com o modelo {self.modelo} e {len(self.conhecimento_texto.splitlines())} linhas de conhecimento carregadas.")
+
+    def _iniciar_cliente(self):
+        """Inicializa o cliente Gemini usando a chave de ambiente."""
+        api_key = os.getenv('GEMINI_API_KEY')
+        if not api_key:
+            raise ValueError("A variável de ambiente 'GEMINI_API_KEY' não está configurada.")
+        return genai.Client(api_key=api_key)
+
+    def _carregar_conhecimento(self, caminho):
+        """Carrega o texto de conhecimento de um arquivo local."""
+        try:
+            # Tenta carregar o arquivo a partir do caminho absoluto, útil em ambientes de deploy
+            caminho_absoluto = os.path.join(os.path.dirname(__file__), caminho)
+            with open(caminho_absoluto, 'r', encoding='utf-8') as f:
+                return f.read()
+        except FileNotFoundError:
+            print(f"AVISO: Arquivo de conhecimento '{caminho}' não encontrado.")
+            return "Nenhum conhecimento extra carregado."
         
-        print(f"Assistente Avançada inicializada com o modelo {self.modelo} e {len(self.versiculos)} versículos carregados.")
-
-    def iniciar_novo_chat(self) -> list:
-        """
-        Retorna uma lista vazia, que é o formato inicial do histórico na sessão do Flask.
-        """
-        return []
-
-    def _criar_chat_temporario(self, historico_mensagens: list):
-        """
-        Cria o objeto Chat do Gemini com base no histórico de mensagens (lista) fornecido.
-        """
-        return self.cliente.chats.create(
-            model=self.modelo,
-            history=historico_mensagens,  # O histórico salvo é passado aqui (como lista de dicionários)
-            config={'system_instruction': INSTRUCAO_SISTEMA}
+    def _criar_configuracao_gemini(self):
+        """Cria as configurações de sistema e safety_settings."""
+        
+        # 1. Instrução de Sistema (Persona e Grounding)
+        instrucao_sistema = (
+            "Você é a Esperança, uma assistente virtual e parceira de fé da Igreja Esperança Pontal Sul."
+            "Seu principal objetivo é fornecer respostas que refletem os ensinamentos cristãos e a doutrina da igreja."
+            "Use o contexto fornecido sobre a igreja para responder a perguntas específicas sobre a Igreja Esperança Pontal Sul."
+            "Mantenha um tom acolhedor, inspirador e respeitoso. Seja concisa, mas completa."
+            "Sempre que possível, use trechos da Bíblia ou do conhecimento fornecido para dar suporte às suas respostas."
+            "Se a pergunta for de natureza complexa ou pessoal, incentive o usuário a buscar a liderança ou pastores."
+            f"Contexto da Igreja: {self.conhecimento_texto}"
         )
         
-    def obter_resposta_com_memoria(self, historico_mensagens: list, pergunta: str) -> tuple[str, list]:
-        """
-        Gera a resposta usando o histórico salvo na sessão, anexando o Banco de Conhecimento.
-        """
+        # 2. Safety Settings (Configurações de Segurança)
+        safety_settings = [
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                threshold=types.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            ),
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                threshold=types.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+            ),
+        ]
         
-        pergunta_limpa = pergunta.lower().strip()
-        
-        # --- 1. Lógica para Versículo Bíblico (Prioritária) ---
-        if "versiculo" in pergunta_limpa or "bíblia" in pergunta_limpa or "palavra de deus" in pergunta_limpa:
-            vers = versiculo_aleatorio(self.versiculos)
-            return f"Claro! O Espírito Santo inspirou uma Palavra para o seu coração:\n\n{vers}", historico_mensagens
-        
-        # --- 2. Preparação da Pergunta com Grounding ---
-        pergunta_formatada = (
-            f"[INÍCIO DO BANCO DE CONHECIMENTO DA IGREJA]\n"
-            f"{self.conhecimento_igreja}\n"
-            f"[FIM DO BANCO DE CONHECIMENTO DA IGREJA]\n\n"
-            f"Pergunta do Usuário: {pergunta}"
+        return types.GenerateContentConfig(
+            system_instruction=instrucao_sistema,
+            safety_settings=safety_settings
         )
         
-        # --- 3. Geração de Resposta com Gemini (Com Lógica de Tentativa) ---
-        
-        max_tentativas = 3
-        
-        for tentativa in range(max_tentativas):
-            try:
-                chat_objeto = self._criar_chat_temporario(historico_mensagens)
-                
-                # Usa a pergunta formatada!
-                response = chat_objeto.send_message(pergunta_formatada) 
-                
-                # Retorna a resposta E o histórico ATUALIZADO (lista de objetos Content)
-                return response.text, chat_objeto.get_history()
-                
-            except APIError as e: 
-                
-                if tentativa == max_tentativas - 1:
-                    print(f"\n[ERRO DE IA] Falha após {max_tentativas} tentativas. Erro: {e.status_code}")
-                    return "Desculpe, o servidor da minha inteligência está muito ocupado agora. Por favor, tente fazer a pergunta novamente em instantes.", historico_mensagens
-                
-                tempo_espera = 2 ** tentativa 
-                print(f"\n[AVISO DE IA] Tentativa {tentativa + 1} falhou. Aguardando {tempo_espera}s...")
-                time.sleep(tempo_espera) 
-                
-            except Exception as e:
-                return f"Ocorreu um erro inesperado na assistente. Por favor, tente novamente: {e}", historico_mensagens
-
     def enviar_saudacao(self):
-        """Retorna uma saudação inicial."""
-        return "Olá! Que a paz de Cristo esteja contigo. Eu sou a Esperança, sua assistente virtual da Igreja Esperança Pontal Sul. Em que posso te guiar hoje?"
+        """Retorna a mensagem de saudação inicial."""
+        return (
+            "<strong>Esperança:</strong> Olá! Que alegria ter você aqui. Sou a Esperança, sua assistente virtual "
+            "e parceira de fé da Igreja Esperança Pontal Sul. Como posso te ajudar hoje?"
+        )
+        
+    def iniciar_novo_chat(self):
+        """Retorna o histórico inicial serializado com a saudação da IA."""
+        # Cria uma mensagem inicial da IA (que será a primeira da sessão)
+        primeira_mensagem_ia = types.Content(
+            role="model",
+            parts=[types.Part.from_text(self.enviar_saudacao())]
+        )
+        
+        # Retorna a lista contendo apenas a primeira mensagem, já serializada
+        return [json.loads(primeira_mensagem_ia.model_dump_json())]
+
+    def obter_resposta_com_memoria(self, historico_serializado: list, pergunta: str) -> tuple[str, list]:
+        """
+        Recebe o histórico serializado, envia a pergunta ao Gemini e retorna
+        a resposta e o novo histórico completo.
+        """
+        
+        # 1. Deserializar o Histórico (JSON -> Objeto Gemini Content)
+        # O Pydantic/SDK do Gemini pode reconstruir os objetos a partir do JSON serializado.
+        try:
+             historico_objetos = [
+                types.Content.model_validate(item) 
+                for item in historico_serializado
+            ]
+        except Exception as e:
+            # Caso o histórico serializado esteja corrompido, inicia um novo
+            print(f"AVISO: Falha ao deserializar o histórico ({e}). Iniciando novo chat.")
+            historico_objetos = []
+            
+        # 2. Criar a sessão de chat com as configurações
+        configuracao_gemini = self._criar_configuracao_gemini()
+        
+        # Inicia a sessão de chat com o histórico carregado
+        chat_session = self.client.chats.create(
+            model=self.modelo,
+            history=historico_objetos,
+            config=configuracao_gemini
+        )
+        
+        # 3. Enviar a Pergunta
+        try:
+            resposta = chat_session.send_message(pergunta)
+            
+            # 4. Retornar a Resposta e o Histórico Atualizado
+            return resposta.text, chat_session.get_history()
+        
+        except Exception as e:
+            print(f"Erro ao obter resposta do Gemini: {e}")
+            erro_msg = ("Desculpe, houve um erro ao processar sua solicitação no servidor de IA. "
+                        "Por favor, tente novamente mais tarde.")
+            
+            # Se falhar, retorna a mensagem de erro e o histórico original (sem a última pergunta)
+            return erro_msg, historico_objetos
+
+
+# --- FUNÇÃO DE TESTE (OPCIONAL) ---
+# if __name__ == '__main__':
+#     # Exemplo de uso para teste local da classe
+#     assistente = ParceiroDeFeAvancado()
+#     
+#     # 1. Primeira pergunta
+#     historico = assistente.iniciar_novo_chat() # Começa com a saudação
+#     pergunta1 = "Qual é o nome do pastor da igreja e qual o principal livro que ele usa?"
+#     resposta1, novo_historico = assistente.obter_resposta_com_memoria(historico, pergunta1)
+#     print(f"Resposta 1: {resposta1}\n---")
+    
+#     # 2. Pergunta de acompanhamento (usando a memória do histórico anterior)
+#     pergunta2 = "E onde fica a sede dessa igreja que você mencionou?"
+#     resposta2, historico_final = assistente.obter_resposta_com_memoria(novo_historico, pergunta2)
+#     print(f"Resposta 2: {resposta2}")

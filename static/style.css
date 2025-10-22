@@ -1,6 +1,6 @@
-/* static/style.css - TEMA GEMINI DARK MODE (Minimalista e Preto) */
+/* static/style.css - TEMA GEMINI DARK MODE (RESPONSIVO E SEM TÍTULO) */
 
-/* --- Variáveis de Cor (Para facilitar futuros ajustes) --- */
+/* --- Variáveis de Cor --- */
 :root {
     --color-bg-main: #000000;         /* Preto Puro */
     --color-bg-container: #0a0a0a;    /* Preto muito escuro para o container */
@@ -11,10 +11,10 @@
     --color-user-text: #00BFFF;       /* Texto da bolha do usuário */
 }
 
-/* --- Configurações Básicas --- */
+/* --- Configurações Básicas (Desktop) --- */
 body {
     font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    max-width: 800px; 
+    max-width: 800px; /* Limite de largura para desktop */
     margin: 40px auto;
     background-color: var(--color-bg-main);
     color: var(--color-text-main);
@@ -22,25 +22,20 @@ body {
     line-height: 1.6;
 }
 
+/* Oculta o H1 caso tenha sido adicionado acidentalmente no futuro */
 h1 {
-    text-align: center;
-    color: var(--color-highlight); 
-    border-bottom: 2px solid #1a1a1a;
-    padding-bottom: 18px;
-    font-size: 2.2em;
-    font-weight: 500; 
-    letter-spacing: 0.5px;
+    display: none;
 }
 
-/* --- Área Principal do Chat --- */
+/* --- Área Principal do Chat (Desktop) --- */
 #chat-container {
     background: var(--color-bg-container);
-    border-radius: 16px; /* Bordas mais arredondadas */
+    border-radius: 16px; 
     border: 1px solid #1a1a1a;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8);
     display: flex;
     flex-direction: column;
-    height: 650px; /* Aumentado o tamanho */
+    height: 650px; 
 }
 
 #chat-box {
@@ -63,6 +58,7 @@ h1 {
     background: var(--color-bg-container);
 }
 
+
 /* --- Estilo das Mensagens --- */
 .mensagem {
     margin-bottom: 18px;
@@ -75,19 +71,17 @@ h1 {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-/* Estilo do Usuário (Minimalista com toque de destaque) */
 .usuario {
     margin-left: auto;
     background-color: var(--color-user-bubble);
-    color: var(--color-user-text); /* Texto da bolha na cor de destaque */
+    color: var(--color-user-text); 
     border-bottom-right-radius: 6px;
     border: 1px solid #2a2a2a;
 }
 
-/* Estilo da IA (Esperança) */
 .ia {
     margin-right: auto;
-    background-color: #1a1a1a; /* Cinza Escuro de Fundo */
+    background-color: #1a1a1a; 
     color: var(--color-text-main);
     border-bottom-left-radius: 6px;
     border: 1px solid #2a2a2a;
@@ -122,13 +116,13 @@ h1 {
     border-color: var(--color-highlight); 
     outline: none;
     background-color: #0d0d0d;
-    box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.2); /* Anel de foco sutil */
+    box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.2); 
 }
 
 #input-area button {
     padding: 12px 25px;
     background-color: var(--color-highlight); 
-    color: #000000; /* Texto preto no botão */
+    color: #000000; 
     border: none;
     border-radius: 30px;
     cursor: pointer;
@@ -138,6 +132,62 @@ h1 {
 }
 
 #input-area button:hover {
-    background-color: #33ccff; /* Destaque mais claro no hover */
+    background-color: #33ccff; 
     transform: translateY(-1px);
+}
+
+/* ========================================= */
+/* --- MEDIA QUERY: AJUSTES PARA MOBILE --- */
+/* ========================================= */
+
+@media (max-width: 600px) {
+    
+    /* Corpo do documento (Mobile) */
+    body {
+        margin: 0; 
+        padding: 0; 
+        min-height: 100vh; 
+        display: flex; 
+        flex-direction: column;
+    }
+
+    /* Container Principal (Mobile: Full-Screen Look) */
+    #chat-container {
+        flex-grow: 1; 
+        width: 100%;
+        height: 100vh; 
+        border-radius: 0; 
+        border: none; 
+        box-shadow: none; 
+    }
+
+    #chat-box {
+        padding: 15px;
+        flex-grow: 1;
+    }
+
+    /* Ajuste de tamanho e margem das bolhas de mensagem para mobile */
+    .mensagem {
+        max-width: 90%; 
+        font-size: 15px; 
+        margin-bottom: 12px;
+        padding: 10px 14px;
+        border-radius: 16px;
+    }
+    
+    /* Input Area (Mobile) */
+    #input-area {
+        padding: 10px 15px; 
+        border-radius: 0;
+    }
+
+    #pergunta-input {
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    #input-area button {
+        padding: 10px 18px; 
+        font-size: 15px;
+    }
 }
