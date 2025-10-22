@@ -257,21 +257,32 @@ body {
         padding-top: calc(var(--header-height) + 10px); 
         padding-bottom: 120px; 
     }
-
-    #input-area-wrapper {
-        /* AJUSTE FINAL GARANTIDO: 25px de respiro lateral para desencostar das bordas */
-        padding: 0 25px; 
+    
+    /* NOVO AJUSTE CRÍTICO: Aplica margem externa ao container principal do rodapé */
+    #fixed-bottom-area {
+        /* Remove o padding lateral do elemento pai */
+        padding-left: 0;
+        padding-right: 0;
+        /* Adiciona margem lateral para afastar TODO o bloco da tela */
+        margin: 0 15px 0 15px; 
+        /* Ajusta a largura para garantir que a margem funcione */
+        width: calc(100% - 30px); 
     }
 
-    /* ÍCONES MOBILE: Ajuste a posição para afastar da borda INTERNA da caixa */
-    /* Mantenho left/right 30px para garantir a distância. */
+    #input-area-wrapper {
+        /* Remove o padding interno do wrapper, pois o margin do pai fará o recuo */
+        padding: 0; 
+    }
+
+    /* ÍCONES MOBILE: Ajusta a posição para afastar da borda INTERNA da caixa */
+    /* Posicionamento em relação ao #input-area-wrapper que não tem padding */
     #microphone-btn { 
-        left: 30px; 
-        bottom: 22px; /* Ajuste vertical para alinhar com o texto */
+        left: 5px; /* Mais perto da borda da caixa, que já está recuada */
+        bottom: 22px; 
     } 
     #enviar-btn { 
-        right: 30px; 
-        bottom: 22px; /* Ajuste vertical para alinhar com o texto */
+        right: 5px; 
+        bottom: 22px; 
     }
     
     #pergunta-input {
