@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL E FUNCIONAL (V10.0 - Fix de Envio / Áudio)
+// static/script.js - Versão FINAL E FUNCIONAL (V10.1 - Debug de Envio Forçado)
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -6,17 +6,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const microphoneBtn = document.getElementById('microphone-btn');
     const chatBox = document.getElementById('chat-box');
     
+    // CRÍTICO: Verifica se todos os elementos foram encontrados.
+    if (!input || !enviarBtn || !microphoneBtn || !chatBox) {
+        console.error("ERRO CRÍTICO JS: Um ou mais elementos essenciais não foram encontrados no DOM (IDs: pergunta-input, enviar-btn, microphone-btn, chat-box).");
+        return; // Para a execução se o DOM estiver quebrado
+    }
+    
     let singleRowHeight = 0; 
     let recognition = null; 
     
     // --- FUNÇÕES DE ESTADO E UTILS ---
     
     function resetarEstadoInput() {
-        // Garante que o input e microfone estão sempre habilitados
         input.disabled = false;
         microphoneBtn.disabled = false;
-        
-        // Habilita o botão de envio SOMENTE se houver texto
         enviarBtn.disabled = input.value.trim() === ''; 
     }
 
@@ -27,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function autoExpand() {
+        // ... (Lógica de autoExpand mantida)
         if (singleRowHeight === 0) {
             input.style.height = 'auto';
             singleRowHeight = input.scrollHeight; 
@@ -36,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.height = 'auto'; 
         input.style.height = input.scrollHeight + 'px'; 
         
-        // Atualiza o estado do botão aqui
         enviarBtn.disabled = input.value.trim() === '';
         
         rolarParaBaixo();
@@ -53,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FUNÇÃO PRINCIPAL DE ENVIO (START POINT) ---
     async function enviarMensagem() {
+        // CRÍTICO: Este log deve aparecer quando você clica em Enviar ou aperta Enter
+        console.log('ENVIARMENSAGEM INICIADA - Pergunta detectada.'); 
+        
         const pergunta = input.value.trim();
         
         if (pergunta === '') { 
@@ -70,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
         input.value = ''; 
         input.style.height = singleRowHeight + 'px';
         
-        // Bloqueia o envio enquanto processa
         input.disabled = true;
         enviarBtn.disabled = true;
         microphoneBtn.disabled = true;
@@ -80,6 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const loadingDiv = adicionarMensagem('<span class="loading-indicator"></span>Esperança está processando...', 'ia');
 
         try {
+            // CRÍTICO: Log antes da chamada fetch
+            console.log(`Enviando POST para /api/chat com a pergunta: "${pergunta}"`);
+            
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -87,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
+                // Log de resposta não-ok
+                console.error(`Resposta HTTP não OK: ${response.status}`);
                 const errorData = await response.json().catch(() => ({ erro: 'Erro de comunicação desconhecido.' }));
                 throw new Error(errorData.erro || `Erro HTTP: ${response.status}`);
             }
@@ -102,17 +112,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if(loadingDiv.parentNode) {
                 chatBox.removeChild(loadingDiv);
             }
-            console.error('Erro ao enviar mensagem:', error);
+            console.error('ERRO FATAL NO FETCH:', error);
             let erroDisplay = error.message;
             if (erroDisplay.includes('Erro HTTP')) {
+                // Se for Erro HTTP, significa que o Flask respondeu, mas algo deu errado (ex: CORS, JSON quebrado)
                 erroDisplay = `Erro do Servidor. Verifique os logs do Render.`;
             } else if (erroDisplay.includes('Failed to fetch')) {
-                erroDisplay = "Erro de conexão: Não foi possível alcançar o servidor.";
+                // Se for Failed to fetch, o front-end não conseguiu nem se conectar (Rede ou Flask Travado)
+                erroDisplay = "Erro de conexão: Não foi possível alcançar o servidor. (Verifique o log do Gunicorn/Render).";
             }
             adicionarMensagem(`<p style="color: #ff5555;">Erro: ${erroDisplay}</p>`, 'ia'); 
             
         } finally {
-            // Reabilita o estado
             resetarEstadoInput(); 
             input.focus();
             rolarParaBaixo();
@@ -130,19 +141,22 @@ document.addEventListener('DOMContentLoaded', () => {
             enviarMensagem();
         }
     });
-
+    
+    // CRÍTICO: Event Listener de Clique
     enviarBtn.addEventListener('click', enviarMensagem);
     
-    // 2. MICROFONE 
+    // 2. MICROFONE (Lógica mantida, com verificação de elemento já no topo)
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
+        // ... (todo o código do microfone)
         recognition = new SpeechRecognition();
         recognition.lang = 'pt-BR'; 
         recognition.interimResults = false; 
         recognition.maxAlternatives = 1;
 
         microphoneBtn.addEventListener('click', () => {
+            console.log("Botão de Microfone Clicado.");
             if (microphoneBtn.classList.contains('recording')) {
                 recognition.stop();
             } else {
@@ -155,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         recognition.onstart = () => {
+             // ... (Lógica de onstart)
             microphoneBtn.classList.add('recording');
             microphoneBtn.style.color = '#ff5555'; 
             input.placeholder = 'Escutando... Fale agora.';
@@ -163,11 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         recognition.onresult = (event) => {
+             // ... (Lógica de onresult)
             const speechResult = event.results[0][0].transcript;
             input.value = speechResult;
         };
 
         recognition.onend = () => {
+             // ... (Lógica de onend)
             microphoneBtn.classList.remove('recording');
             microphoneBtn.style.color = 'var(--color-highlight)';
             input.placeholder = 'Peça à Esperança';
@@ -180,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         recognition.onerror = (event) => {
+             // ... (Lógica de onerror)
             console.error('Erro no reconhecimento de voz:', event.error);
             recognition.onend(); 
             if (event.error === 'not-allowed') {
@@ -187,14 +205,16 @@ document.addEventListener('DOMContentLoaded', () => {
             } 
         };
 
+
     } else {
         microphoneBtn.style.display = 'none';
     }
     
-    // 3. CHIPS CLICÁVEIS 
+    // 3. CHIPS CLICÁVEIS (Lógica mantida)
     chatBox.addEventListener('click', (e) => {
         const chip = e.target.closest('.chip'); 
         if (chip) {
+            // ... (Lógica dos Chips mantida)
             const url = chip.getAttribute('data-url');
             const isSuggestion = chip.classList.contains('suggestion-chip');
             
@@ -226,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Inicialização final do estado
+    console.log("script.js carregado e event listeners anexados.");
     resetarEstadoInput();
     rolarParaBaixo();
 });
