@@ -15,10 +15,17 @@
             </div>
         </div>
         
-        <div id="input-area">
-            <input type="text" id="pergunta-input" placeholder="Digite sua pergunta aqui..." autofocus>
-            <button id="enviar-btn">Enviar</button>
+        <div id="fixed-bottom-area">
+            <div id="input-area">
+                <input type="text" id="pergunta-input" placeholder="Digite sua pergunta aqui..." autofocus>
+                <button id="enviar-btn">Enviar</button>
+            </div>
+            
+            <div id="aviso-ia">
+                O Hope pode cometer erros. Por isso, é bom checar as respostas.
+            </div>
         </div>
+
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

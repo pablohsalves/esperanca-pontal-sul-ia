@@ -1,4 +1,4 @@
-/* static/style.css - TEMA GEMINI DARK MODE (RESPONSIVO E SEM TÍTULO) */
+/* static/style.css - TEMA GEMINI DARK MODE (VERDE, FIXO E FLUIDO) */
 
 /* --- Variáveis de Cor --- */
 :root {
@@ -6,12 +6,13 @@
     --color-bg-container: #0a0a0a;    /* Preto muito escuro para o container */
     --color-bg-input: #1a1a1a;        /* Cinza escuro para o input */
     --color-text-main: #e0e0e0;       /* Texto branco/claro */
-    --color-highlight: #00BFFF;       /* Ciano/Azul Brilhante (Cor de destaque) */
+    --color-highlight: #00ff66;       /* NOVO: Verde Esmeralda/Neon */
     --color-user-bubble: #171720;     /* Fundo da bolha do usuário */
-    --color-user-text: #00BFFF;       /* Texto da bolha do usuário */
+    --color-user-text: #00ff66;       /* NOVO: Texto da bolha do usuário (verde) */
+    --color-aviso: #555555;           /* Cinza para o aviso */
 }
 
-/* --- Configurações Básicas (Desktop) --- */
+/* --- Configurações Básicas --- */
 body {
     font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     max-width: 800px; /* Limite de largura para desktop */
@@ -20,11 +21,6 @@ body {
     color: var(--color-text-main);
     padding: 0 20px;
     line-height: 1.6;
-}
-
-/* Oculta o H1 caso tenha sido adicionado acidentalmente no futuro */
-h1 {
-    display: none;
 }
 
 /* --- Área Principal do Chat (Desktop) --- */
@@ -41,9 +37,11 @@ h1 {
 #chat-box {
     flex-grow: 1;
     padding: 25px;
-    overflow-y: auto; 
+    overflow-y: auto; /* Permite que o chat-box role */
     border-bottom: 1px solid #1a1a1a;
     scroll-behavior: smooth;
+    /* Adiciona padding no final para que a última mensagem não fique escondida atrás do fixed-bottom-area */
+    padding-bottom: 100px; 
 }
 
 /* Scrollbar (Minimalista Dark) */
@@ -58,8 +56,7 @@ h1 {
     background: var(--color-bg-container);
 }
 
-
-/* --- Estilo das Mensagens --- */
+/* --- Estilo das Mensagens (Bolhas) --- */
 .mensagem {
     margin-bottom: 18px;
     padding: 14px 18px;
@@ -69,6 +66,13 @@ h1 {
     word-wrap: break-word; 
     font-size: 16px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    /* Transição para suavizar a entrada da mensagem (fluidez) */
+    opacity: 0;
+    animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
 }
 
 .usuario {
@@ -88,17 +92,29 @@ h1 {
 }
 
 .ia strong {
-    color: var(--color-highlight); 
+    color: var(--color-highlight); /* Usa o novo verde */
     font-weight: 600;
 }
 
-/* --- Área de Input --- */
-#input-area {
-    display: flex;
-    padding: 20px 25px;
+/* --- Área de Input e Aviso (Desktop) --- */
+#fixed-bottom-area {
+    /* No desktop, esta área permanece estática dentro do chat-container */
     background-color: var(--color-bg-container);
     border-radius: 0 0 16px 16px;
+    padding: 0 25px 15px; /* Espaçamento interno */
+}
+
+#input-area {
+    display: flex;
+    padding: 20px 0; /* Espaçamento vertical */
     gap: 10px;
+}
+
+#aviso-ia {
+    text-align: center;
+    color: var(--color-aviso);
+    font-size: 13px;
+    padding-bottom: 10px;
 }
 
 #pergunta-input {
@@ -116,7 +132,7 @@ h1 {
     border-color: var(--color-highlight); 
     outline: none;
     background-color: #0d0d0d;
-    box-shadow: 0 0 0 3px rgba(0, 191, 255, 0.2); 
+    box-shadow: 0 0 0 3px rgba(0, 255, 102, 0.2); /* Sombra verde */
 }
 
 #input-area button {
@@ -132,17 +148,17 @@ h1 {
 }
 
 #input-area button:hover {
-    background-color: #33ccff; 
+    background-color: #33ff99; /* Verde mais claro no hover */
     transform: translateY(-1px);
 }
 
+
 /* ========================================= */
-/* --- MEDIA QUERY: AJUSTES PARA MOBILE --- */
+/* --- MEDIA QUERY: AJUSTES PARA MOBILE (FIXO) --- */
 /* ========================================= */
 
 @media (max-width: 600px) {
     
-    /* Corpo do documento (Mobile) */
     body {
         margin: 0; 
         padding: 0; 
@@ -151,7 +167,6 @@ h1 {
         flex-direction: column;
     }
 
-    /* Container Principal (Mobile: Full-Screen Look) */
     #chat-container {
         flex-grow: 1; 
         width: 100%;
@@ -161,12 +176,26 @@ h1 {
         box-shadow: none; 
     }
 
+    /* O elemento que contém o input e o aviso fica FIXO no rodapé */
+    #fixed-bottom-area {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.7);
+        padding: 0 15px 10px; 
+        z-index: 100;
+        border-top: 1px solid #1a1a1a;
+    }
+    
+    /* Aumenta o padding do chat-box para que as mensagens subam acima da barra fixa */
     #chat-box {
+        padding-bottom: 150px; /* Mais espaço para o conteúdo subir */
         padding: 15px;
         flex-grow: 1;
     }
 
-    /* Ajuste de tamanho e margem das bolhas de mensagem para mobile */
+    /* Ajustes de tamanho e margem das bolhas de mensagem para mobile */
     .mensagem {
         max-width: 90%; 
         font-size: 15px; 
@@ -177,8 +206,7 @@ h1 {
     
     /* Input Area (Mobile) */
     #input-area {
-        padding: 10px 15px; 
-        border-radius: 0;
+        padding: 10px 0; /* Ajusta o padding para o novo container fixo */
     }
 
     #pergunta-input {
