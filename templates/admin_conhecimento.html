@@ -66,19 +66,20 @@
             background-color: #3e3e3e;
             color: #ffffff;
         }
-        .logout-link {
-            color: #ff6b6b;
+        .back-link {
+            color: #a8c7fa;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 16px;
+            margin-left: 20px;
         }
-        .logout-link:hover {
+        .back-link:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Administração do Conhecimento da IA</h2>
+        <h2>Administração do Conhecimento da IA (Acesso Aberto)</h2>
         {% if mensagem %}
             <p class="message">{{ mensagem }}</p>
         {% endif %}
@@ -89,7 +90,7 @@
             <textarea name="novo_conhecimento" required>{{ conteudo_atual }}</textarea>
             <div>
                 <input type="submit" value="Salvar e Atualizar Conhecimento">
-                <a href="{{ url_for('logout') }}" class="logout-link">Sair (Logout)</a>
+                <a href="{{ url_for('index') }}" class="back-link">← Voltar para o Chat</a>
             </div>
         </form>
     </div>

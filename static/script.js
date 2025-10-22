@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL E ESTÁVEL com Rolagem, Chips e Microfone (Revisão V7)
+// static/script.js - Versão FINAL E FUNCIONAL (V8 - Foco no Envio e Microfone FIX)
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -9,18 +9,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let singleRowHeight = 0; 
     let recognition = null; 
     
-    // --- FUNÇÕES DE ESTADO INICIAL ---
+    // --- FUNÇÕES DE ESTADO DO INPUT E BOTÕES ---
     
     function resetarEstadoInput() {
-        // Garante que o input e botões estejam habilitados (estado padrão)
+        // Habilita o input e o microfone sempre
         input.disabled = false;
         microphoneBtn.disabled = false;
         
-        // CRÍTICO: O botão de enviar só é ativado se houver texto
+        // O botão de envio só é habilitado se houver texto
         enviarBtn.disabled = input.value.trim() === '';
     }
 
-    // Inicializa o estado dos botões ao carregar a página
+    // Inicializa o estado dos botões
     resetarEstadoInput();
 
     // --- ROLAGEM E AUTOSIZE ---
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.height = 'auto'; 
         input.style.height = input.scrollHeight + 'px'; 
         
-        // CRÍTICO: Ativa/Desativa o botão de envio em tempo real
+        // Atualiza o estado do botão Enviar
         enviarBtn.disabled = input.value.trim() === '';
         
         rolarParaBaixo();
@@ -59,11 +59,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return div;
     }
 
-    // --- FUNÇÃO PRINCIPAL DE ENVIO ---
+    // --- FUNÇÃO PRINCIPAL DE ENVIO (START POINT) ---
     async function enviarMensagem() {
         const pergunta = input.value.trim();
         
-        if (pergunta === '') { return; }
+        // CRÍTICO: Verifica se o botão de envio deveria estar desabilitado se a pergunta estiver vazia.
+        if (pergunta === '') { 
+             resetarEstadoInput(); // Garante que se o usuário clicar sem querer, o estado é resetado.
+             return; 
+        }
 
         const suggestionChipsContainer = document.querySelector('.suggestion-chips');
         if (suggestionChipsContainer) {
@@ -73,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Exibe a mensagem do usuário
         adicionarMensagem(pergunta, 'usuario'); 
         
-        // 2. Desabilita todos os inputs
+        // 2. Desabilita todos os inputs e limpa
         input.value = ''; 
         input.style.height = singleRowHeight + 'px';
         
@@ -124,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } finally {
             // 7. Reabilita o estado e foca
-            resetarEstadoInput(); // Usa a nova função para resetar o estado
+            resetarEstadoInput(); // CRÍTICO: Garante o reset do estado dos botões
             input.focus();
             rolarParaBaixo();
         }
@@ -147,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     recognition.start();
                 } catch (e) {
+                    // Ignora o erro se já estiver ativo
                     console.warn("Reconhecimento de voz já ativo ou falha ao iniciar.", e);
                 }
             }
@@ -154,27 +159,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         recognition.onstart = () => {
             microphoneBtn.classList.add('recording');
-            microphoneBtn.style.color = '#ff5555'; // Vermelho
+            microphoneBtn.style.color = '#ff5555'; 
             input.placeholder = 'Escutando... Fale agora.';
+            // Desabilita input e envio durante a gravação
             input.disabled = true;
-            enviarBtn.disabled = true; // Desabilita o envio durante a gravação
+            enviarBtn.disabled = true; 
         };
 
         recognition.onresult = (event) => {
             const speechResult = event.results[0][0].transcript;
             input.value = speechResult;
-            enviarMensagem(); 
+            // A chamada de enviarMensagem() será feita no onend (após a fala)
+            // Ou o usuário pode clicar em enviar ou parar a gravação manualmente
         };
 
         recognition.onend = () => {
             microphoneBtn.classList.remove('recording');
             microphoneBtn.style.color = 'var(--color-highlight)';
             input.placeholder = 'Peça à Esperança';
-            resetarEstadoInput(); // Usa a nova função para resetar o estado
+            
+            // CRÍTICO: Se houver texto no input, envia a mensagem após o onend
+            if (input.value.trim() !== '') {
+                enviarMensagem();
+            } else {
+                resetarEstadoInput(); 
+            }
         };
 
         recognition.onerror = (event) => {
             console.error('Erro no reconhecimento de voz:', event.error);
+            // Chama onend para resetar o estado dos botões, mesmo em erro
             recognition.onend(); 
             if (event.error === 'not-allowed') {
                  alert('Acesso ao microfone negado. Verifique as permissões do seu navegador.');
@@ -182,6 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
     } else {
+        // Se a API não for suportada, esconde o botão
         microphoneBtn.style.display = 'none';
     }
     
@@ -193,6 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // CRÍTICO: Garante que o clique chame a função
     enviarBtn.addEventListener('click', enviarMensagem);
     
     // --- Lógica para Chips/Botões Clicáveis ---
@@ -224,7 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     input.value = perguntaSugerida;
                     autoExpand();
-                    enviarMensagem();
+                    // CRÍTICO: Envia a mensagem imediatamente após preencher o input com o chip
+                    enviarMensagem(); 
                 }
             }
         }
