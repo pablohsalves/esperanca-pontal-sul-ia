@@ -289,8 +289,7 @@ body {
     box-shadow: 0 0 5px rgba(168, 199, 250, 0.4);
 }
 
-/* --- Estilos de Classes de Chips (Localização, WhatsApp, etc.) -- */
-
+/* --- Estilos de Classes de Chips (Ícones) -- */
 .chip.localizacao:before { content: "\f3c5"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 6px; }
 .chip.localizacao { color: #4ac994; border-color: #4ac994; }
 .chip.whatsapp:before { content: "\f232"; font-family: "Font Awesome 6 Brands"; font-weight: 400; margin-right: 6px; }

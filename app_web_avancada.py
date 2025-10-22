@@ -6,6 +6,7 @@ import os
 import logging
 import bcrypt 
 from functools import wraps 
+# A classe ParceiroDeFeAvancado é assumida como estável
 from assistente_avancada import ParceiroDeFeAvancado
 from dotenv import load_dotenv
 

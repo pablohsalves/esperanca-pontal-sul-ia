@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL E ESTÁVEL com Rolagem, Chips e Microfone
+// static/script.js - Versão FINAL E ESTÁVEL com Rolagem, Chips e Microfone (Revisão V7)
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -8,30 +8,43 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let singleRowHeight = 0; 
     let recognition = null; 
+    
+    // --- FUNÇÕES DE ESTADO INICIAL ---
+    
+    function resetarEstadoInput() {
+        // Garante que o input e botões estejam habilitados (estado padrão)
+        input.disabled = false;
+        microphoneBtn.disabled = false;
+        
+        // CRÍTICO: O botão de enviar só é ativado se houver texto
+        enviarBtn.disabled = input.value.trim() === '';
+    }
+
+    // Inicializa o estado dos botões ao carregar a página
+    resetarEstadoInput();
 
     // --- ROLAGEM E AUTOSIZE ---
     function rolarParaBaixo() {
-        // Rola o corpo da página até o final (CSS controla o padding)
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }
     
     function autoExpand() {
         if (singleRowHeight === 0) {
             input.style.height = 'auto';
-            // Garante que o singleRowHeight pegue a altura base do padding/font
             singleRowHeight = input.scrollHeight; 
             input.style.height = singleRowHeight + 'px';
         }
         
         input.style.height = 'auto'; 
-        // Define a altura com base no conteúdo, respeitando o max-height
         input.style.height = input.scrollHeight + 'px'; 
+        
+        // CRÍTICO: Ativa/Desativa o botão de envio em tempo real
+        enviarBtn.disabled = input.value.trim() === '';
         
         rolarParaBaixo();
     }
     
     input.addEventListener('input', autoExpand);
-    // Garante que o autosize seja executado na inicialização
     setTimeout(autoExpand, 0); 
     rolarParaBaixo(); 
 
@@ -40,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function adicionarMensagem(texto, remetente) {
         const div = document.createElement('div');
         div.className = `mensagem ${remetente}`;
-        // A resposta da IA já contém tags HTML de chips e quebras de linha (<br>)
         div.innerHTML = texto; 
         chatBox.appendChild(div);
         rolarParaBaixo();
@@ -53,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (pergunta === '') { return; }
 
-        // Remove os chips de sugestão do topo após a primeira interação
         const suggestionChipsContainer = document.querySelector('.suggestion-chips');
         if (suggestionChipsContainer) {
             suggestionChipsContainer.style.display = 'none'; 
@@ -62,15 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Exibe a mensagem do usuário
         adicionarMensagem(pergunta, 'usuario'); 
         
-        // 2. Reseta o input e desabilita
+        // 2. Desabilita todos os inputs
         input.value = ''; 
-        input.style.height = singleRowHeight + 'px'; // Volta para 1 linha
+        input.style.height = singleRowHeight + 'px';
         
         input.disabled = true;
         enviarBtn.disabled = true;
         microphoneBtn.disabled = true;
 
-        rolarParaBaixo(); // Força a rolagem antes do indicador
+        rolarParaBaixo(); 
 
         // 3. Adiciona o indicador de carregamento
         const loadingDiv = adicionarMensagem('<span class="loading-indicator"></span>Esperança está processando...', 'ia');
@@ -90,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             
-            // 5. Remove o indicador de carregamento
+            // 5. Remove o indicador
             if(loadingDiv.parentNode) {
                 chatBox.removeChild(loadingDiv);
             }
@@ -112,10 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
             adicionarMensagem(`<p>Erro: ${erroDisplay}</p>`, 'ia'); 
             
         } finally {
-            // 7. Reabilita e foca
-            input.disabled = false;
-            enviarBtn.disabled = false;
-            microphoneBtn.disabled = false;
+            // 7. Reabilita o estado e foca
+            resetarEstadoInput(); // Usa a nova função para resetar o estado
             input.focus();
             rolarParaBaixo();
         }
@@ -133,14 +142,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         microphoneBtn.addEventListener('click', () => {
             if (microphoneBtn.classList.contains('recording')) {
-                // Se estiver gravando, para a gravação
                 recognition.stop();
             } else {
-                // Se não estiver gravando, tenta iniciar
                 try {
                     recognition.start();
                 } catch (e) {
-                    // Previne erro se tentar iniciar enquanto já está ativo
                     console.warn("Reconhecimento de voz já ativo ou falha ao iniciar.", e);
                 }
             }
@@ -151,36 +157,31 @@ document.addEventListener('DOMContentLoaded', () => {
             microphoneBtn.style.color = '#ff5555'; // Vermelho
             input.placeholder = 'Escutando... Fale agora.';
             input.disabled = true;
-            enviarBtn.disabled = true;
+            enviarBtn.disabled = true; // Desabilita o envio durante a gravação
         };
 
         recognition.onresult = (event) => {
             const speechResult = event.results[0][0].transcript;
             input.value = speechResult;
-            // Envia a mensagem imediatamente após o reconhecimento
             enviarMensagem(); 
         };
 
         recognition.onend = () => {
             microphoneBtn.classList.remove('recording');
-            microphoneBtn.style.color = 'var(--color-highlight)'; // Volta à cor padrão
+            microphoneBtn.style.color = 'var(--color-highlight)';
             input.placeholder = 'Peça à Esperança';
-            input.disabled = false;
-            enviarBtn.disabled = false;
+            resetarEstadoInput(); // Usa a nova função para resetar o estado
         };
 
         recognition.onerror = (event) => {
             console.error('Erro no reconhecimento de voz:', event.error);
-            // Chama onend para resetar o estado dos botões
             recognition.onend(); 
-            // Informa ao usuário sobre a permissão
             if (event.error === 'not-allowed') {
                  alert('Acesso ao microfone negado. Verifique as permissões do seu navegador.');
             } 
         };
 
     } else {
-        // Se a API não for suportada, esconde o botão
         microphoneBtn.style.display = 'none';
     }
     
@@ -201,40 +202,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const url = chip.getAttribute('data-url');
             const isSuggestion = chip.classList.contains('suggestion-chip');
             
-            // Se o chip tiver um URL
             if (url) {
-                
-                // 1. CHIP DE RESPOSTA DA IA (Não é sugestão)
                 if (!isSuggestion) {
-                    e.preventDefault(); // Impede ação padrão do link se for link
+                    e.preventDefault(); 
                     window.open(url, '_blank');
                     return;
                 } 
-                
-                // 2. CHIP DE SUGESTÃO (Botão de Boas-vindas)
                 else {
                     const text = chip.getAttribute('data-text');
                     
-                    if (url.startsWith('/')) {
-                        // Navegação interna (ex: /#horarios)
-                        window.location.href = url;
-                    } else {
-                        // Chips que devem enviar uma pergunta ao chat
-                        let perguntaSugerida = text; // Usa o texto como sugestão inicial
+                    let perguntaSugerida = text;
 
-                        // Se for um chip de contato, monta a pergunta correta
-                        if (text.includes("WhatsApp")) {
-                             perguntaSugerida = "Qual é o número de WhatsApp da igreja?";
-                        } else if (text.includes("Mapa") || text.includes("Localização")) {
-                             perguntaSugerida = "Onde fica a igreja (endereço completo)?";
-                        } else if (text.includes("Horários")) {
-                             perguntaSugerida = "Quais são os horários dos cultos?";
-                        }
-                        
-                        input.value = perguntaSugerida;
-                        autoExpand();
-                        enviarMensagem();
+                    // Lógica para montar a pergunta sugerida (mantida)
+                    if (text.includes("WhatsApp")) {
+                         perguntaSugerida = "Qual é o número de WhatsApp da igreja?";
+                    } else if (text.includes("Mapa") || text.includes("Localização")) {
+                         perguntaSugerida = "Onde fica a igreja (endereço completo)?";
+                    } else if (text.includes("Horários")) {
+                         perguntaSugerida = "Quais são os horários dos cultos?";
                     }
+                    
+                    input.value = perguntaSugerida;
+                    autoExpand();
+                    enviarMensagem();
                 }
             }
         }
