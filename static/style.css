@@ -1,4 +1,4 @@
-/* static/style.css - TEMA GEMINI DARK MODE (FINAL) */
+/* static/style.css - TEMA GEMINI DARK MODE (FINAL E CORRIGIDO) */
 
 :root {
     --color-bg-main: #000000;         /* Preto Puro */
@@ -8,7 +8,9 @@
     --color-user-bubble: #171720;     /* Fundo da bolha do usuário */
     --color-user-text: #a8c7fa;       /* Texto da bolha do usuário (Cinza/Azul) */
     --color-aviso: #555555;           /* Cinza para o aviso */
-    --header-height: 55px; /* Altura do novo cabeçalho */
+    --header-height: 55px; /* Altura do cabeçalho */
+    /* NOVA VARIÁVEL: Altura aproximada da área de input + aviso para padding */
+    --input-area-height: 120px; 
 }
 
 /* --- Configurações Básicas --- */
@@ -16,6 +18,9 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
+    /* Faz a rolagem ser feita pelo BODY/HTML, não por um DIV interno */
+    overflow-y: auto; 
+    overflow-x: hidden;
 }
 
 body {
@@ -30,7 +35,7 @@ body {
 
 /* --- Cabeçalho Fixo --- */
 #header-fixed {
-    position: fixed;
+    position: fixed; /* MANTÉM FIXO */
     top: 0;
     left: 0;
     width: 100%;
@@ -40,7 +45,7 @@ body {
     justify-content: center;
     align-items: center;
     border-bottom: 1px solid #1a1a1a;
-    z-index: 1000; /* Garante que fique acima de tudo */
+    z-index: 1000; 
 }
 
 #header-content {
@@ -67,31 +72,29 @@ body {
 }
 
 
-/* --- Área Principal do Chat --- */
+/* --- Área Principal do Chat (CORREÇÃO CRÍTICA AQUI) --- */
 #chat-box {
     width: 100%;
     max-width: 800px;
-    height: 100%; 
-    padding: 20px 20px;
-    overflow-y: auto; 
-    scroll-behavior: smooth;
+    /* Altura MÍNIMA para preencher a tela */
+    min-height: 100vh; 
     
-    /* Padding para acomodar o header e o rodapé fixos */
+    /* CORREÇÃO 1: Padding para empurrar o conteúdo abaixo do cabeçalho fixo */
     padding-top: calc(var(--header-height) + 20px); 
-    padding-bottom: 120px; 
+    
+    /* CORREÇÃO 2: Padding para empurrar o conteúdo acima da área de input fixa */
+    padding-bottom: var(--input-area-height); 
+    
+    padding-left: 20px;
+    padding-right: 20px;
+    
+    /* Remove a rolagem interna, pois o body fará a rolagem */
+    overflow-y: visible; 
+    scroll-behavior: smooth;
 }
 
-/* Scrollbar (Minimalista Dark) */
-#chat-box::-webkit-scrollbar {
-    width: 6px;
-}
-#chat-box::-webkit-scrollbar-thumb {
-    background: #444444;
-    border-radius: 3px;
-}
-#chat-box::-webkit-scrollbar-track {
-    background: var(--color-bg-main);
-}
+/* Scrollbar (Minimalista Dark) - Agora aplicado ao body, se necessário */
+
 
 /* --- Estilo das Mensagens (Bolhas) --- */
 .mensagem {
@@ -104,7 +107,6 @@ body {
     font-size: 16px;
     opacity: 0;
     animation: fadeIn 0.5s forwards;
-    /* Remove a sombra do container base */
     box-shadow: none; 
 }
 
@@ -113,7 +115,6 @@ body {
 }
 
 .usuario {
-    /* Aplica a bolha SOMENTE ao usuário */
     margin-left: auto; 
     margin-right: 0;
     background-color: var(--color-user-bubble);
@@ -124,7 +125,6 @@ body {
 }
 
 .ia {
-    /* Remove a bolha da IA - Apenas texto */
     margin-right: auto; 
     margin-left: 0;
     background-color: transparent; 
@@ -164,9 +164,9 @@ body {
 }
 
 
-/* --- Área de Input FIXADA no Rodapé --- */
+/* --- Área de Input FIXADA no Rodapé (CORREÇÃO CRÍTICA AQUI) --- */
 #fixed-bottom-area {
-    position: fixed;
+    position: fixed; /* MANTÉM FIXO */
     bottom: 0;
     left: 0;
     width: 100%;
@@ -177,6 +177,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    
+    /* CORREÇÃO 3: Ajuste o padding inferior para resolver o aviso cortado no mobile */
+    padding-bottom: 5px; 
 }
 
 #input-area-wrapper {
@@ -191,7 +194,7 @@ body {
 /* ÍCONES (Desktop/Geral) */
 #microphone-btn, #enviar-btn {
     position: absolute;
-    bottom: 25px; 
+    bottom: 15px; /* Ajuste para centralizar verticalmente no input */
     background: transparent;
     border: none;
     color: var(--color-highlight); 
@@ -239,7 +242,7 @@ body {
     text-align: center;
     color: var(--color-aviso);
     font-size: 13px;
-    padding: 10px 20px 15px; 
+    padding: 10px 20px 10px; /* Ajustado padding vertical */
 }
 
 /* ========================================= */
@@ -248,25 +251,32 @@ body {
 
 @media (max-width: 600px) {
     
+    /* Altura da área de input ajustada para mobile (aproximadamente) */
+    :root {
+        --input-area-height: 110px; 
+    }
+    
     #header-content {
         padding: 0 10px; 
     }
 
     #chat-box {
-        padding: 10px 10px;
         padding-top: calc(var(--header-height) + 10px); 
-        padding-bottom: 120px; 
+        padding-bottom: var(--input-area-height); /* Usa a nova variável de altura */
+        padding-left: 10px;
+        padding-right: 10px;
     }
     
-    /* RESOLUÇÃO DEFINITIVA: Margem externa para afastar TODO o bloco da tela */
+    /* RESUMO: Área fixa de input no rodapé */
     #fixed-bottom-area {
+        padding-bottom: 5px; /* Mantém o aviso visível */
         /* Remove o padding lateral do elemento pai */
         padding-left: 0;
         padding-right: 0;
         /* Adiciona margem lateral para afastar TODO o bloco da tela */
-        margin: 0 15px 0 15px; 
+        margin: 0 10px 0 10px; 
         /* Ajusta a largura para garantir que a margem funcione */
-        width: calc(100% - 30px); 
+        width: calc(100% - 20px); 
     }
 
     #input-area-wrapper {
@@ -275,14 +285,15 @@ body {
     }
 
     /* ÍCONES MOBILE: Ajusta a posição para afastar da borda INTERNA da caixa */
-    /* Posicionamento em relação ao #input-area-wrapper que não tem padding */
     #microphone-btn { 
-        left: 5px; /* Mais perto da borda da caixa, que já está recuada */
-        bottom: 22px; 
+        left: 5px; 
+        bottom: 12px; /* Ajuste para mobile */
+        font-size: 20px;
     } 
     #enviar-btn { 
         right: 5px; 
-        bottom: 22px; 
+        bottom: 12px; /* Ajuste para mobile */
+        font-size: 20px;
     }
     
     #pergunta-input {
@@ -292,35 +303,35 @@ body {
     }
 
     #aviso-ia {
-        padding: 8px 10px 10px;
+        padding: 5px 10px 5px; /* Ajustado o padding vertical para otimizar espaço */
         font-size: 12px;
     }
 }
 
 
-/* --- NOVOS ESTILOS PARA CHIP/BOTÃO CLICÁVEL DA IA --- */
+/* --- ESTILOS PARA CHIP/BOTÃO CLICÁVEL DA IA (SEM ALTERAÇÕES) --- */
 
 /* Container para agrupar os chips */
 .chip-container {
     margin-top: 10px;
     display: flex;
-    flex-wrap: wrap; /* Permite quebrar linha em telas menores */
-    gap: 8px; /* Espaço entre os chips */
+    flex-wrap: wrap; 
+    gap: 8px; 
 }
 
 /* Estilo Base do Chip/Botão */
 .chip {
-    display: inline-flex; /* Permite o ícone e o texto lado a lado */
+    display: inline-flex; 
     align-items: center;
     padding: 8px 12px;
     border-radius: 20px;
-    background-color: #2a2a2a; /* Fundo escuro */
-    color: var(--color-highlight); /* Texto na cor de destaque */
+    background-color: #2a2a2a; 
+    color: var(--color-highlight); 
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
     transition: background-color 0.2s, box-shadow 0.2s;
-    user-select: none; /* Não permite selecionar o texto */
+    user-select: none; 
     border: 1px solid #3c3c3c;
 }
 
@@ -329,47 +340,45 @@ body {
     box-shadow: 0 0 5px rgba(168, 199, 250, 0.4);
 }
 
-/* Ícone dentro do Chip (Font Awesome) - O ícone é inserido via ::before */
-
 /* Classes Modificadoras para Cores/Ícones */
 
 /* 1. Localização (Mapa) */
 .chip.localizacao:before {
-    content: "\f3c5"; /* Ícone de mapa (fa-map-marker-alt) */
+    content: "\f3c5"; 
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
     margin-right: 6px;
 }
 .chip.localizacao {
-    color: #4ac994; /* Verde sutil */
+    color: #4ac994; 
     border-color: #4ac994;
 }
 
 /* 2. WhatsApp */
 .chip.whatsapp:before {
-    content: "\f232"; /* Ícone do WhatsApp (fa-whatsapp) */
+    content: "\f232"; 
     font-family: "Font Awesome 6 Brands";
     font-weight: 400; 
     margin-right: 6px;
 }
 .chip.whatsapp {
-    color: #25d366; /* Verde WhatsApp */
+    color: #25d366; 
     border-color: #25d366;
 }
 
 /* 3. Instagram */
 .chip.instagram:before {
-    content: "\f16d"; /* Ícone do Instagram (fa-instagram) */
+    content: "\f16d"; 
     font-family: "Font Awesome 6 Brands";
     font-weight: 400; 
     margin-right: 6px;
 }
 .chip.instagram {
-    color: #e4405f; /* Vermelho/Rosa Instagram */
+    color: #e4405f; 
     border-color: #e4405f;
 }
 
 /* Garantir que o texto do chip na mensagem IA seja exibido em bloco separado */
 .mensagem.ia > .chip {
-    margin-top: 5px; /* Pequeno espaçamento se estiver sozinho */
+    margin-top: 5px; 
 }
