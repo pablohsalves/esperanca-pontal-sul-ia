@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL E FUNCIONAL (V9.2 - Força Habilitação do Botão)
+// static/script.js - Versão FINAL E FUNCIONAL (V10.0 - Fix de Envio / Áudio)
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -12,17 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNÇÕES DE ESTADO E UTILS ---
     
     function resetarEstadoInput() {
-        // Habilita tudo, depois desabilita o botão de enviar se não houver texto
+        // Garante que o input e microfone estão sempre habilitados
         input.disabled = false;
         microphoneBtn.disabled = false;
-        enviarBtn.disabled = input.value.trim() === ''; 
         
-        // CRÍTICO: Se o input estiver vazio, garantimos que o botão de enviar ESTÁ desabilitado.
-        if (input.value.trim() === '') {
-            enviarBtn.disabled = true;
-        } else {
-            enviarBtn.disabled = false; // Garante que é re-habilitado
-        }
+        // Habilita o botão de envio SOMENTE se houver texto
+        enviarBtn.disabled = input.value.trim() === ''; 
     }
 
     function rolarParaBaixo() {
@@ -41,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.height = 'auto'; 
         input.style.height = input.scrollHeight + 'px'; 
         
-        // CRÍTICO: Atualiza o estado do botão aqui também
+        // Atualiza o estado do botão aqui
         enviarBtn.disabled = input.value.trim() === '';
         
         rolarParaBaixo();
@@ -138,11 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     enviarBtn.addEventListener('click', enviarMensagem);
     
-    // 2. MICROFONE (Lógica mantida)
+    // 2. MICROFONE 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
-        // ... (todo o código do microfone é o mesmo da V9.1)
         recognition = new SpeechRecognition();
         recognition.lang = 'pt-BR'; 
         recognition.interimResults = false; 
@@ -197,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         microphoneBtn.style.display = 'none';
     }
     
-    // 3. CHIPS CLICÁVEIS (Lógica mantida)
+    // 3. CHIPS CLICÁVEIS 
     chatBox.addEventListener('click', (e) => {
         const chip = e.target.closest('.chip'); 
         if (chip) {
