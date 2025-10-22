@@ -1,12 +1,10 @@
-# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v4.0 - ESTÁVEL)
+# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v5.0 - ADMIN ABERTO E ESTÁVEL)
 
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import json
 import os
 import logging
-import bcrypt 
-from functools import wraps 
-# A classe ParceiroDeFeAvancado é assumida como estável
+# Removidos: import bcrypt e from functools import wraps
 from assistente_avancada import ParceiroDeFeAvancado
 from dotenv import load_dotenv
 
@@ -15,14 +13,7 @@ load_dotenv()
 
 # --- CONFIGURAÇÃO DE SEGURANÇA E AMBIENTE ---
 app = Flask(__name__)
-# CRÍTICO: Chave secreta carregada do .env ou Render
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'chave_padrao_muito_segura_troque_isso') 
-
-# Credenciais de Admin carregadas do ambiente
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
-# Carrega o HASH da senha como string, convertendo para bytes
-# O VALOR NO RENDER DEVE SER O HASH PURO, SEM ASPAS!
-ADMIN_PASSWORD_HASH = os.getenv('ADMIN_PASSWORD_HASH', '').encode('utf-8') 
 
 # --- CONFIGURAÇÃO DE LOGS ---
 logging.basicConfig(level=logging.INFO,
@@ -38,17 +29,7 @@ CONHECIMENTO_PATH = 'conhecimento_esperancapontalsul.txt'
 CONTATOS_PATH = 'contatos_igreja.json'
 
 
-# --- 1. FUNÇÕES DE ADMIN E DADOS ---
-
-def admin_required(f):
-    """Decorador para proteger rotas de administração."""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get('logged_in') != True:
-            # Redireciona para o login, passando a URL atual como 'next'
-            return redirect(url_for('login', next=request.url)) 
-        return f(*args, **kwargs)
-    return decorated_function
+# --- 1. FUNÇÕES DE DADOS ---
 
 def ler_conhecimento_atual():
     """Lê o conteúdo atual do arquivo de conhecimento."""
@@ -84,72 +65,29 @@ def carregar_links_contatos():
 # --- 2. INICIALIZAÇÃO DA ASSISTENTE ---
 
 try:
-    # A assistente é inicializada uma única vez na inicialização do Flask
     assistente = ParceiroDeFeAvancado(contatos=carregar_links_contatos())
-except ValueError as e:
+except Exception as e:
     logger.critical(f"ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. {e}")
+    # Cria uma classe placeholder para evitar que o app trave totalmente no Render
+    class PlaceholderAssistente:
+        def iniciar_novo_chat(self): return []
+        def enviar_saudacao(self): return "<h1>ERRO CRÍTICO</h1><p>O assistente de IA não pôde ser inicializado. Verifique logs e chaves API.</p>"
+        def obter_resposta_com_memoria(self, hist, perg): return "IA Inoperante devido a erro de inicialização.", hist
+        
+    assistente = PlaceholderAssistente()
 
 
 # ----------------------------------------------------
 # 3. ROTAS DO FLASK
 # ----------------------------------------------------
 
-# --- Rotas de Autenticação ---
-
-@app.route('/admin/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        
-        if not ADMIN_USERNAME or not ADMIN_PASSWORD_HASH:
-             return render_template('login.html', mensagem="Erro de Configuração: O nome de usuário ou HASH da senha não estão definidos no ambiente do servidor (Render).")
-
-        try:
-            # CRÍTICO: Verifica se o HASH tem tamanho razoável antes de tentar decodificar/comparar
-            if len(ADMIN_PASSWORD_HASH) < 60:
-                 raise TypeError("HASH da senha muito curto. Verifique se o valor da variável de ambiente no Render está correto e sem aspas.")
-
-            if (username == ADMIN_USERNAME and 
-                bcrypt.checkpw(password.encode('utf-8'), ADMIN_PASSWORD_HASH)):
-                
-                session['logged_in'] = True
-                next_url = request.args.get('next') or url_for('admin_conhecimento')
-                
-                return redirect(next_url) 
-            else:
-                return render_template('login.html', mensagem="Nome de usuário ou senha incorretos.")
-                
-        except (TypeError, ValueError) as e:
-            logger.error(f"Erro ao checar a senha (bcrypt): {e}")
-            return render_template('login.html', mensagem=f"Erro de Configuração CRÍTICO: O ADMIN_PASSWORD_HASH está mal formado. Erro: {e}. Verifique a variável de ambiente no Render.")
-        except Exception as e:
-            logger.error(f"Erro desconhecido durante o login: {e}")
-            return render_template('login.html', mensagem="Erro desconhecido durante o login.")
-
-    return render_template('login.html')
-
-@app.route('/admin/logout')
-def logout():
-    session.pop('logged_in', None)
-    # Limpa o histórico de chat para começar uma nova conversa
-    session.pop('historico', None) 
-    return redirect(url_for('login'))
-
-
-# --- Rota Principal (Chat) ---
-
 @app.route('/')
 def index():
     if 'historico' not in session:
-        # Garante que a primeira mensagem da IA esteja no histórico
         session['historico'] = assistente.iniciar_novo_chat() 
     
-    # Carrega os links para os chips de sugestão (botões iniciais)
     links = carregar_links_contatos()
-    
     saudacao_html = assistente.enviar_saudacao()
-    # Usa o template CORRETO
     return render_template('chat_interface.html', saudacao=saudacao_html, links=links)
 
 
@@ -162,7 +100,7 @@ def chat():
     if not pergunta:
         return jsonify({'erro': 'Pergunta vazia.'}), 400
 
-    # 1. Adiciona a pergunta do usuário ao histórico (para logs e contexto)
+    # Adiciona a pergunta do usuário ao histórico
     historico_serializado.append({
         "role": "user",
         "parts": [{"text": pergunta}]
@@ -171,13 +109,12 @@ def chat():
     resposta_ia = "Desculpe, houve um erro de comunicação com a IA. Por favor, tente novamente mais tarde."
     
     try:
-        # 2. Obtém a resposta e o histórico atualizado
         resposta_ia, novo_historico_gemini = assistente.obter_resposta_com_memoria(
             historico_serializado, 
             pergunta
         )
         
-        # 3. Atualiza o histórico na sessão
+        # Atualiza o histórico na sessão
         novo_historico_serializado = [
             json.loads(item.model_dump_json()) 
             for item in novo_historico_gemini
@@ -185,22 +122,20 @@ def chat():
         session['historico'] = novo_historico_serializado
         
     except Exception as e:
-        # 4. Tratamento de Erros: Loga o erro
         logger.error(f"Erro na API Gemini para a pergunta '{pergunta[:50]}...': {e}", exc_info=True)
+        resposta_ia = f"Erro Interno: {str(e)[:100]}..." 
         pass 
     finally:
-        # 5. Log de Conversa (Pergunta e Resposta)
         logger.info(f"USER: {pergunta} | IA: {resposta_ia}")
     
     return jsonify({'resposta': resposta_ia})
 
 
-# --- Rota de Administração (Protegida) ---
+# --- Rota de Administração (PÚBLICA) ---
 
 @app.route('/admin/conhecimento', methods=['GET', 'POST'])
-@admin_required
 def admin_conhecimento():
-    """Painel de administração para editar o arquivo de conhecimento."""
+    """Painel de administração para editar o arquivo de conhecimento (acesso público)."""
     mensagem = ""
     
     if request.method == 'POST':
@@ -210,7 +145,6 @@ def admin_conhecimento():
         assistente.contatos = carregar_links_contatos()
         
         if salvar_novo_conhecimento(novo_conteudo):
-            # CRÍTICO: Recarrega o conhecimento da assistente com o novo texto
             assistente.conhecimento_texto = ler_conhecimento_atual()
             mensagem = "Conhecimento atualizado com sucesso! (A IA recarregou o novo texto.)"
         else:
@@ -220,7 +154,6 @@ def admin_conhecimento():
     else:
         conteudo_atual = ler_conhecimento_atual()
 
-    # Usa o template CORRETO
     return render_template('admin_conhecimento.html', 
                            conteudo_atual=conteudo_atual, 
                            mensagem=mensagem)
@@ -228,5 +161,4 @@ def admin_conhecimento():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    # Usar '0.0.0.0' para garantir que funcione corretamente no Render
     app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_ENV') == 'development')

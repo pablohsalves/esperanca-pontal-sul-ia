@@ -1,170 +1,114 @@
-# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v5.0 - ADMIN ABERTO E ESTÁVEL)
+# assistente_avancada.py - ARQUIVO DA LÓGICA DA IA (Corrigido para evitar ImportError)
 
-from flask import Flask, render_template, request, session, jsonify, redirect, url_for
-import json
 import os
-import logging
-import bcrypt # Mantido, mas não usado para login
-from functools import wraps 
-from assistente_avancada import ParceiroDeFeAvancado
-from dotenv import load_dotenv
+import json
+from google import genai
+from google.genai import types
+from google.genai.errors import APIError
+from datetime import datetime
 
-# --- Carregamento de Variáveis de Ambiente ---
-load_dotenv() 
+# CRÍTICO: Remova QUALQUER linha aqui que diga 'from assistente_avancada import ...'
 
-# --- CONFIGURAÇÃO DE SEGURANÇA E AMBIENTE ---
-app = Flask(__name__)
-# CRÍTICO: Chave secreta carregada do .env ou Render
-app.secret_key = os.getenv('FLASK_SECRET_KEY', 'chave_padrao_muito_segura_troque_isso') 
-
-# --- CONFIGURAÇÃO DE LOGS ---
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s | %(levelname)s | %(message)s',
-                    handlers=[
-                        logging.FileHandler("conversas.log", encoding='utf-8'),
-                        logging.StreamHandler()
-                    ])
-logger = logging.getLogger(__name__)
-
-# --- CONFIGURAÇÃO DE ARQUIVOS DE DADOS ---
-CONHECIMENTO_PATH = 'conhecimento_esperancapontalsul.txt'
-CONTATOS_PATH = 'contatos_igreja.json'
-
-
-# --- 1. FUNÇÕES DE DADOS ---
-
-def ler_conhecimento_atual():
-    """Lê o conteúdo atual do arquivo de conhecimento."""
-    caminho_completo = os.path.join(os.path.dirname(os.path.abspath(__file__)), CONHECIMENTO_PATH)
-    try:
-        with open(caminho_completo, 'r', encoding='utf-8') as f:
-            return f.read()
-    except FileNotFoundError:
-        return "# Arquivo de conhecimento não encontrado. Conteúdo padrão de fallback."
-
-def salvar_novo_conhecimento(novo_conteudo):
-    """Sobrescreve o arquivo de conhecimento com o novo conteúdo."""
-    caminho_completo = os.path.join(os.path.dirname(os.path.abspath(__file__)), CONHECIMENTO_PATH)
-    try:
-        with open(caminho_completo, 'w', encoding='utf-8') as f:
-            f.write(novo_conteudo)
-        return True
-    except Exception as e:
-        logger.error(f"ERRO ao salvar o conhecimento: {e}")
-        return False
+class ParceiroDeFeAvancado:
+    """
+    Classe responsável por interagir com a API Gemini, manter o histórico 
+    e contextualizar as respostas com o conhecimento da igreja.
+    """
+    def __init__(self, contatos, knowledge_path='conhecimento_esperancapontalsul.txt'):
         
-def carregar_links_contatos():
-    """Carrega os links de contatos do JSON."""
-    caminho_completo = os.path.join(os.path.dirname(os.path.abspath(__file__)), CONTATOS_PATH)
-    try:
-        with open(caminho_completo, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except Exception as e:
-        logger.error(f"ERRO ao carregar links de contatos: {e}")
-        return {}
+        # 1. Configuração da API
+        # Certifique-se de que a variável GEMINI_API_KEY está definida no Render
+        self.client = genai.Client() 
+        self.contatos = contatos
+        self.knowledge_path = knowledge_path
+        self.conhecimento_texto = self._ler_conhecimento()
+        
+        # 2. Configuração do Modelo e System Instruction
+        self.model = 'gemini-2.5-flash'
+        self.system_instruction = self._montar_instrucao_sistema()
 
+    def _ler_conhecimento(self):
+        """Lê o arquivo de conhecimento da igreja."""
+        try:
+            # Caminho absoluto para garantir que funciona no Render
+            caminho_completo = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.knowledge_path)
+            with open(caminho_completo, 'r', encoding='utf-8') as f:
+                return f.read()
+        except FileNotFoundError:
+            return "Nenhum conhecimento base encontrado."
 
-# --- 2. INICIALIZAÇÃO DA ASSISTENTE ---
+    def _montar_instrucao_sistema(self):
+        """Monta a instrução de sistema que guia o comportamento da IA."""
+        
+        data_atual = datetime.now().strftime("%d/%m/%Y")
+        
+        instrucao = f"""
+        Você é a "Esperança", a inteligência artificial Parceira de Fé da Igreja da Paz Pontal Sul.
+        Seu propósito é fornecer informações úteis e acolhedoras sobre a igreja, com foco em:
+        1. Acolhimento e linguagem amigável (sempre use um tom de esperança e carinho).
+        2. Responder perguntas baseando-se EXCLUSIVAMENTE no CONHECIMENTO fornecido abaixo e nos CONTATOS.
+        3. Se a informação não estiver no CONHECIMENTO, diga educadamente que não possui essa informação específica.
+        4. O contexto da data atual é: {data_atual}.
 
-try:
-    # A assistente é inicializada uma única vez na inicialização do Flask
-    assistente = ParceiroDeFeAvancado(contatos=carregar_links_contatos())
-except ValueError as e:
-    logger.critical(f"ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. {e}")
+        --- CONHECIMENTO DA IGREJA ---
+        {self.conhecimento_texto}
+        
+        --- CONTATOS E LINKS PARA CHIPS ---
+        {json.dumps(self.contatos, indent=2, ensure_ascii=False)}
 
+        --- INSTRUÇÕES DE FORMATAÇÃO E CHIPS ---
+        - Sempre use Markdown para formatar a resposta (negrito, listas, parágrafos).
+        - Se a resposta incluir informações que você possa confirmar com um link dos CONTATOS (WhatsApp, Localização, Cultos, etc.),
+          você DEVE incluir o chip de ação na sua resposta em um bloco HTML simples.
+        - Formato do Chip:
+          <div class="chip-container">
+              <div class="chip [classe_do_chip]" data-url="[link_do_contato]" data-text="[Texto do Botão]">
+                  [Texto do Botão]
+              </div>
+          </div>
+        - O [link_do_contato] deve vir diretamente do JSON de CONTATOS.
+        - As classes de chips disponíveis são: localizacao, whatsapp, instagram, cultos. Use a classe apropriada.
+        """
+        return instrucao
 
-# ----------------------------------------------------
-# 3. ROTAS DO FLASK
-# ----------------------------------------------------
-
-# --- Rota Principal (Chat) ---
-
-@app.route('/')
-def index():
-    if 'historico' not in session:
-        # Garante que a primeira mensagem da IA esteja no histórico
-        session['historico'] = assistente.iniciar_novo_chat() 
-    
-    # Carrega os links para os chips de sugestão (botões iniciais)
-    links = carregar_links_contatos()
-    
-    saudacao_html = assistente.enviar_saudacao()
-    # Usa o template CORRETO
-    return render_template('chat_interface.html', saudacao=saudacao_html, links=links)
-
-
-@app.route('/api/chat', methods=['POST'])
-def chat():
-    data = request.get_json()
-    pergunta = data.get('pergunta')
-    historico_serializado = session.get('historico', [])
-    
-    if not pergunta:
-        return jsonify({'erro': 'Pergunta vazia.'}), 400
-
-    # 1. Adiciona a pergunta do usuário ao histórico (para logs e contexto)
-    historico_serializado.append({
-        "role": "user",
-        "parts": [{"text": pergunta}]
-    })
-
-    resposta_ia = "Desculpe, houve um erro de comunicação com a IA. Por favor, tente novamente mais tarde."
-    
-    try:
-        # 2. Obtém a resposta e o histórico atualizado
-        resposta_ia, novo_historico_gemini = assistente.obter_resposta_com_memoria(
-            historico_serializado, 
-            pergunta
+    def iniciar_novo_chat(self):
+        """Cria e retorna o histórico inicial com a System Instruction."""
+        
+        system_message = types.Content(
+            role="system",
+            parts=[types.Part.from_text(self.system_instruction)]
         )
+        return [json.loads(system_message.model_dump_json())]
+
+    def enviar_saudacao(self):
+        """Envia a mensagem de boas-vindas inicial da IA."""
+        return """
+        Olá! Eu sou a **Esperança**, sua parceira de fé da Igreja da Paz Pontal Sul.
+        Estou aqui para responder suas dúvidas sobre horários, localização, contatos e tudo mais sobre a nossa comunidade.
+        Em que posso te ajudar hoje?
+        """
+
+    def obter_resposta_com_memoria(self, historico_serializado, nova_pergunta):
+        """Obtém a resposta da IA mantendo o histórico da conversa."""
         
-        # 3. Atualiza o histórico na sessão
-        novo_historico_serializado = [
-            json.loads(item.model_dump_json()) 
-            for item in novo_historico_gemini
+        historico_gemini = [
+            types.Content.from_dict(item) 
+            for item in historico_serializado
         ]
-        session['historico'] = novo_historico_serializado
         
-    except Exception as e:
-        # 4. Tratamento de Erros: Loga o erro
-        logger.error(f"Erro na API Gemini para a pergunta '{pergunta[:50]}...': {e}", exc_info=True)
-        pass 
-    finally:
-        # 5. Log de Conversa (Pergunta e Resposta)
-        logger.info(f"USER: {pergunta} | IA: {resposta_ia}")
-    
-    return jsonify({'resposta': resposta_ia})
+        chat = self.client.chats.create(
+            model=self.model,
+            history=historico_gemini,
+        )
 
+        try:
+            response = chat.send_message(nova_pergunta)
+            novo_historico = chat.get_history()
 
-# --- Rota de Administração (AGORA PÚBLICA) ---
-
-@app.route('/admin/conhecimento', methods=['GET', 'POST'])
-def admin_conhecimento():
-    """Painel de administração para editar o arquivo de conhecimento (acesso público)."""
-    mensagem = ""
-    
-    if request.method == 'POST':
-        novo_conteudo = request.form['novo_conhecimento']
-        
-        # Recarrega os contatos e salva o novo conhecimento
-        assistente.contatos = carregar_links_contatos()
-        
-        if salvar_novo_conhecimento(novo_conteudo):
-            # CRÍTICO: Recarrega o conhecimento da assistente com o novo texto
-            assistente.conhecimento_texto = ler_conhecimento_atual()
-            mensagem = "Conhecimento atualizado com sucesso! (A IA recarregou o novo texto.)"
-        else:
-            mensagem = "Erro ao salvar o novo conhecimento. Verifique as permissões e logs."
+            return response.text, novo_historico
             
-        conteudo_atual = novo_conteudo
-    else:
-        conteudo_atual = ler_conhecimento_atual()
-
-    return render_template('admin_conhecimento.html', 
-                           conteudo_atual=conteudo_atual, 
-                           mensagem=mensagem)
-
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    # Usar '0.0.0.0' para garantir que funcione corretamente no Render
-    app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_ENV') == 'development')
+        except APIError as e:
+            # Propaga o erro para ser tratado no Flask
+            raise Exception(f"Erro na API Google Gemini: {e.args[0]}")
+        except Exception as e:
+            raise Exception(f"Erro inesperado no assistente: {e}")
