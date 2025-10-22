@@ -259,14 +259,20 @@ body {
     }
 
     #input-area-wrapper {
-        /* AJUSTE CRÍTICO: 20px de respiro lateral para não encostar nas bordas */
-        padding: 0 20px; 
+        /* AJUSTE FINAL GARANTIDO: 25px de respiro lateral para desencostar das bordas */
+        padding: 0 25px; 
     }
 
     /* ÍCONES MOBILE: Ajuste a posição para afastar da borda INTERNA da caixa */
-    /* De 30px para 25px (Respeitando o novo padding de 20px) */
-    #microphone-btn { left: 25px; } 
-    #enviar-btn { right: 25px; }
+    /* Mantenho left/right 30px para garantir a distância. */
+    #microphone-btn { 
+        left: 30px; 
+        bottom: 22px; /* Ajuste vertical para alinhar com o texto */
+    } 
+    #enviar-btn { 
+        right: 30px; 
+        bottom: 22px; /* Ajuste vertical para alinhar com o texto */
+    }
     
     #pergunta-input {
         padding: 12px 50px 12px 45px; 
