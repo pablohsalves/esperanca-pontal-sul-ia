@@ -44,7 +44,7 @@ class ParceiroDeFeAvancado:
             "Mantenha um tom acolhedor, inspirador e respeitoso. Seja concisa, mas completa."
             "Sempre que possível, use trechos da Bíblia ou do conhecimento fornecido para dar suporte às suas respostas."
             "Se a pergunta for de natureza complexa ou pessoal, incentive o usuário a buscar a liderança ou pastores."
-            f"Contexto da Igreja: {self.conhecimento_texto}"
+            f"Contexto da Igreja: {selfimento_texto}"
         )
         
         # 2. Safety Settings (Configurações de Segurança)
@@ -76,10 +76,12 @@ class ParceiroDeFeAvancado:
         # Cria uma mensagem inicial da IA (que será a primeira da sessão)
         primeira_mensagem_ia = types.Content(
             role="model",
-            parts=[types.Part.from_text(self.enviar_saudacao())]
+            # LINHA CORRIGIDA: Adicionado 'text=' para resolver o TypeError do SDK do Gemini
+            parts=[types.Part.from_text(text=self.enviar_saudacao())] 
         )
         
         # Retorna a lista contendo apenas a primeira mensagem, já serializada
+        # Nota: A serialização deve ocorrer no app_web_avancada.py (função serialize_history)
         return [json.loads(primeira_mensagem_ia.model_dump_json())]
 
     def obter_resposta_com_memoria(self, historico_serializado: list, pergunta: str) -> tuple[str, list]:
@@ -89,7 +91,6 @@ class ParceiroDeFeAvancado:
         """
         
         # 1. Deserializar o Histórico (JSON -> Objeto Gemini Content)
-        # O Pydantic/SDK do Gemini pode reconstruir os objetos a partir do JSON serializado.
         try:
              historico_objetos = [
                 types.Content.model_validate(item) 
@@ -124,20 +125,3 @@ class ParceiroDeFeAvancado:
             
             # Se falhar, retorna a mensagem de erro e o histórico original (sem a última pergunta)
             return erro_msg, historico_objetos
-
-
-# --- FUNÇÃO DE TESTE (OPCIONAL) ---
-# if __name__ == '__main__':
-#     # Exemplo de uso para teste local da classe
-#     assistente = ParceiroDeFeAvancado()
-#     
-#     # 1. Primeira pergunta
-#     historico = assistente.iniciar_novo_chat() # Começa com a saudação
-#     pergunta1 = "Qual é o nome do pastor da igreja e qual o principal livro que ele usa?"
-#     resposta1, novo_historico = assistente.obter_resposta_com_memoria(historico, pergunta1)
-#     print(f"Resposta 1: {resposta1}\n---")
-    
-#     # 2. Pergunta de acompanhamento (usando a memória do histórico anterior)
-#     pergunta2 = "E onde fica a sede dessa igreja que você mencionou?"
-#     resposta2, historico_final = assistente.obter_resposta_com_memoria(novo_historico, pergunta2)
-#     print(f"Resposta 2: {resposta2}")
