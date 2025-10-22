@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     enviarBtn.addEventListener('click', enviarMensagem);
     
-    // --- Lógica para Chips/Botões Clicáveis (CORRIGIDA) ---
+    // --- Lógica para Chips/Botões Clicáveis ---
     chatBox.addEventListener('click', (e) => {
         const chip = e.target.closest('.chip'); 
         if (chip) {

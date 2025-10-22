@@ -148,6 +148,29 @@ body {
     font-weight: 600;
 }
 
+/* Estilo de Carregamento (Pensando...) */
+.loading-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    vertical-align: middle;
+    font-weight: bold;
+}
+.loading-indicator::after {
+    content: ".";
+    animation: loading-dots 1s steps(5, end) infinite;
+}
+
+@keyframes loading-dots {
+    0% { content: "."; }
+    20% { content: ".."; }
+    40% { content: "..."; }
+    60% { content: "...."; }
+    80% { content: "....."; }
+    100% { content: "."; }
+}
+
 
 /* --- Área de Input FIXADA no Rodapé --- */
 #fixed-bottom-area {
@@ -174,11 +197,31 @@ body {
     padding: 0 20px; 
 }
 
-/* ÍCONES e Textarea (Mantidos, mas garantindo que o overflow esteja hidden) */
-#microphone-btn, #enviar-btn { /* ... Estilos de ícones ... */ }
-#microphone-btn { left: 30px; }
-#enviar-btn { right: 30px; transform: none; }
+/* ÍCONES (Desktop/Geral) */
+#microphone-btn, #enviar-btn {
+    position: absolute;
+    bottom: 15px; 
+    background: transparent;
+    border: none;
+    color: var(--color-highlight); 
+    cursor: pointer;
+    font-size: 22px; 
+    padding: 8px;
+    line-height: 1; 
+    z-index: 200; 
+    transition: color 0.2s;
+}
 
+#microphone-btn { left: 30px; }
+#enviar-btn { 
+    right: 30px; 
+    transform: none; 
+}
+
+#microphone-btn:hover, #enviar-btn:hover { color: #ffffff; }
+
+
+/* Textarea Dinâmica (CORRIGIDA - Sem barra de rolagem desnecessária) */
 #pergunta-input {
     flex-grow: 1;
     padding: 15px 50px 15px 50px; 
@@ -188,11 +231,21 @@ body {
     border-radius: 25px; 
     font-size: 17px;
     resize: none; 
+    
     min-height: 25px; 
+    
+    /* CRÍTICO: Remove a barra de rolagem interna, o JS controla o resize */
     overflow: hidden; 
+    
     max-height: 200px;
 }
 
+#pergunta-input:focus {
+    background-color: #0d0d0d;
+    outline: none;
+}
+
+/* --- Aviso de IA --- */
 #aviso-ia {
     width: 100%;
     max-width: 800px;
@@ -214,8 +267,44 @@ body {
     padding: 0 18px 14px 0; 
 }
 
-/* Estilo Base do Chip/Botão (Mantido) */
-.chip { /* ... Estilos de chips ... */ }
+/* Estilo Base do Chip/Botão */
+.chip {
+    display: inline-flex; 
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 20px;
+    background-color: #2a2a2a; 
+    color: var(--color-highlight); 
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    user-select: none; 
+    border: 1px solid #3c3c3c;
+    display: inline-flex; 
+}
+
+.chip:hover {
+    background-color: #3c3c3c;
+    box-shadow: 0 0 5px rgba(168, 199, 250, 0.4);
+}
+
+/* --- Estilos de Classes de Chips (Localização, WhatsApp, etc.) -- */
+
+.chip.localizacao:before { content: "\f3c5"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 6px; }
+.chip.localizacao { color: #4ac994; border-color: #4ac994; }
+.chip.whatsapp:before { content: "\f232"; font-family: "Font Awesome 6 Brands"; font-weight: 400; margin-right: 6px; }
+.chip.whatsapp { color: #25d366; border-color: #25d366; }
+.chip.instagram:before { content: "\f16d"; font-family: "Font Awesome 6 Brands"; font-weight: 400; margin-right: 6px; }
+.chip.instagram { color: #e4405f; border-color: #e4405f; }
+.chip.cultos:before { content: "\f073"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 6px; }
+.chip.cultos { color: #f7b447; border-color: #f7b447; }
+
+/* --- CHIPS DE SUGESTÃO (Botões de Boas-vindas) --- */
+.chip-container.suggestion-chips { margin-top: 15px; margin-bottom: 5px; }
+.chip.suggestion-chip { background-color: #1a1a1a; color: #a8c7fa; border-color: #1a1a1a; font-weight: normal; font-size: 15px; padding: 10px 15px; transition: background-color 0.2s; }
+.chip.suggestion-chip:hover { background-color: #2a2a2a; box-shadow: none; }
+.chip.suggestion-chip::before { content: none !important; margin-right: 0 !important; }
 
 
 /* ========================================= */

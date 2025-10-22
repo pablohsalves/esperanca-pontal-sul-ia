@@ -93,7 +93,7 @@ except ValueError as e:
 # 3. ROTAS DO FLASK
 # ----------------------------------------------------
 
-# --- Rotas de Autenticação (CORRIGIDA) ---
+# --- Rotas de Autenticação ---
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def login():
