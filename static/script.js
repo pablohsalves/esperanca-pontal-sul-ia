@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL CORRIGIDA
+// static/script.js - Versão FINAL CORRIGIDA com Pensando... e Envio Automático
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function autoExpand() {
         if (singleRowHeight === 0) {
             input.style.height = 'auto';
-            // Calcula a altura da primeira linha ao carregar
             singleRowHeight = input.scrollHeight;
         }
         
@@ -48,18 +47,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // Garante que o input não esteja vazio
         if (pergunta === '') { return; }
 
+        // 1. Exibe a mensagem do usuário
         adicionarMensagem(pergunta, 'usuario');
         
-        // Reseta o input para o estado inicial (1 linha)
+        // 2. Reseta o input e desabilita
         input.value = ''; 
         input.style.height = singleRowHeight + 'px';
         
         input.disabled = true;
         enviarBtn.disabled = true;
 
-        const loadingDiv = adicionarMensagem('Digitando...', 'ia');
+        // 3. Adiciona o indicador de carregamento (Pensando...)
+        const loadingDiv = adicionarMensagem('<span class="loading-indicator"></span>Pensando...', 'ia');
 
         try {
+            // 4. Envia a requisição para o endpoint /api/chat
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -72,10 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
+            
+            // 5. Remove o indicador de carregamento
             chatBox.removeChild(loadingDiv);
+            
+            // 6. Exibe a resposta final da IA
             adicionarMensagem(data.resposta, 'ia');
 
         } catch (error) {
+            // Trata erros de servidor ou conexão
             chatBox.removeChild(loadingDiv);
             console.error('Erro ao enviar mensagem:', error);
             let erroDisplay = error.message;
@@ -87,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             adicionarMensagem(`Erro: ${erroDisplay}`, 'ia');
             
         } finally {
+            // 7. Reabilita e foca
             input.disabled = false;
             enviarBtn.disabled = false;
             input.focus();
@@ -112,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const transcript = event.results[0][0].transcript;
             input.value = transcript;
             autoExpand(); 
-            // AÇÃO CRÍTICA: Envia a mensagem automaticamente após capturar
+            // Ação: Envia a mensagem automaticamente
             enviarMensagem(); 
         };
 

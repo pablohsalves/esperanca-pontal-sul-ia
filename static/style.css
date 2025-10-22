@@ -40,7 +40,7 @@ body {
     justify-content: center;
     align-items: center;
     border-bottom: 1px solid #1a1a1a;
-    z-index: 1000;
+    z-index: 1000; /* Garante que fique acima de tudo */
 }
 
 #header-content {
@@ -102,9 +102,10 @@ body {
     line-height: 1.5;
     word-wrap: break-word; 
     font-size: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     opacity: 0;
     animation: fadeIn 0.5s forwards;
+    /* Remove a sombra do container base */
+    box-shadow: none; 
 }
 
 @keyframes fadeIn {
@@ -112,27 +113,56 @@ body {
 }
 
 .usuario {
+    /* CORREÇÃO: Aplica a bolha SOMENTE ao usuário */
     margin-left: auto; 
     margin-right: 0;
     background-color: var(--color-user-bubble);
     color: var(--color-user-text); 
     border-bottom-right-radius: 6px;
     border: 1px solid #2a2a2a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .ia {
+    /* CORREÇÃO: Remove a bolha da IA - Apenas texto */
     margin-right: auto; 
     margin-left: 0;
-    background-color: #1a1a1a; 
+    background-color: transparent; 
     color: var(--color-text-main);
-    border-bottom-left-radius: 6px;
-    border: 1px solid #2a2a2a;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 .ia strong {
     color: var(--color-highlight); 
     font-weight: 600;
 }
+
+/* NOVO: Estilo de Carregamento (Pensando...) */
+.loading-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    vertical-align: middle;
+    font-weight: bold;
+}
+.loading-indicator::after {
+    content: ".";
+    /* Animação de pontos */
+    animation: loading-dots 1s steps(5, end) infinite;
+}
+
+@keyframes loading-dots {
+    0% { content: "."; }
+    20% { content: ".."; }
+    40% { content: "..."; }
+    60% { content: "...."; }
+    80% { content: "....."; }
+    100% { content: "."; }
+}
+
 
 /* --- Área de Input FIXADA no Rodapé --- */
 #fixed-bottom-area {
@@ -229,13 +259,13 @@ body {
     }
 
     #input-area-wrapper {
-        /* Correção Final: Ajusta o respiro lateral para não encostar nas bordas */
-        padding: 0 10px; 
+        /* CORREÇÃO FINAL: Aumenta o respiro lateral para 15px */
+        padding: 0 15px; 
     }
 
-    /* ÍCONES MOBILE */
-    #microphone-btn { left: 18px; }
-    #enviar-btn { right: 18px; }
+    /* ÍCONES MOBILE (Ajusta a posição de acordo com o novo padding do wrapper) */
+    #microphone-btn { left: 25px; }
+    #enviar-btn { right: 25px; }
     
     #pergunta-input {
         padding: 12px 50px 12px 45px; 
