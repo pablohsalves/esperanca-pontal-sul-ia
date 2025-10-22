@@ -1,4 +1,4 @@
-# assistente_avancada.py - ARQUIVO DA LÓGICA DA IA (Corrigido para evitar ImportError)
+# assistente_avancada.py - ARQUIVO DA LÓGICA DA IA (V9.2 - Debug de Inicialização)
 
 import os
 import json
@@ -16,31 +16,47 @@ class ParceiroDeFeAvancado:
     """
     def __init__(self, contatos, knowledge_path='conhecimento_esperancapontalsul.txt'):
         
-        # 1. Configuração da API
-        # Certifique-se de que a variável GEMINI_API_KEY está definida no Render
-        self.client = genai.Client() 
         self.contatos = contatos
         self.knowledge_path = knowledge_path
+        
+        # 1. TENTATIVA SEGURA DE INICIALIZAÇÃO DA API
+        try:
+            # O cliente será inicializado mesmo que a chave esteja em um .env
+            self.client = genai.Client() 
+            self.model = 'gemini-2.5-flash'
+        except Exception as e:
+            # Se a chave da API for o problema, levante um erro informativo
+            raise ValueError(f"Falha ao inicializar o cliente Gemini. Verifique a GEMINI_API_KEY: {e}")
+
+        # 2. Leitura Segura dos Arquivos
         self.conhecimento_texto = self._ler_conhecimento()
         
-        # 2. Configuração do Modelo e System Instruction
-        self.model = 'gemini-2.5-flash'
+        # 3. Configuração do System Instruction
         self.system_instruction = self._montar_instrucao_sistema()
 
     def _ler_conhecimento(self):
         """Lê o arquivo de conhecimento da igreja."""
+        # Caminho absoluto para garantir que funciona no Render
+        caminho_completo = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.knowledge_path)
         try:
-            # Caminho absoluto para garantir que funciona no Render
-            caminho_completo = os.path.join(os.path.dirname(os.path.abspath(__file__)), self.knowledge_path)
             with open(caminho_completo, 'r', encoding='utf-8') as f:
                 return f.read()
         except FileNotFoundError:
-            return "Nenhum conhecimento base encontrado."
+            # Se o Render não conseguir encontrar o arquivo, a IA irá falhar
+            raise FileNotFoundError(f"Erro CRÍTICO: O arquivo de conhecimento '{self.knowledge_path}' não foi encontrado no caminho esperado: {caminho_completo}")
+        except Exception as e:
+            raise Exception(f"Erro na leitura do arquivo de conhecimento: {e}")
+
 
     def _montar_instrucao_sistema(self):
         """Monta a instrução de sistema que guia o comportamento da IA."""
         
         data_atual = datetime.now().strftime("%d/%m/%Y")
+        
+        instrucao = f"""
+        # ... (O restante da sua instrução de sistema é o mesmo)
+        """
+        # ... (O restante da sua instrução de sistema é o mesmo)
         
         instrucao = f"""
         Você é a "Esperança", a inteligência artificial Parceira de Fé da Igreja da Paz Pontal Sul.
@@ -72,8 +88,7 @@ class ParceiroDeFeAvancado:
         return instrucao
 
     def iniciar_novo_chat(self):
-        """Cria e retorna o histórico inicial com a System Instruction."""
-        
+        # ... (Mantenha o código)
         system_message = types.Content(
             role="system",
             parts=[types.Part.from_text(self.system_instruction)]
@@ -81,7 +96,7 @@ class ParceiroDeFeAvancado:
         return [json.loads(system_message.model_dump_json())]
 
     def enviar_saudacao(self):
-        """Envia a mensagem de boas-vindas inicial da IA."""
+        # ... (Mantenha o código)
         return """
         Olá! Eu sou a **Esperança**, sua parceira de fé da Igreja da Paz Pontal Sul.
         Estou aqui para responder suas dúvidas sobre horários, localização, contatos e tudo mais sobre a nossa comunidade.
@@ -89,8 +104,7 @@ class ParceiroDeFeAvancado:
         """
 
     def obter_resposta_com_memoria(self, historico_serializado, nova_pergunta):
-        """Obtém a resposta da IA mantendo o histórico da conversa."""
-        
+        # ... (Mantenha o código)
         historico_gemini = [
             types.Content.from_dict(item) 
             for item in historico_serializado

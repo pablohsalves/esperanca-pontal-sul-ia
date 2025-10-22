@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL E FUNCIONAL (V9.1 - Máxima Garantia de Envio)
+// static/script.js - Versão FINAL E FUNCIONAL (V9.2 - Força Habilitação do Botão)
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -12,13 +12,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNÇÕES DE ESTADO E UTILS ---
     
     function resetarEstadoInput() {
+        // Habilita tudo, depois desabilita o botão de enviar se não houver texto
         input.disabled = false;
         microphoneBtn.disabled = false;
-        enviarBtn.disabled = input.value.trim() === '';
+        enviarBtn.disabled = input.value.trim() === ''; 
+        
+        // CRÍTICO: Se o input estiver vazio, garantimos que o botão de enviar ESTÁ desabilitado.
+        if (input.value.trim() === '') {
+            enviarBtn.disabled = true;
+        } else {
+            enviarBtn.disabled = false; // Garante que é re-habilitado
+        }
     }
 
     function rolarParaBaixo() {
-        // Usa setTimeout para garantir que a rolagem ocorra após a renderização do novo conteúdo
         setTimeout(() => {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }, 50); 
@@ -34,15 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
         input.style.height = 'auto'; 
         input.style.height = input.scrollHeight + 'px'; 
         
+        // CRÍTICO: Atualiza o estado do botão aqui também
         enviarBtn.disabled = input.value.trim() === '';
         
         rolarParaBaixo();
     }
-
+    
     function adicionarMensagem(texto, remetente) {
         const div = document.createElement('div');
         div.className = `mensagem ${remetente}`;
-        // CRÍTICO: Usamos innerHTML para IA (que pode conter HTML de chips)
         div.innerHTML = texto; 
         chatBox.appendChild(div);
         rolarParaBaixo();
@@ -63,24 +70,21 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestionChipsContainer.style.display = 'none'; 
         }
 
-        // 1. Exibe a mensagem do usuário
         adicionarMensagem(pergunta, 'usuario'); 
         
-        // 2. Limpa e desabilita
         input.value = ''; 
         input.style.height = singleRowHeight + 'px';
         
+        // Bloqueia o envio enquanto processa
         input.disabled = true;
         enviarBtn.disabled = true;
         microphoneBtn.disabled = true;
 
         rolarParaBaixo(); 
 
-        // 3. Adiciona o indicador de carregamento
         const loadingDiv = adicionarMensagem('<span class="loading-indicator"></span>Esperança está processando...', 'ia');
 
         try {
-            // 4. Envia a requisição
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -94,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             
-            // 5. Remove o indicador e exibe a resposta final
             if(loadingDiv.parentNode) {
                 chatBox.removeChild(loadingDiv);
             }
@@ -107,14 +110,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Erro ao enviar mensagem:', error);
             let erroDisplay = error.message;
             if (erroDisplay.includes('Erro HTTP')) {
-                erroDisplay = `Erro do Servidor. Tente recarregar a página.`;
+                erroDisplay = `Erro do Servidor. Verifique os logs do Render.`;
             } else if (erroDisplay.includes('Failed to fetch')) {
                 erroDisplay = "Erro de conexão: Não foi possível alcançar o servidor.";
             }
             adicionarMensagem(`<p style="color: #ff5555;">Erro: ${erroDisplay}</p>`, 'ia'); 
             
         } finally {
-            // 6. Reabilita o estado
+            // Reabilita o estado
             resetarEstadoInput(); 
             input.focus();
             rolarParaBaixo();
@@ -135,10 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     enviarBtn.addEventListener('click', enviarMensagem);
     
-    // 2. MICROFONE
+    // 2. MICROFONE (Lógica mantida)
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
+        // ... (todo o código do microfone é o mesmo da V9.1)
         recognition = new SpeechRecognition();
         recognition.lang = 'pt-BR'; 
         recognition.interimResults = false; 
@@ -193,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         microphoneBtn.style.display = 'none';
     }
     
-    // 3. CHIPS CLICÁVEIS (Sugestões e Links)
+    // 3. CHIPS CLICÁVEIS (Lógica mantida)
     chatBox.addEventListener('click', (e) => {
         const chip = e.target.closest('.chip'); 
         if (chip) {
