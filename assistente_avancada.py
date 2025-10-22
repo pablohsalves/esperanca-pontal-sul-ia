@@ -11,8 +11,6 @@ class ParceiroDeFeAvancado:
         self.client = self._iniciar_cliente()
         self.conhecimento_texto = self._carregar_conhecimento(arquivo_conhecimento)
         
-        # O histórico de chat é gerenciado pela sessão do Flask (fora desta classe)
-        # O chat_session é criado apenas quando a função de memória é chamada
         print(f"Assistente Avançada inicializada com o modelo {self.modelo} e {len(self.conhecimento_texto.splitlines())} linhas de conhecimento carregadas.")
 
     def _iniciar_cliente(self):
@@ -25,7 +23,6 @@ class ParceiroDeFeAvancado:
     def _carregar_conhecimento(self, caminho):
         """Carrega o texto de conhecimento de um arquivo local."""
         try:
-            # Tenta carregar o arquivo a partir do caminho absoluto, útil em ambientes de deploy
             caminho_absoluto = os.path.join(os.path.dirname(__file__), caminho)
             with open(caminho_absoluto, 'r', encoding='utf-8') as f:
                 return f.read()
@@ -45,11 +42,11 @@ class ParceiroDeFeAvancado:
             "Sempre que possível, use trechos da Bíblia ou do conhecimento fornecido para dar suporte às suas respostas."
             "Se a pergunta for de natureza complexa ou pessoal, incentive o usuário a buscar a liderança ou pastores."
             
-            # CORREÇÃO CRÍTICA: De 'selfimento_texto' para 'self.conhecimento_texto'
-            f"Contexto da Igreja: {self.conhecimento_texto}"
+            # CORREÇÃO: Variável CORRETA
+            f"Contexto da Igreja: {self.conhecimento_texto}" 
         )
         
-        # 2. Safety Settings (Configurações de Segurança)
+        # 2. Safety Settings 
         safety_settings = [
             types.SafetySetting(
                 category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -75,14 +72,12 @@ class ParceiroDeFeAvancado:
         
     def iniciar_novo_chat(self):
         """Retorna o histórico inicial serializado com a saudação da IA."""
-        # Cria uma mensagem inicial da IA (que será a primeira da sessão)
         primeira_mensagem_ia = types.Content(
             role="model",
-            # CORREÇÃO: Necessário usar 'text=' para evitar o TypeError no SDK do Gemini
+            # CORREÇÃO: Sintaxe correta do Gemini SDK
             parts=[types.Part.from_text(text=self.enviar_saudacao())] 
         )
         
-        # Retorna a lista contendo apenas a primeira mensagem, já serializada
         return [json.loads(primeira_mensagem_ia.model_dump_json())]
 
     def obter_resposta_com_memoria(self, historico_serializado: list, pergunta: str) -> tuple[str, list]:
@@ -91,21 +86,19 @@ class ParceiroDeFeAvancado:
         a resposta e o novo histórico completo.
         """
         
-        # 1. Deserializar o Histórico (JSON -> Objeto Gemini Content)
+        # 1. Deserializar o Histórico
         try:
              historico_objetos = [
                 types.Content.model_validate(item) 
                 for item in historico_serializado
             ]
         except Exception as e:
-            # Caso o histórico serializado esteja corrompido, inicia um novo
             print(f"AVISO: Falha ao deserializar o histórico ({e}). Iniciando novo chat.")
             historico_objetos = []
             
         # 2. Criar a sessão de chat com as configurações
         configuracao_gemini = self._criar_configuracao_gemini()
         
-        # Inicia a sessão de chat com o histórico carregado
         chat_session = self.client.chats.create(
             model=self.modelo,
             history=historico_objetos,
@@ -124,5 +117,4 @@ class ParceiroDeFeAvancado:
             erro_msg = ("Desculpe, houve um erro ao processar sua solicitação no servidor de IA. "
                         "Por favor, tente novamente mais tarde.")
             
-            # Se falhar, retorna a mensagem de erro e o histórico original (sem a última pergunta)
             return erro_msg, historico_objetos

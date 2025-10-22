@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Hope - Assistente de IA</title>
+    <title>Esperança - Assistente de IA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    </head>
+</head>
 <body>
     
     <div id="chat-box">
@@ -16,7 +16,10 @@
     
     <div id="fixed-bottom-area">
         <div id="input-area-wrapper">
-            <input type="text" id="pergunta-input" placeholder="Digite sua pergunta aqui..." autofocus>
+            <button id="microphone-btn" aria-label="Falar com a Esperança">
+                &#127908; </button>
+            
+            <textarea id="pergunta-input" placeholder="Peça à Esperança" rows="1" autofocus></textarea>
             
             <button id="enviar-btn" aria-label="Enviar Mensagem">
                 &#10148; </button>

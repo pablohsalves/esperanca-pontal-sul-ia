@@ -4,11 +4,10 @@
 :root {
     --color-bg-main: #000000;         /* Preto Puro */
     --color-bg-container: #0a0a0a;    /* Preto muito escuro para o container */
-    --color-bg-input: #1a1a1a;        /* Cinza escuro para o input */
     --color-text-main: #e0e0e0;       /* Texto branco/claro */
-    --color-highlight: #a8c7fa;       /* NOVO: Cinza/Azul Claro (Estilo Gemini) */
+    --color-highlight: #a8c7fa;       /* Cinza/Azul Claro (Estilo Gemini) */
     --color-user-bubble: #171720;     /* Fundo da bolha do usuário */
-    --color-user-text: #a8c7fa;       /* NOVO: Texto da bolha do usuário (Cinza/Azul) */
+    --color-user-text: #a8c7fa;       /* Texto da bolha do usuário (Cinza/Azul) */
     --color-aviso: #555555;           /* Cinza para o aviso */
 }
 
@@ -26,20 +25,18 @@ body {
     line-height: 1.6;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centraliza horizontalmente o chat-box */
+    align-items: center; 
 }
 
-/* --- Área Principal do Chat (Fixação do Conteúdo) --- */
+/* --- Área Principal do Chat --- */
 #chat-box {
     width: 100%;
     max-width: 800px;
-    height: 100%; /* Ocupa a altura restante da tela */
+    height: 100%; 
     padding: 20px 20px;
     overflow-y: auto; 
     scroll-behavior: smooth;
-    
-    /* Padding inferior para que o conteúdo não fique escondido pela área fixa */
-    padding-bottom: 120px; /* Ajuste para acomodar a fixed-bottom-area */
+    padding-bottom: 120px; /* Espaço para a barra fixa */
 }
 
 /* Scrollbar (Minimalista Dark) */
@@ -56,10 +53,10 @@ body {
 
 /* --- Estilo das Mensagens (Bolhas) --- */
 .mensagem {
-    margin: 0 auto 18px; /* Centraliza as bolhas */
+    margin: 0 auto 18px; 
     padding: 14px 18px;
     border-radius: 20px;
-    max-width: 90%; /* Mais espaço para o mobile */
+    max-width: 90%; 
     line-height: 1.5;
     word-wrap: break-word; 
     font-size: 16px;
@@ -73,7 +70,7 @@ body {
 }
 
 .usuario {
-    margin-left: auto; /* Alinha o usuário à direita */
+    margin-left: auto; 
     margin-right: 0;
     background-color: var(--color-user-bubble);
     color: var(--color-user-text); 
@@ -82,7 +79,7 @@ body {
 }
 
 .ia {
-    margin-right: auto; /* Alinha a IA à esquerda */
+    margin-right: auto; 
     margin-left: 0;
     background-color: #1a1a1a; 
     color: var(--color-text-main);
@@ -95,7 +92,7 @@ body {
     font-weight: 600;
 }
 
-/* --- Área de Input e Aviso (FIXADA no Rodapé) --- */
+/* --- Área de Input FIXADA no Rodapé --- */
 #fixed-bottom-area {
     position: fixed;
     bottom: 0;
@@ -112,46 +109,72 @@ body {
 
 #input-area-wrapper {
     width: 100%;
-    max-width: 800px; /* Limita a largura do input na área fixa */
+    max-width: 800px;
     display: flex;
-    align-items: center;
+    align-items: flex-end; 
     position: relative;
     padding: 0 20px; 
 }
 
+/* NOVO: Botão de Microfone */
+#microphone-btn {
+    position: absolute;
+    left: 30px; 
+    bottom: 25px; 
+    
+    background: transparent;
+    border: none;
+    color: var(--color-highlight); 
+    cursor: pointer;
+    font-size: 22px; 
+    padding: 8px;
+    line-height: 1; 
+    z-index: 200; 
+    transition: color 0.2s;
+}
+
+#microphone-btn:hover {
+     color: #ffffff;
+}
+
+/* Textarea Dinâmica */
 #pergunta-input {
     flex-grow: 1;
-    padding: 15px 50px 15px 20px; /* Padding extra para acomodar o ícone */
-    background-color: var(--color-bg-input); 
+    /* Padding para acomodar o microfone (esquerda) e a seta (direita) */
+    padding: 15px 50px 15px 50px; 
+    
+    background-color: var(--color-bg-container);
     color: var(--color-text-main);
-    border: none; /* Remove borda para visual mais limpo */
-    border-radius: 30px; 
+    border: 1px solid var(--color-highlight); /* Borda Cinza/Azul */
+    
+    border-radius: 25px; 
     font-size: 17px;
-    transition: background-color 0.3s;
+    resize: none; 
+    min-height: 20px; 
+    max-height: 200px;
+    overflow: auto;
 }
 
 #pergunta-input:focus {
     background-color: #0d0d0d;
     outline: none;
-    /* Remove sombra azul de foco - mantendo minimalista */
 }
 
-/* --- Botão/Ícone de Envio (Seta) --- */
+/* Ícone de Envio (Seta) */
 #enviar-btn {
     position: absolute;
-    right: 30px; /* Ajuste para o padding lateral do wrapper */
-    top: 50%;
-    transform: translateY(-50%);
+    right: 30px; 
+    bottom: 25px; 
+    
     background: transparent;
     border: none;
-    color: var(--color-highlight); /* Usa o cinza/azul claro */
+    color: var(--color-highlight); 
     cursor: pointer;
     font-size: 22px; 
     padding: 8px;
-    line-height: 1; /* Alinhamento vertical do caractere */
+    line-height: 1; 
     transition: color 0.2s;
-    /* Ajuste para o caractere Unicode ficar como avião */
-    transform: translateY(-50%) rotate(45deg); 
+    transform: rotate(45deg); /* Gira para parecer um avião de papel */
 }
 
 #enviar-btn:hover {
@@ -165,31 +188,39 @@ body {
     text-align: center;
     color: var(--color-aviso);
     font-size: 13px;
-    padding: 10px 20px 15px; /* Padding final e lateral */
+    padding: 10px 20px 15px; 
 }
 
 /* ========================================= */
-/* --- MEDIA QUERY: AJUSTES PARA MOBILE (Ajusta o padding) --- */
+/* --- MEDIA QUERY: AJUSTES PARA MOBILE --- */
 /* ========================================= */
 
 @media (max-width: 600px) {
     
     #chat-box {
         padding: 10px 10px;
-        padding-bottom: 120px; /* Garante que o conteúdo role acima da barra fixa */
+        padding-bottom: 120px; 
     }
 
     #input-area-wrapper {
-        padding: 0 10px; /* Menor padding lateral no mobile */
+        padding: 0 10px; /* Respiro lateral */
     }
 
+    #microphone-btn {
+        left: 18px; 
+        bottom: 20px;
+        font-size: 20px;
+    }
+    
     #pergunta-input {
-        padding: 12px 50px 12px 15px;
+        padding: 12px 50px 12px 45px; /* Ajuste de padding para ícones */
         font-size: 15px;
+        border-radius: 22px;
     }
 
     #enviar-btn {
-        right: 15px; /* Ajuste de posição da seta no mobile */
+        right: 18px; 
+        bottom: 20px;
         font-size: 20px;
     }
 
