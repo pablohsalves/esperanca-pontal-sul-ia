@@ -1,11 +1,11 @@
-# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v3.0)
+# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v3.0 - REVISADO)
 
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import json
 import os
 import logging
-import bcrypt # Novo: Para autenticação
-from functools import wraps # Novo: Para criar o decorador de login
+import bcrypt 
+from functools import wraps 
 from assistente_avancada import ParceiroDeFeAvancado
 from dotenv import load_dotenv
 
@@ -14,14 +14,15 @@ load_dotenv()
 
 # --- CONFIGURAÇÃO DE SEGURANÇA E AMBIENTE ---
 app = Flask(__name__)
+# Certifique-se de que esta chave está definida no seu .env
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'chave_padrao_muito_segura_troque_isso') 
 
 # Credenciais de Admin carregadas do ambiente
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
-ADMIN_PASSWORD_HASH = os.getenv('ADMIN_PASSWORD_HASH')
+# Carrega o HASH da senha como string
+ADMIN_PASSWORD_HASH = os.getenv('ADMIN_PASSWORD_HASH', '').encode('utf-8') 
 
 # --- CONFIGURAÇÃO DE LOGS ---
-# Cria um logger que salva em 'conversas.log'
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s | %(levelname)s | %(message)s',
                     handlers=[
@@ -76,6 +77,7 @@ def carregar_links_contatos():
             return json.load(f)
     except Exception as e:
         logger.error(f"ERRO ao carregar links de contatos: {e}")
+        # Retorna um dicionário vazio em caso de erro para não quebrar a aplicação
         return {}
 
 
@@ -86,6 +88,7 @@ try:
     assistente = ParceiroDeFeAvancado(contatos=carregar_links_contatos())
 except ValueError as e:
     logger.critical(f"ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. {e}")
+    # Se a IA não iniciar, as rotas de chat darão erro, mas o admin e index devem carregar.
 
 
 # ----------------------------------------------------
@@ -100,14 +103,19 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        if (username == ADMIN_USERNAME and 
-            bcrypt.checkpw(password.encode('utf-8'), ADMIN_PASSWORD_HASH.encode('utf-8'))):
-            
-            session['logged_in'] = True
-            next_url = request.args.get('next') or url_for('admin_conhecimento')
-            return redirect(next_url)
-        else:
-            return render_template('login.html', mensagem="Nome de usuário ou senha incorretos.")
+        # O password é do formulário (string), o hash é do ambiente (bytes)
+        try:
+            if (username == ADMIN_USERNAME and 
+                bcrypt.checkpw(password.encode('utf-8'), ADMIN_PASSWORD_HASH)):
+                
+                session['logged_in'] = True
+                next_url = request.args.get('next') or url_for('admin_conhecimento')
+                return redirect(next_url)
+            else:
+                return render_template('login.html', mensagem="Nome de usuário ou senha incorretos.")
+        except Exception:
+            # Caso o ADMIN_PASSWORD_HASH não esteja configurado corretamente (erro de bytes/tipo)
+            return render_template('login.html', mensagem="Erro de configuração. Verifique as variáveis de ambiente (HASH).")
             
     return render_template('login.html')
 
@@ -146,7 +154,7 @@ def chat():
         "parts": [{"text": pergunta}]
     })
 
-    resposta_ia = "Desculpe, a IA está indisponível no momento. Tente novamente mais tarde."
+    resposta_ia = "Desculpe, houve um erro de comunicação com a IA. Por favor, tente novamente mais tarde."
     
     try:
         # 2. Obtém a resposta e o histórico atualizado
@@ -163,7 +171,7 @@ def chat():
         session['historico'] = novo_historico_serializado
         
     except Exception as e:
-        # 4. Tratamento de Erros: Loga o erro e usa a mensagem padrão
+        # 4. Tratamento de Erros: Loga o erro
         logger.error(f"Erro na API Gemini para a pergunta '{pergunta[:50]}...': {e}", exc_info=True)
         # Mantém a resposta padrão de erro definida acima
         pass 
@@ -185,8 +193,11 @@ def admin_conhecimento():
     if request.method == 'POST':
         novo_conteudo = request.form['novo_conhecimento']
         
+        # Tenta recarregar os contatos caso tenham sido alterados
+        assistente.contatos = carregar_links_contatos()
+        
         if salvar_novo_conhecimento(novo_conteudo):
-            # Recarrega a instância do assistente para forçar a leitura do novo arquivo
+            # Recarrega o conhecimento e a configuração da IA com o novo texto
             assistente.conhecimento_texto = ler_conhecimento_atual()
             mensagem = "Conhecimento atualizado com sucesso! (A IA recarregou o novo texto.)"
         else:
@@ -202,4 +213,5 @@ def admin_conhecimento():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Use '0.0.0.0' para garantir que funcione corretamente no Render
+    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5000), debug=True)

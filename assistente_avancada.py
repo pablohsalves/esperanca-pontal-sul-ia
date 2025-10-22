@@ -1,4 +1,4 @@
-# assistente_avancada.py (v3.0 - Com Links Externos)
+# assistente_avancada.py (v3.0 - REVISADO)
 
 from google import genai
 from google.genai import types
@@ -13,12 +13,13 @@ class ParceiroDeFeAvancado:
         self.conhecimento_texto = self._carregar_conhecimento(arquivo_conhecimento)
         self.contatos = contatos if contatos is not None else {}
         
-        print(f"Assistente Avançada inicializada com o modelo {self.modelo} e {len(self.conhecimento_texto.splitlines())} linhas de conhecimento carregadas.")
+        print(f"Assistente Avançada inicializada com o modelo {self.modelo}")
 
     def _iniciar_cliente(self):
         """Inicializa o cliente Gemini usando a chave de ambiente."""
         api_key = os.getenv('GEMINI_API_KEY')
         if not api_key:
+            # Lançamos o ValueError para que o app_web_avancada.py possa capturar
             raise ValueError("A variável de ambiente 'GEMINI_API_KEY' não está configurada.")
         return genai.Client(api_key=api_key)
 
@@ -34,14 +35,15 @@ class ParceiroDeFeAvancado:
     def _criar_configuracao_gemini(self):
         """Cria as configurações de sistema e safety_settings."""
         
-        # Gera uma lista de instruções de chips baseada no contatos_igreja.json
+        # Gera a lista de instruções de chips dinamicamente
         instrucoes_chips = []
         for chave, dados in self.contatos.items():
-            instrucoes_chips.append(f" - Para '{chave}': use <span class=\"chip {dados['classe']}\" data-url=\"{dados['url']}\">{dados['texto']}</span>")
+            # Usa o template de chip baseado no JSON de contatos
+            instrucoes_chips.append(f" - Para '{chave}' (ex: número, endereço): use <span class=\"chip {dados['classe']}\" data-url=\"{dados['url']}\">{dados['texto']}</span>")
             
         chips_str = "\n".join(instrucoes_chips)
         
-        # 1. Instrução de Sistema (Persona e Grounding) - ATUALIZADA PARA O NOVO FORMATO DE LINKS
+        # 1. Instrução de Sistema (Persona e Grounding) - REVISADA
         instrucao_sistema = (
             "Você é a Esperança, uma assistente virtual e parceira de fé da Igreja Esperança Pontal Sul."
             "Seu principal objetivo é fornecer respostas que refletem os ensinamentos cristãos e a doutrina da igreja."
@@ -81,10 +83,9 @@ class ParceiroDeFeAvancado:
         """Retorna a mensagem de saudação inicial."""
         return (
             "<strong>Esperança:</strong> Olá! Que alegria ter você aqui. Sou a Esperança, sua assistente virtual "
-            "e parceira de fé da Igreja Esperança Pontal Sul. Como posso te ajudar hoje?"
+            "e parceira de fé da Igreja Esperança Pontal Sul. Como posso te ajudar hoje? Tente um dos botões abaixo:"
         )
         
-    # ... (Resto da classe: iniciar_novo_chat e obter_resposta_com_memoria são iguais) ...
     def iniciar_novo_chat(self):
         """Retorna o histórico inicial serializado com a saudação da IA."""
         primeira_mensagem_ia = types.Content(
@@ -106,8 +107,8 @@ class ParceiroDeFeAvancado:
                 types.Content.model_validate(item) 
                 for item in historico_serializado
             ]
-        except Exception as e:
-            print(f"AVISO: Falha ao deserializar o histórico ({e}). Iniciando novo chat.")
+        except Exception:
+            # Em caso de erro, inicia um histórico vazio para tentar continuar
             historico_objetos = []
             
         # 2. Criar a sessão de chat com as configurações
