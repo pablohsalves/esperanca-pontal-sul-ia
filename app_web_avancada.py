@@ -1,4 +1,4 @@
-# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v4.0 - FINAL)
+# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v4.0 - ESTÁVEL)
 
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import json

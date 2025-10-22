@@ -1,4 +1,4 @@
-/* static/style.css - TEMA GEMINI DARK MODE (FINAL E CORRIGIDO) */
+/* static/style.css - TEMA GEMINI DARK MODE (FINAL, CORRIGIDO e ESTÁVEL) */
 
 :root {
     --color-bg-main: #000000;         /* Preto Puro */
@@ -79,10 +79,10 @@ body {
     /* Altura MÍNIMA para preencher a tela */
     min-height: 100vh; 
     
-    /* CORREÇÃO CRÍTICA 1: Padding para empurrar o conteúdo abaixo do cabeçalho fixo */
+    /* CRÍTICO 1: Padding para empurrar o conteúdo abaixo do cabeçalho fixo */
     padding-top: calc(var(--header-height) + 20px); 
     
-    /* CORREÇÃO CRÍTICA 2: Padding para garantir que a última mensagem NÃO fique atrás da caixa de input fixa */
+    /* CRÍTICO 2: Padding para garantir que a última mensagem NÃO fique atrás da caixa de input fixa */
     padding-bottom: var(--input-area-height); 
     
     padding-left: 20px;
@@ -129,6 +129,15 @@ body {
     border: none;
     border-radius: 0;
     box-shadow: none;
+    /* Garante que o texto dentro da bolha da IA não tenha margem extra */
+    padding: 0; 
+    margin-bottom: 25px; /* Aumenta o espaço final da bolha IA */
+}
+
+/* Estilo para Parágrafos dentro da bolha da IA (se a IA usar <p> ou o texto vier solto) */
+.ia p {
+    margin: 0 0 10px 0;
+    padding: 14px 18px 0 0; /* Simula o padding da bolha, mas na margem */
 }
 
 .ia strong {
@@ -209,7 +218,7 @@ body {
 #microphone-btn:hover, #enviar-btn:hover { color: #ffffff; }
 
 
-/* Textarea Dinâmica */
+/* Textarea Dinâmica (CORRIGIDA - Sem barra de rolagem desnecessária) */
 #pergunta-input {
     flex-grow: 1;
     padding: 15px 50px 15px 50px; 
@@ -219,9 +228,14 @@ body {
     border-radius: 25px; 
     font-size: 17px;
     resize: none; 
-    min-height: 20px; 
+    
+    /* CORREÇÃO CRÍTICA: Altura mínima ajustada para caber 1 linha + padding */
+    min-height: 25px; 
+    
+    /* CRÍTICO: Remove a barra de rolagem interna, o JS controla o resize */
+    overflow: hidden; 
+    
     max-height: 200px;
-    overflow: auto;
 }
 
 #pergunta-input:focus {
@@ -244,14 +258,16 @@ body {
 /* --- ESTILOS PARA CHIP/BOTÃO CLICÁVEL DA IA (CORRIGIDO) --- */
 /* ========================================= */
 
-/* Container para agrupar os chips */
+/* Container para agrupar os chips (CRÍTICO: Garante que chips quebrem a linha) */
 .chip-container {
     margin-top: 10px;
     display: flex;
     flex-wrap: wrap; 
     gap: 8px; 
-    /* Garante que o container esteja na próxima linha da bolha de chat */
+    /* Garante que o container esteja na próxima linha */
     width: 100%; 
+    padding-left: 18px; /* Alinha com o texto da bolha da IA */
+    padding-bottom: 14px; /* Espaçamento da bolha */
 }
 
 /* Estilo Base do Chip/Botão */
@@ -268,9 +284,6 @@ body {
     transition: background-color 0.2s, box-shadow 0.2s;
     user-select: none; 
     border: 1px solid #3c3c3c;
-    
-    /* CORREÇÃO CRÍTICA 3: Força o chip a ser exibido como um bloco ou inline-block */
-    /* inline-block permite que ele respeite o espaço, mas o flex no container o organiza */
     display: inline-flex; 
 }
 
@@ -279,62 +292,24 @@ body {
     box-shadow: 0 0 5px rgba(168, 199, 250, 0.4);
 }
 
-/* Garante que o chip na mensagem IA seja exibido abaixo do texto */
-/* Como a IA usa o <br> para separar, não precisamos de CSS de bloco agressivo, mas garantimos que o container ocupe a linha. */
-.mensagem.ia > .chip-container {
-    margin-top: 15px; 
-}
-
 /* --- Estilos de Classes de Chips (Localização, WhatsApp, etc.) -- */
+/* (Estilos mantidos, dependem do Font Awesome) */
 
 /* 1. Localização (Mapa) */
-.chip.localizacao:before {
-    content: "\f3c5"; 
-    font-family: "Font Awesome 6 Free";
-    font-weight: 900;
-    margin-right: 6px;
-}
-.chip.localizacao {
-    color: #4ac994; 
-    border-color: #4ac994;
-}
+.chip.localizacao:before { content: "\f3c5"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 6px; }
+.chip.localizacao { color: #4ac994; border-color: #4ac994; }
 
 /* 2. WhatsApp */
-.chip.whatsapp:before {
-    content: "\f232"; 
-    font-family: "Font Awesome 6 Brands";
-    font-weight: 400; 
-    margin-right: 6px;
-}
-.chip.whatsapp {
-    color: #25d366; 
-    border-color: #25d366;
-}
+.chip.whatsapp:before { content: "\f232"; font-family: "Font Awesome 6 Brands"; font-weight: 400; margin-right: 6px; }
+.chip.whatsapp { color: #25d366; border-color: #25d366; }
 
 /* 3. Instagram */
-.chip.instagram:before {
-    content: "\f16d"; 
-    font-family: "Font Awesome 6 Brands";
-    font-weight: 400; 
-    margin-right: 6px;
-}
-.chip.instagram {
-    color: #e4405f; 
-    border-color: #e4405f;
-}
+.chip.instagram:before { content: "\f16d"; font-family: "Font Awesome 6 Brands"; font-weight: 400; margin-right: 6px; }
+.chip.instagram { color: #e4405f; border-color: #e4405f; }
 
 /* 4. Cultos */
-.chip.cultos:before {
-    content: "\f073"; 
-    font-family: "Font Awesome 6 Free";
-    font-weight: 900;
-    margin-right: 6px;
-}
-
-.chip.cultos {
-    color: #f7b447; 
-    border-color: #f7b447;
-}
+.chip.cultos:before { content: "\f073"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 6px; }
+.chip.cultos { color: #f7b447; border-color: #f7b447; }
 
 
 /* --- CHIPS DE SUGESTÃO (Botões de Boas-vindas) --- */
@@ -413,6 +388,8 @@ body {
         padding: 12px 50px 12px 45px; 
         font-size: 15px;
         border-radius: 22px;
+        /* CRÍTICO: Ajustar min-height no mobile */
+        min-height: 20px; 
     }
 
     #aviso-ia {
