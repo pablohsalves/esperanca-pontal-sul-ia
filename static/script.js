@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL E FUNCIONAL (V8 - Foco no Envio e Microfone FIX)
+// static/script.js - Versão FINAL E FUNCIONAL (V9.1 - Máxima Garantia de Envio)
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -9,17 +9,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let singleRowHeight = 0; 
     let recognition = null; 
     
+    // --- FUNÇÕES DE ESTADO E UTILS ---
+    
     function resetarEstadoInput() {
         input.disabled = false;
         microphoneBtn.disabled = false;
         enviarBtn.disabled = input.value.trim() === '';
     }
 
-    resetarEstadoInput();
-
-    // --- ROLAGEM E AUTOSIZE ---
     function rolarParaBaixo() {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        // Usa setTimeout para garantir que a rolagem ocorra após a renderização do novo conteúdo
+        setTimeout(() => {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }, 50); 
     }
     
     function autoExpand() {
@@ -36,16 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         rolarParaBaixo();
     }
-    
-    input.addEventListener('input', autoExpand);
-    setTimeout(autoExpand, 0); 
-    rolarParaBaixo(); 
 
-
-    // --- FUNÇÃO DE MENSAGEM ---
     function adicionarMensagem(texto, remetente) {
         const div = document.createElement('div');
         div.className = `mensagem ${remetente}`;
+        // CRÍTICO: Usamos innerHTML para IA (que pode conter HTML de chips)
         div.innerHTML = texto; 
         chatBox.appendChild(div);
         rolarParaBaixo();
@@ -66,8 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestionChipsContainer.style.display = 'none'; 
         }
 
+        // 1. Exibe a mensagem do usuário
         adicionarMensagem(pergunta, 'usuario'); 
         
+        // 2. Limpa e desabilita
         input.value = ''; 
         input.style.height = singleRowHeight + 'px';
         
@@ -77,9 +76,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         rolarParaBaixo(); 
 
+        // 3. Adiciona o indicador de carregamento
         const loadingDiv = adicionarMensagem('<span class="loading-indicator"></span>Esperança está processando...', 'ia');
 
         try {
+            // 4. Envia a requisição
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -93,10 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             
+            // 5. Remove o indicador e exibe a resposta final
             if(loadingDiv.parentNode) {
                 chatBox.removeChild(loadingDiv);
             }
-            
             adicionarMensagem(data.resposta, 'ia'); 
 
         } catch (error) {
@@ -106,21 +107,35 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Erro ao enviar mensagem:', error);
             let erroDisplay = error.message;
             if (erroDisplay.includes('Erro HTTP')) {
-                erroDisplay = "Erro do Servidor. Tente recarregar a página.";
+                erroDisplay = `Erro do Servidor. Tente recarregar a página.`;
             } else if (erroDisplay.includes('Failed to fetch')) {
                 erroDisplay = "Erro de conexão: Não foi possível alcançar o servidor.";
             }
-            adicionarMensagem(`<p>Erro: ${erroDisplay}</p>`, 'ia'); 
+            adicionarMensagem(`<p style="color: #ff5555;">Erro: ${erroDisplay}</p>`, 'ia'); 
             
         } finally {
+            // 6. Reabilita o estado
             resetarEstadoInput(); 
             input.focus();
             rolarParaBaixo();
         }
     }
     
-    // --- LÓGICA DE RECONHECIMENTO DE FALA (MICROFONE) ---
+    // --- LÓGICA DE EVENT LISTENERS ---
+    
+    // 1. INPUT/ENVIAR (Teclado e Clique)
+    input.addEventListener('input', autoExpand);
 
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { 
+            e.preventDefault(); 
+            enviarMensagem();
+        }
+    });
+
+    enviarBtn.addEventListener('click', enviarMensagem);
+    
+    // 2. MICROFONE
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
@@ -136,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     recognition.start();
                 } catch (e) {
-                    console.warn("Reconhecimento de voz já ativo ou falha ao iniciar.", e);
+                    console.warn("Reconhecimento de voz já ativo.", e);
                 }
             }
         });
@@ -178,17 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         microphoneBtn.style.display = 'none';
     }
     
-    // --- Lógica de Envio (Enter e Clique) ---
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) { 
-            e.preventDefault(); 
-            enviarMensagem();
-        }
-    });
-
-    enviarBtn.addEventListener('click', enviarMensagem);
-    
-    // --- Lógica para Chips/Botões Clicáveis ---
+    // 3. CHIPS CLICÁVEIS (Sugestões e Links)
     chatBox.addEventListener('click', (e) => {
         const chip = e.target.closest('.chip'); 
         if (chip) {
@@ -221,4 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+    
+    // Inicialização final do estado
+    resetarEstadoInput();
+    rolarParaBaixo();
 });

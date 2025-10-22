@@ -1,4 +1,4 @@
-# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v5.0 - ADMIN ABERTO E ESTÁVEL)
+# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (v5.0 - ADMIN ABERTO E ESTÁVEL, COM ROBUSTEZ)
 
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import json
@@ -68,11 +68,16 @@ try:
     assistente = ParceiroDeFeAvancado(contatos=carregar_links_contatos())
 except Exception as e:
     logger.critical(f"ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. {e}")
-    # Cria uma classe placeholder para evitar que o app trave totalmente no Render
+    # Cria uma classe placeholder (fallback) para evitar que o app trave
     class PlaceholderAssistente:
         def iniciar_novo_chat(self): return []
         def enviar_saudacao(self): return "<h1>ERRO CRÍTICO</h1><p>O assistente de IA não pôde ser inicializado. Verifique logs e chaves API.</p>"
         def obter_resposta_com_memoria(self, hist, perg): return "IA Inoperante devido a erro de inicialização.", hist
+        def __setattr__(self, name, value):
+            if name in ['contatos', 'conhecimento_texto']:
+                pass # Não permite alterar propriedades no placeholder
+            else:
+                super().__setattr__(name, value)
         
     assistente = PlaceholderAssistente()
 
@@ -83,11 +88,21 @@ except Exception as e:
 
 @app.route('/')
 def index():
-    if 'historico' not in session:
-        session['historico'] = assistente.iniciar_novo_chat() 
-    
+    # Bloco robusto para garantir a inicialização da sessão
+    try:
+        if 'historico' not in session:
+            session['historico'] = assistente.iniciar_novo_chat() 
+    except Exception as e:
+        # Se a IA travar aqui (ex: falha na API key), limpa a sessão e tenta de novo.
+        logger.error(f"Erro ao iniciar histórico da sessão: {e}. Limpando a sessão.")
+        session.pop('historico', None) # Remove histórico corrompido
+        if 'historico' not in session:
+             session['historico'] = assistente.iniciar_novo_chat() 
+             
+    # Carrega os links e a saudação
     links = carregar_links_contatos()
     saudacao_html = assistente.enviar_saudacao()
+    
     return render_template('chat_interface.html', saudacao=saudacao_html, links=links)
 
 
@@ -100,7 +115,6 @@ def chat():
     if not pergunta:
         return jsonify({'erro': 'Pergunta vazia.'}), 400
 
-    # Adiciona a pergunta do usuário ao histórico
     historico_serializado.append({
         "role": "user",
         "parts": [{"text": pergunta}]
@@ -114,7 +128,6 @@ def chat():
             pergunta
         )
         
-        # Atualiza o histórico na sessão
         novo_historico_serializado = [
             json.loads(item.model_dump_json()) 
             for item in novo_historico_gemini
@@ -135,13 +148,12 @@ def chat():
 
 @app.route('/admin/conhecimento', methods=['GET', 'POST'])
 def admin_conhecimento():
-    """Painel de administração para editar o arquivo de conhecimento (acesso público)."""
     mensagem = ""
     
     if request.method == 'POST':
         novo_conteudo = request.form['novo_conhecimento']
         
-        # Recarrega os contatos e salva o novo conhecimento
+        # Estas linhas são seguras, pois o PlaceholderAssistente as ignora.
         assistente.contatos = carregar_links_contatos()
         
         if salvar_novo_conhecimento(novo_conteudo):

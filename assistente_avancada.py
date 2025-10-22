@@ -108,7 +108,6 @@ class ParceiroDeFeAvancado:
             return response.text, novo_historico
             
         except APIError as e:
-            # Propaga o erro para ser tratado no Flask
             raise Exception(f"Erro na API Google Gemini: {e.args[0]}")
         except Exception as e:
             raise Exception(f"Erro inesperado no assistente: {e}")
