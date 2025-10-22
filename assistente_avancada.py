@@ -1,4 +1,4 @@
-# assistente_avancada.py
+# assistente_avancada.py (v3.0 - Com Links Externos)
 
 from google import genai
 from google.genai import types
@@ -6,10 +6,12 @@ import os
 import json
 
 class ParceiroDeFeAvancado:
-    def __init__(self, modelo='gemini-2.5-flash', arquivo_conhecimento='conhecimento_esperancapontalsul.txt'):
+    # Adicionamos o parâmetro 'contatos'
+    def __init__(self, modelo='gemini-2.5-flash', arquivo_conhecimento='conhecimento_esperancapontalsul.txt', contatos=None):
         self.modelo = modelo
         self.client = self._iniciar_cliente()
         self.conhecimento_texto = self._carregar_conhecimento(arquivo_conhecimento)
+        self.contatos = contatos if contatos is not None else {}
         
         print(f"Assistente Avançada inicializada com o modelo {self.modelo} e {len(self.conhecimento_texto.splitlines())} linhas de conhecimento carregadas.")
 
@@ -27,43 +29,33 @@ class ParceiroDeFeAvancado:
             with open(caminho_absoluto, 'r', encoding='utf-8') as f:
                 return f.read()
         except FileNotFoundError:
-            print(f"AVISO: Arquivo de conhecimento '{caminho}' não encontrado.")
-            # Retorna o texto inicial se o arquivo não for encontrado
-            return """
-# conhecimento_esperancapontalsul.txt
-
-Pastor Líder: Pastor Daniel Rodrigues
-Localização da Sede: Rua A-4, Quadra 44, Lote 17, Setor Garavelo, Aparecida de Goiânia - GO.
-Horário de Cultos: Domingos às 19:00h e Terças-feiras (Culto da Vitória) às 19:30h.
-Missão da Igreja: Levar a mensagem de Jesus Cristo a todas as famílias e formar discípulos que impactem sua comunidade com amor e esperança.
-Visão Principal: Uma comunidade vibrante, centrada na Palavra de Deus (a Bíblia Sagrada), focada em missões urbanas e no discipulado.
-Base Doutrinária: Ênfase na Bíblia Sagrada como a única regra de fé e prática, o Batismo nas águas por imersão, a Santa Ceia e o Poder do Espírito Santo.
-Livro de Referência: A Bíblia Sagrada é o principal livro de estudo e ensino.
-"""
+            return "# Arquivo de conhecimento não encontrado. Conteúdo padrão de fallback."
         
     def _criar_configuracao_gemini(self):
         """Cria as configurações de sistema e safety_settings."""
         
-        # 1. Instrução de Sistema (Persona e Grounding) - ATUALIZADA PARA BOTÕES/CHIPS
+        # Gera uma lista de instruções de chips baseada no contatos_igreja.json
+        instrucoes_chips = []
+        for chave, dados in self.contatos.items():
+            instrucoes_chips.append(f" - Para '{chave}': use <span class=\"chip {dados['classe']}\" data-url=\"{dados['url']}\">{dados['texto']}</span>")
+            
+        chips_str = "\n".join(instrucoes_chips)
+        
+        # 1. Instrução de Sistema (Persona e Grounding) - ATUALIZADA PARA O NOVO FORMATO DE LINKS
         instrucao_sistema = (
             "Você é a Esperança, uma assistente virtual e parceira de fé da Igreja Esperança Pontal Sul."
             "Seu principal objetivo é fornecer respostas que refletem os ensinamentos cristãos e a doutrina da igreja."
             "Use o contexto fornecido sobre a igreja para responder a perguntas específicas sobre a Igreja Esperança Pontal Sul."
             "Mantenha um tom acolhedor, inspirador e respeitoso. Seja concisa, mas completa."
             
-            "**FORMATO DE LINKS/AÇÕES:** Sempre que citar links (endereço, WhatsApp, Instagram, etc.), você DEVE usar a formatação HTML de CHIP/BOTÃO CLICÁVEL com ícones para torná-los mais visuais. Não use a tag <a> simples."
-            
+            "**FORMATO DE LINKS/AÇÕES:** Sempre que citar informações de contato ou localização, você DEVE usar a formatação HTML de CHIP/BOTÃO CLICÁVEL."
             "**SINTAXE DEVE SER:** <span class=\"chip [tipo]\" data-url=\"https://www.collinsdictionary.com/dictionary/spanish-english/completa\">Texto do Botão</span>"
+            "Use quebras de linha (<br>) ou espaços para separar os chips do texto."
             
-            "**Instruções Específicas:**"
-            "1. Endereço/Maps: Use a classe 'localizacao'. Ex: <span class=\"chip localizacao\" data-url=\"URL DO GOOGLE MAPS\">Localização</span>"
-            "2. WhatsApp: Use a classe 'whatsapp'. Ex: <span class=\"chip whatsapp\" data-url=\"https://wa.me/5562900000000\">WhatsApp</span>"
-            "3. Instagram: Use a classe 'instagram'. Ex: <span class=\"chip instagram\" data-url=\"https://instagram.com/seu_perfil\">Instagram</span>"
+            f"\n**Instruções Específicas de Chips (Baseado em contatos_igreja.json):**\n{chips_str}\n"
+            
             "Mantenha a tag '<strong>' para ênfase (como no nome da Igreja)."
-            "Separe os chips com um espaço ou quebra de linha."
-            
             "Sempre que possível, use trechos da Bíblia ou do conhecimento fornecido para dar suporte às suas respostas."
-            "Se a pergunta for de natureza complexa ou pessoal, incentive o usuário a buscar a liderança ou pastores."
             
             f"Contexto da Igreja: {self.conhecimento_texto}" 
         )
@@ -92,6 +84,7 @@ Livro de Referência: A Bíblia Sagrada é o principal livro de estudo e ensino.
             "e parceira de fé da Igreja Esperança Pontal Sul. Como posso te ajudar hoje?"
         )
         
+    # ... (Resto da classe: iniciar_novo_chat e obter_resposta_com_memoria são iguais) ...
     def iniciar_novo_chat(self):
         """Retorna o histórico inicial serializado com a saudação da IA."""
         primeira_mensagem_ia = types.Content(
@@ -127,15 +120,7 @@ Livro de Referência: A Bíblia Sagrada é o principal livro de estudo e ensino.
         )
         
         # 3. Enviar a Pergunta
-        try:
-            resposta = chat_session.send_message(pergunta)
+        resposta = chat_session.send_message(pergunta)
             
-            # 4. Retornar a Resposta e o Histórico Atualizado
-            return resposta.text, chat_session.get_history()
-        
-        except Exception as e:
-            print(f"Erro ao obter resposta do Gemini: {e}")
-            erro_msg = ("Desculpe, houve um erro ao processar sua solicitação no servidor de IA. "
-                        "Por favor, tente novamente mais tarde.")
-            
-            return erro_msg, historico_objetos
+        # 4. Retornar a Resposta e o Histórico Atualizado
+        return resposta.text, chat_session.get_history()

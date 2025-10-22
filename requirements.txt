@@ -3,3 +3,4 @@ google-genai
 python-dotenv
 gunicorn
 pydantic # (Necessário para a serialização robusta que implementamos)
+bcrypt  # Novo: Para hash de senha do admin
