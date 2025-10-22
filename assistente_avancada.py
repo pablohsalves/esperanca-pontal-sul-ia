@@ -44,7 +44,9 @@ class ParceiroDeFeAvancado:
             "Mantenha um tom acolhedor, inspirador e respeitoso. Seja concisa, mas completa."
             "Sempre que possível, use trechos da Bíblia ou do conhecimento fornecido para dar suporte às suas respostas."
             "Se a pergunta for de natureza complexa ou pessoal, incentive o usuário a buscar a liderança ou pastores."
-            f"Contexto da Igreja: {selfimento_texto}"
+            
+            # CORREÇÃO CRÍTICA: De 'selfimento_texto' para 'self.conhecimento_texto'
+            f"Contexto da Igreja: {self.conhecimento_texto}"
         )
         
         # 2. Safety Settings (Configurações de Segurança)
@@ -76,12 +78,11 @@ class ParceiroDeFeAvancado:
         # Cria uma mensagem inicial da IA (que será a primeira da sessão)
         primeira_mensagem_ia = types.Content(
             role="model",
-            # LINHA CORRIGIDA: Adicionado 'text=' para resolver o TypeError do SDK do Gemini
+            # CORREÇÃO: Necessário usar 'text=' para evitar o TypeError no SDK do Gemini
             parts=[types.Part.from_text(text=self.enviar_saudacao())] 
         )
         
         # Retorna a lista contendo apenas a primeira mensagem, já serializada
-        # Nota: A serialização deve ocorrer no app_web_avancada.py (função serialize_history)
         return [json.loads(primeira_mensagem_ia.model_dump_json())]
 
     def obter_resposta_com_memoria(self, historico_serializado: list, pergunta: str) -> tuple[str, list]:
