@@ -9,8 +9,8 @@
     --color-user-text: #a8c7fa;       /* Texto da bolha do usuário (Cinza/Azul) */
     --color-aviso: #555555;           /* Cinza para o aviso */
     --header-height: 55px; /* Altura do cabeçalho */
-    /* Altura aproximada da área de input + aviso para padding */
-    --input-area-height: 120px; 
+    /* Altura MÁXIMA da área de input no rodapé (para padding) */
+    --input-area-height: 180px; 
 }
 
 /* --- Configurações Básicas --- */
@@ -18,7 +18,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    /* Faz a rolagem ser feita pelo BODY/HTML, não por um DIV interno */
+    /* Faz a rolagem ser feita pelo BODY/HTML */
     overflow-y: auto; 
     overflow-x: hidden;
 }
@@ -35,7 +35,7 @@ body {
 
 /* --- Cabeçalho Fixo --- */
 #header-fixed {
-    position: fixed; /* MANTÉM FIXO */
+    position: fixed; 
     top: 0;
     left: 0;
     width: 100%;
@@ -72,17 +72,17 @@ body {
 }
 
 
-/* --- Área Principal do Chat (CORREÇÃO CRÍTICA AQUI) --- */
+/* --- Área Principal do Chat (CORREÇÃO DE ROLAGEM CRÍTICA) --- */
 #chat-box {
     width: 100%;
     max-width: 800px;
     /* Altura MÍNIMA para preencher a tela */
     min-height: 100vh; 
     
-    /* CORREÇÃO 1: Padding para empurrar o conteúdo abaixo do cabeçalho fixo */
+    /* CORREÇÃO CRÍTICA 1: Padding para empurrar o conteúdo abaixo do cabeçalho fixo */
     padding-top: calc(var(--header-height) + 20px); 
     
-    /* CORREÇÃO 2: Padding para empurrar o conteúdo acima da área de input fixa */
+    /* CORREÇÃO CRÍTICA 2: Padding para garantir que a última mensagem NÃO fique atrás da caixa de input fixa */
     padding-bottom: var(--input-area-height); 
     
     padding-left: 20px;
@@ -162,7 +162,7 @@ body {
 
 /* --- Área de Input FIXADA no Rodapé --- */
 #fixed-bottom-area {
-    position: fixed; /* MANTÉM FIXO */
+    position: fixed; 
     bottom: 0;
     left: 0;
     width: 100%;
@@ -173,8 +173,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    
-    /* Padding inferior para resolver o aviso cortado */
     padding-bottom: 5px; 
 }
 
@@ -241,67 +239,10 @@ body {
     padding: 10px 20px 10px; 
 }
 
+
 /* ========================================= */
-/* --- MEDIA QUERY: AJUSTES PARA MOBILE --- */
+/* --- ESTILOS PARA CHIP/BOTÃO CLICÁVEL DA IA (CORRIGIDO) --- */
 /* ========================================= */
-
-@media (max-width: 600px) {
-    
-    /* Altura da área de input ajustada para mobile */
-    :root {
-        --input-area-height: 110px; 
-    }
-    
-    #header-content {
-        padding: 0 10px; 
-    }
-
-    #chat-box {
-        padding-top: calc(var(--header-height) + 10px); 
-        padding-bottom: var(--input-area-height); 
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-    
-    /* RESUMO: Área fixa de input no rodapé */
-    #fixed-bottom-area {
-        padding-bottom: 5px; 
-        padding-left: 0;
-        padding-right: 0;
-        margin: 0 10px 0 10px; 
-        width: calc(100% - 20px); 
-    }
-
-    #input-area-wrapper {
-        padding: 0; 
-    }
-
-    /* ÍCONES MOBILE: Ajusta a posição para afastar da borda INTERNA da caixa */
-    #microphone-btn { 
-        left: 5px; 
-        bottom: 12px; 
-        font-size: 20px;
-    } 
-    #enviar-btn { 
-        right: 5px; 
-        bottom: 12px; 
-        font-size: 20px;
-    }
-    
-    #pergunta-input {
-        padding: 12px 50px 12px 45px; 
-        font-size: 15px;
-        border-radius: 22px;
-    }
-
-    #aviso-ia {
-        padding: 5px 10px 5px; 
-        font-size: 12px;
-    }
-}
-
-
-/* --- ESTILOS PARA CHIP/BOTÃO CLICÁVEL DA IA --- */
 
 /* Container para agrupar os chips */
 .chip-container {
@@ -309,6 +250,8 @@ body {
     display: flex;
     flex-wrap: wrap; 
     gap: 8px; 
+    /* Garante que o container esteja na próxima linha da bolha de chat */
+    width: 100%; 
 }
 
 /* Estilo Base do Chip/Botão */
@@ -325,6 +268,10 @@ body {
     transition: background-color 0.2s, box-shadow 0.2s;
     user-select: none; 
     border: 1px solid #3c3c3c;
+    
+    /* CORREÇÃO CRÍTICA 3: Força o chip a ser exibido como um bloco ou inline-block */
+    /* inline-block permite que ele respeite o espaço, mas o flex no container o organiza */
+    display: inline-flex; 
 }
 
 .chip:hover {
@@ -332,7 +279,13 @@ body {
     box-shadow: 0 0 5px rgba(168, 199, 250, 0.4);
 }
 
-/* Classes Modificadoras para Cores/Ícones */
+/* Garante que o chip na mensagem IA seja exibido abaixo do texto */
+/* Como a IA usa o <br> para separar, não precisamos de CSS de bloco agressivo, mas garantimos que o container ocupe a linha. */
+.mensagem.ia > .chip-container {
+    margin-top: 15px; 
+}
+
+/* --- Estilos de Classes de Chips (Localização, WhatsApp, etc.) -- */
 
 /* 1. Localização (Mapa) */
 .chip.localizacao:before {
@@ -370,30 +323,28 @@ body {
     border-color: #e4405f;
 }
 
-/* NOVO: Estilo para o chip "Cultos" (Sugestão/Ação) */
+/* 4. Cultos */
 .chip.cultos:before {
-    content: "\f073"; /* Ícone de calendário */
+    content: "\f073"; 
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
     margin-right: 6px;
 }
 
 .chip.cultos {
-    color: #f7b447; /* Amarelo/Laranja */
+    color: #f7b447; 
     border-color: #f7b447;
 }
 
 
 /* --- CHIPS DE SUGESTÃO (Botões de Boas-vindas) --- */
-
-/* Container dos chips iniciais */
 .chip-container.suggestion-chips {
     margin-top: 15px;
     margin-bottom: 5px;
 }
 
 .chip.suggestion-chip {
-    background-color: #1a1a1a; /* Fundo mais suave para sugestão */
+    background-color: #1a1a1a; 
     color: #a8c7fa; 
     border-color: #1a1a1a;
     font-weight: normal;
@@ -407,13 +358,65 @@ body {
     box-shadow: none;
 }
 
-/* Remove o ícone dos chips de sugestão de boas-vindas */
 .chip.suggestion-chip::before {
     content: none !important;
     margin-right: 0 !important;
 }
 
-/* Garante que o texto do chip na mensagem IA seja exibido em bloco separado */
-.mensagem.ia > .chip {
-    margin-top: 5px; 
+
+/* ========================================= */
+/* --- MEDIA QUERY: AJUSTES PARA MOBILE --- */
+/* ========================================= */
+
+@media (max-width: 600px) {
+    
+    /* Aumenta um pouco mais o padding de segurança no mobile */
+    :root {
+        --input-area-height: 140px; 
+    }
+    
+    #header-content {
+        padding: 0 10px; 
+    }
+
+    #chat-box {
+        padding-top: calc(var(--header-height) + 10px); 
+        padding-bottom: var(--input-area-height); /* CRÍTICO: Novo padding para mobile */
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    #fixed-bottom-area {
+        padding-bottom: 5px; 
+        padding-left: 0;
+        padding-right: 0;
+        margin: 0 10px 0 10px; 
+        width: calc(100% - 20px); 
+    }
+
+    #input-area-wrapper {
+        padding: 0; 
+    }
+
+    #microphone-btn { 
+        left: 5px; 
+        bottom: 12px; 
+        font-size: 20px;
+    } 
+    #enviar-btn { 
+        right: 5px; 
+        bottom: 12px; 
+        font-size: 20px;
+    }
+    
+    #pergunta-input {
+        padding: 12px 50px 12px 45px; 
+        font-size: 15px;
+        border-radius: 22px;
+    }
+
+    #aviso-ia {
+        padding: 5px 10px 5px; 
+        font-size: 12px;
+    }
 }
