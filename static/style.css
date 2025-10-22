@@ -188,7 +188,7 @@ body {
     padding: 0 20px; 
 }
 
-/* ÍCONES */
+/* ÍCONES (Desktop/Geral) */
 #microphone-btn, #enviar-btn {
     position: absolute;
     bottom: 25px; 
@@ -259,14 +259,14 @@ body {
     }
 
     #input-area-wrapper {
-        /* AJUSTE FINAL CRÍTICO: 20px de respiro lateral para não encostar nas bordas */
+        /* AJUSTE CRÍTICO: 20px de respiro lateral para não encostar nas bordas */
         padding: 0 20px; 
     }
 
-    /* ÍCONES MOBILE (Ajusta a posição de acordo com o novo padding do wrapper) */
-    /* 20px (wrapper padding) + 8px (icon padding) = 28px. Ajustando para 30px no CSS */
-    #microphone-btn { left: 30px; } 
-    #enviar-btn { right: 30px; }
+    /* ÍCONES MOBILE: Ajuste a posição para afastar da borda INTERNA da caixa */
+    /* De 30px para 25px (Respeitando o novo padding de 20px) */
+    #microphone-btn { left: 25px; } 
+    #enviar-btn { right: 25px; }
     
     #pergunta-input {
         padding: 12px 50px 12px 45px; 
