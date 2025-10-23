@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Esperança - Parceira de Fé</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="chat-container">
         
         <header class="chat-header">
-            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo da Igreja" class="logo">
+            <img src="/static/logo.jpg" alt="Logo da Igreja" class="logo">
             <h1>Esperança</h1>
             <p>Parceira de Fé da Igreja da Paz Pontal Sul</p>
         </header>
@@ -25,8 +25,7 @@
                 <div class="chip suggestion-chip" data-url="{{ links.localizacao }}" data-text="Localização">Ver no Mapa</div>
                 <div class="chip suggestion-chip" data-url="{{ links.cultos_horarios }}" data-text="Horários">Horários dos Cultos</div>
             </div>
-            
-            </main>
+        </main>
 
         <footer class="chat-input-container">
             <textarea 
@@ -50,7 +49,6 @@
     <script>
         console.log("Teste de Carga: O script está rodando NO HTML.");
     </script>
-    
     <script src="/static/script.js"></script>
 </body>
 </html>
