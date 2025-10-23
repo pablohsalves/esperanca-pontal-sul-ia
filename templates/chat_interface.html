@@ -6,7 +6,7 @@
     <title>ESPERANÇA - Parceira de Fé</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=20251023_v60_12">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=20251023_v60_13">
 </head>
 <body>
     <div class="chat-container">
@@ -21,15 +21,17 @@
             </div>
 
         <footer class="chat-input-container">
-            <textarea id="pergunta-input" placeholder="Peça à Esperança..." rows="1"></textarea>
-            
-            <button id="microphone-btn" class="icon-btn">
-                <i class="fas fa-microphone"></i>
-            </button>
+            <div id="input-wrapper" style="position: relative; flex-grow: 1;">
+                 <textarea id="pergunta-input" placeholder="Peça à Esperança..." rows="1"></textarea>
+                 
+                 <button id="microphone-btn" class="icon-btn">
+                     <i class="fas fa-microphone"></i>
+                 </button>
 
-            <button id="enviar-btn" class="icon-btn" disabled>
-                <i class="fas fa-paper-plane"></i>
-            </button>
+                 <button id="enviar-btn" class="icon-btn" disabled>
+                     <i class="fas fa-paper-plane"></i>
+                 </button>
+             </div>
         </footer>
         
         <div class="aviso-inferior">
@@ -37,6 +39,6 @@
         </div>
     </div>
     
-    <script src="{{ url_for('static', filename='script.js') }}?v=20251023_v60_12"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=20251023_v60_13"></script>
 </body>
 </html>

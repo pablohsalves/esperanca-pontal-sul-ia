@@ -1,4 +1,4 @@
-// script.js - VERSÃO V60.11 (Ajuste da Lógica UI/UX)
+// script.js - VERSÃO V60.13 (Lógica completa de Microfone/Envio e Redimensionamento)
 
 document.addEventListener('DOMContentLoaded', () => {
     const chatBox = document.getElementById('chat-box');
@@ -17,21 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isThinking) {
             // IA está pensando: O Microfone some e o Enviar se torna o Stop
             microphoneBtn.style.display = 'none';
-            enviarBtn.style.display = 'flex'; 
+            enviarBtn.style.display = 'flex'; // Garante que o botão de Stop esteja visível
             enviarBtn.disabled = false; 
             enviarBtn.innerHTML = '<i class="fas fa-stop"></i>'; 
             enviarBtn.title = 'Parar Resposta';
         } else if (hasText) {
             // Tem texto: O Microfone some e o Enviar é o avião (habilitado)
             microphoneBtn.style.display = 'none';
-            enviarBtn.style.display = 'flex'; 
+            enviarBtn.style.display = 'flex'; // Garante que o avião esteja visível
             enviarBtn.disabled = false;
             enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
             enviarBtn.title = 'Enviar Mensagem';
         } else {
             // Sem texto: Mostra o Microfone e desabilita o Enviar (avião)
             microphoneBtn.style.display = 'flex'; 
-            enviarBtn.style.display = 'flex'; 
+            enviarBtn.style.display = 'flex'; // Mantém o botão de envio visível, mas desabilitado
             enviarBtn.disabled = true;
             enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
             enviarBtn.title = 'Digite uma mensagem';
@@ -156,6 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             sendMessage();
         }
+    });
+
+    // Evento de click (apenas para simular o uso do microfone, já que a API de áudio é complexa)
+    microphoneBtn.addEventListener('click', () => {
+        alert("Função de Microfone em desenvolvimento! Por favor, use a digitação por enquanto.");
+        input.focus();
     });
 
     // Enviar mensagem ao pressionar ENTER

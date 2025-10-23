@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.12 (Correção FINAL: Placeholder Esquerda/Centralizado e Botões Agrupados à Direita)
+ * style.css - VERSÃO V60.13 (Correção FINAL: Ícones DENTRO da Caixa)
  */
 
 /* 1. RESET E VARIAVEIS */
@@ -83,22 +83,25 @@ html, body {
     padding: 18px 20px; 
     
     display: flex; 
-    align-items: center; /* CRÍTICO: Centraliza todos os itens verticalmente */
+    align-items: center; 
     z-index: 10; 
 }
 
 /* 6. CAMPO DE TEXTO (Contorno e Fonte) */
 #pergunta-input {
-    flex-grow: 1; 
+    /* Ocupa 100% do novo container #input-wrapper (definido no HTML) */
+    width: 100%;
     
-    /* CRÍTICO V60.12: VOLTAMOS AO LAYOUT PADRÃO para que o texto fique centralizado/esquerda */
+    /* CRÍTICO V60.13: Remove position: relative e usa position: static para se comportar como um elemento normal */
     position: static; 
     
     /* Aumento da Altura (padding) */
-    padding-top: 20px; /* Reduz ligeiramente para centralizar melhor */
+    padding-top: 20px; 
     padding-bottom: 20px; 
     padding-left: 20px;
-    padding-right: 20px; /* CRÍTICO: Espaço interno padrão */
+    
+    /* CRÍTICO V60.13: Espaço para os 2 ícones + padding lateral (15px + 44px + 5px + 44px + 15px) = ~123px*/
+    padding-right: 125px; 
     
     border-radius: 28px;
     
@@ -112,30 +115,50 @@ html, body {
     resize: none; 
     max-height: 120px; 
     
-    /* CRÍTICO V60.12: Deixa um espaço para os botões à direita, mantendo-os fora */
-    margin-right: 10px; 
+    margin-right: 0; 
     
     line-height: 1.4;
     box-sizing: border-box; 
     transition: box-shadow 0.2s;
 }
 
-/* CRÍTICO V60.12: ESTILO DO PLACEHOLDER (Grande e Centralizado à Esquerda) */
-/* Todos os navegadores */
-#pergunta-input::placeholder {
+/* CRÍTICO V60.13: ESTILO DO PLACEHOLDER (Grande, Esquerda, e Centralizado) */
+/* Para WebKit (Chrome, Safari, Edge) */
+#pergunta-input::-webkit-input-placeholder {
     color: var(--color-text-secondary); 
-    /* Remove qualquer posicionamento absoluto que estava bagunçando */
-    position: static;
-    bottom: auto;
-    right: auto;
-    /* Faz o texto do placeholder ser grande como o texto normal */
     font-size: 1.2em; 
     text-align: left;
     
-    /* Adicional: Para navegadores mais novos que suportam a centralização */
+    /* Posição absoluta para centralização vertical */
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 20px;
+    width: calc(100% - 125px); /* Largura para não sobrepor os ícones */
     line-height: 1.4; 
-    transform: translateY(0); /* Remove qualquer transformação vertical */
 }
+
+/* Para Firefox (Posicionamento absoluto não funciona, mas alinhamento de texto e tamanho sim) */
+#pergunta-input:-moz-placeholder {
+    color: var(--color-text-secondary);
+    font-size: 1.2em;
+    text-align: left;
+    opacity: 1; 
+}
+
+/* Para IE/Edge (Posicionamento absoluto) */
+#pergunta-input:-ms-input-placeholder {
+    color: var(--color-text-secondary);
+    font-size: 1.2em; 
+    text-align: left;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 20px;
+    width: calc(100% - 125px);
+    line-height: 1.4; 
+}
+
 
 /* Foco: Aumentar o Contorno para 2px ao focar */
 #pergunta-input:focus {
@@ -143,9 +166,8 @@ html, body {
     box-shadow: inset 0 0 0 2px var(--color-highlight); 
 }
 
-
 /* 7. BOTÕES (ÍCONES - MIC, AVIÃO, STOP) */
-/* CRÍTICO V60.12: Posicionamento dos botões NOVAMENTE FORA do input, agrupados à direita */
+/* CRÍTICO V60.13: Posicionamento absoluto DENTRO do #input-wrapper */
 .icon-btn {
     border: none;
     background-color: transparent; 
@@ -165,16 +187,24 @@ html, body {
     margin: 0; 
     z-index: 11;
     
-    position: static; /* Voltam a ser elementos normais do fluxo */
+    /* Posição absoluta DENTRO do #input-wrapper */
+    position: absolute; 
+    top: 50%;
+    transform: translateY(-50%); /* Centraliza Verticalmente */
 }
 
-/* Estilo do botão de envio */
+/* Posicionamento do botão de Envio (o mais à direita, COM círculo cinza) */
 #enviar-btn {
-    /* CRÍTICO: Mantém o fundo para o círculo cinza (avião) */
+    right: 5px; /* Posição próxima à borda direita do input */
     background-color: var(--color-send-bg); 
     color: var(--color-text-light);
-    /* CRÍTICO: Deixa um pequeno espaço entre o microfone e o avião */
-    margin-left: 5px; 
+}
+
+/* Posicionamento do botão de Microfone (ao lado do Enviar, SEM círculo cinza) */
+#microphone-btn {
+    right: 50px; /* Posição à esquerda do botão de envio (5px + 44px) */
+    background-color: transparent; 
+    color: var(--color-text-secondary); 
 }
 
 /* Estado Desabilitado do botão de envio */
@@ -184,15 +214,6 @@ html, body {
     color: var(--color-text-light); 
     background-color: var(--color-send-bg); 
 }
-
-/* Botão de Microfone */
-#microphone-btn {
-    background-color: transparent; /* Sem fundo */
-    color: var(--color-text-secondary); /* Cor mais sutil */
-    /* CRÍTICO: Fica ao lado do input, antes do avião */
-    margin-left: 0; 
-}
-
 
 /* 8. ESTILOS DAS BOLHAS DE CHAT */
 .mensagem {
