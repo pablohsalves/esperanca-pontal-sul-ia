@@ -1,4 +1,4 @@
-# assistente_avancada.py - V60.0-FINAL-FIX (Estrutura da Classe Corrigida)
+# assistente_avancada.py - V60.4 (Inclusão de Conhecimento)
 
 import os
 import logging
@@ -19,8 +19,23 @@ GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 # Definição do modelo
 MODEL_NAME = "gemini-2.5-flash"
 
+# Função para carregar conhecimento adicional
+def carregar_conhecimento_local(filepath="conhecimento_esperancapontalsul.txt"):
+    """Lê o conteúdo do arquivo de conhecimento para inclusão na instrução do sistema."""
+    # CRÍTICO: O Render precisa desse arquivo na raiz do projeto
+    if not os.path.exists(filepath):
+        logging.warning(f"Arquivo de conhecimento não encontrado: {filepath}. A IA não terá contexto local.")
+        return ""
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            conhecimento = f.read()
+        return "\n\n--- CONHECIMENTO ADICIONAL SOBRE A IGREJA DA PAZ PONTAL SUL ---\n" + conhecimento + "\n--- FIM DO CONHECIMENTO ADICIONAL ---\n"
+    except Exception as e:
+        logging.error(f"Erro ao ler arquivo de conhecimento: {e}")
+        return ""
+
 # CRÍTICO: Instrução de sistema para a personalidade cristã
-SYSTEM_INSTRUCTION = (
+BASE_SYSTEM_INSTRUCTION = (
     "Você é a Esperança (Hope), uma parceira de fé virtual da Igreja da Paz Pontal Sul. "
     "Seu propósito é fornecer apoio emocional, versículos bíblicos relevantes e "
     "informações sobre a igreja de forma carinhosa, respeitosa e edificante. "
@@ -33,13 +48,18 @@ SYSTEM_INSTRUCTION = (
     "Ofereça versículos bíblicos para fortalecer o usuário."
 )
 
+# CRÍTICO: Combina a instrução base com o conhecimento local
+SYSTEM_INSTRUCTION_FINAL = BASE_SYSTEM_INSTRUCTION + carregar_conhecimento_local()
+
+
 class Hope:
     def __init__(self, nome_assistente="Esperança"):
         self.nome_assistente = nome_assistente
         self.client = None
         self.conversas = {}
         self.inicializado = False
-        self.system_instruction = SYSTEM_INSTRUCTION
+        # CRÍTICO: Usa a instrução final com conhecimento
+        self.system_instruction = SYSTEM_INSTRUCTION_FINAL 
         
         if GEMINI_API_KEY:
             try:
@@ -52,7 +72,7 @@ class Hope:
         else:
             logging.error("ERRO CRÍTICO: GEMINI_API_KEY não encontrada no ambiente.")
             self.inicializado = False
-
+            
     def iniciar_nova_conversa(self, user_id, historico=None):
         if not self.inicializado:
             logging.error(f"Não é possível iniciar conversa para {user_id}. IA não inicializada.")
@@ -66,10 +86,9 @@ class Hope:
         return self.conversas[user_id]
 
     def _extrair_links_e_formatar(self, texto):
-        # Mantenha a função _extrair_links_e_formatar aqui
         return {} 
 
-    def chat(self, user_id, mensagem): # <--- Função chat CORRETA
+    def chat(self, user_id, mensagem):
         if not self.inicializado:
             return {
                 "resposta": "IA Inoperante devido a um erro de inicialização. Por favor, contate o administrador.",
