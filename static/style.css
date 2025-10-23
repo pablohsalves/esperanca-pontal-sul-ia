@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.41 (SOLUÇÃO FORÇADA DE LAYOUT MOBILE)
+ * style.css - VERSÃO V60.42 (AJUSTE NO ESPAÇAMENTO DO INPUT E AVISO)
  */
 
 :root {
@@ -24,7 +24,7 @@ body {
     background-color: var(--color-background); 
     display: flex;
     justify-content: center;
-    /* CRÍTICO: Centraliza verticalmente o chat-container. */
+    /* Centraliza verticalmente o chat-container. */
     align-items: center; 
     margin: 0;
     padding: 0;
@@ -37,7 +37,7 @@ body {
 .chat-container {
     width: 100%;
     max-width: 650px; 
-    /* CRÍTICO: Reduz a altura máxima para que ele possa flutuar ao centro. */
+    /* Reduz a altura máxima para que ele possa flutuar ao centro. */
     height: 95vh; 
     max-height: 95vh;
     display: flex;
@@ -110,7 +110,7 @@ body {
 /* 5. ÁREA DE INPUT */
 .chat-input-container {
     background-color: var(--color-background); 
-    padding: 10px 20px 5px; 
+    padding: 10px 20px 0px; /* AJUSTE: Reduz o padding inferior para subir o input/aviso */
     display: flex;
     align-items: center; 
     border-top: none; 
@@ -156,14 +156,14 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* CRÍTICO: PADDING FINAL AGRESSIVO PARA GARANTIR VISIBILIDADE NO MOBILE */
-    padding: 10px 20px 25px; /* AUMENTADO O INFERIOR PARA 25PX */
+    /* CRÍTICO: AUMENTA O PADDING TOP E BOTTOM */
+    padding: 15px 20px 30px; /* AJUSTE: Aumentado para 30px no bottom */
     background-color: var(--color-aviso-bg); 
     border-top: none; 
     flex-shrink: 0; 
 }
 
-/* SOLUÇÃO PARA MOBILE (100vh) - CRÍTICO */
+/* SOLUÇÃO PARA MOBILE (100vh) */
 @media screen and (max-width: 650px) {
     body {
         /* Garante que a centralização vertical funcione mesmo no mobile */
