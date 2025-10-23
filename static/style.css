@@ -1,30 +1,29 @@
 /*
- * style.css - VERSÃO V60.33 (CORREÇÃO FINAL DE CORES, ÍCONES E MOBILE)
+ * style.css - VERSÃO V60.34 (CORREÇÃO FINAL: Botão Transbordando, Balão IA e Proporção)
  */
 
 :root {
     /* Cores Customizadas pelo Usuário */
     --color-background: #1B1C1D; 
-    --color-ia-bg: var(--color-background); /* CRÍTICO: Balão da IA AGORA SEM COR (fundo da página) */
+    --color-ia-bg: var(--color-background); 
     
     /* Cores Derivadas/Padrão */
     --color-chat-bg: var(--color-background); 
     --color-ia-text: #ffffff; 
-    --color-user-bg: #4A4A4A; /* Balão do usuário (um cinza escuro para contraste) */
+    --color-user-bg: #4A4A4A; 
     --color-user-text: #ffffff; 
     --color-input-bg: var(--color-background); 
     --color-border: #505050; 
     --color-text-secondary: #aaaaaa; 
-    --color-highlight: #558B2F; /* Verde principal para destaque (botão, links) */
+    --color-highlight: #558B2F; 
     --color-text-light: #ffffff; 
     --color-aviso-bg: var(--color-background); 
-    
-    /* Cores dos Ícones (como nos exemplos) */
-    --color-icon-bg: #4A4A4A; /* Fundo do círculo do avião/microfone quando inativo */
+    --color-icon-bg: #4A4A4A; 
 }
 
 /* 1. LAYOUT GERAL E RESPONSIVIDADE */
 body {
+    /* ... (Restante do body inalterado) */
     font-family: Arial, sans-serif;
     background-color: var(--color-background); 
     display: flex;
@@ -48,12 +47,12 @@ body {
     box-shadow: none; 
     background-color: var(--color-chat-bg); 
     overflow: hidden;
-    /* REMOVER borda para que a cor #1B1C1D se funda no body */
     border-radius: 0; 
 }
 
 /* 2. CABEÇALHO */
 .chat-header {
+    /* ... (Inalterado) */
     background-color: var(--color-chat-bg); 
     color: var(--color-user-text);
     padding: 15px 20px; 
@@ -66,6 +65,7 @@ body {
 
 /* 3. ÁREA DE MENSAGENS (CHAT BOX) */
 #chat-box {
+    /* ... (Inalterado) */
     flex-grow: 1;
     padding: 15px 20px;
     overflow-y: auto; 
@@ -74,7 +74,6 @@ body {
     gap: 15px; 
     background-color: var(--color-chat-bg); 
     
-    /* Esconder barra de rolagem */
     &::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -101,18 +100,18 @@ body {
 .mensagem.ia,
 #typing-indicator {
     align-self: flex-start;
-    /* CRÍTICO: O Fundo da IA agora é o mesmo do chat, mas mantemos o padding/forma */
     background-color: var(--color-ia-bg); 
     color: var(--color-ia-text);
-    border: 1px solid var(--color-border); /* Adiciona borda sutil para definir o balão */
+    /* CRÍTICO: Bordas suaves para o balão da IA */
+    border: 1px solid var(--color-border); 
     border-top-left-radius: 4px; 
 }
 
 /* 5. ÁREA DE INPUT */
 .chat-input-container {
     background-color: var(--color-background); 
-    /* CRÍTICO: Reduz o padding inferior para subir a caixa no mobile */
-    padding: 10px 20px 5px; /* Reduz o padding inferior (5px) */
+    /* CRÍTICO: Ajusta o padding inferior para resolver o corte no mobile */
+    padding: 10px 20px 10px; /* Mais equilibrado */
     display: flex;
     align-items: center; 
     border-top: none; 
@@ -120,6 +119,7 @@ body {
 }
 
 #input-wrapper {
+    /* ... (Inalterado) */
     flex-grow: 1;
     display: flex; 
     align-items: center; 
@@ -128,6 +128,7 @@ body {
 }
 
 #pergunta-input {
+    /* ... (Inalterado) */
     flex-grow: 1;
     min-height: 55px; 
     max-height: 200px; 
@@ -151,8 +152,8 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* CRÍTICO: Reduz o padding superior e usa padding inferior fixo */
-    padding: 5px 20px 15px; 
+    /* CRÍTICO: Garante padding para que a frase não seja cortada e fique no fundo */
+    padding: 5px 20px 10px; /* Padding inferior final no footer */
     background-color: var(--color-aviso-bg); 
     border-top: none; 
     flex-shrink: 0; 
@@ -174,23 +175,21 @@ body {
     top: 50%;
     transform: translateY(-50%); 
     
-    /* CRÍTICO: Ajuste dos ícones para o estilo de círculo */
     background-color: transparent; 
     color: var(--color-text-secondary); 
 }
 
 #microphone-btn {
     right: 55px; 
-    background-color: transparent; /* Certifica-se que o fundo é transparente */
+    background-color: transparent;
     color: var(--color-text-secondary);
 }
 
 #enviar-btn {
     right: 10px; 
-    /* CRÍTICO: Remove o background color e usa a cor de destaque apenas no ícone */
     background-color: transparent; 
-    color: var(--color-highlight); /* Usa a cor de destaque no ícone */
-    box-shadow: none; /* Remove a sombra */
+    color: var(--color-highlight); 
+    box-shadow: none; 
     font-size: 1.4em; 
 }
 
@@ -208,7 +207,6 @@ body {
     padding: 12px 18px;
     border-radius: 25px;
     
-    /* Estilo mais limpo para os botões de ação */
     background-color: var(--color-highlight); 
     color: var(--color-text-light); 
     
@@ -218,8 +216,9 @@ body {
     cursor: pointer;
     
     transition: background-color 0.2s, opacity 0.2s;
+    /* CRÍTICO: Ajusta o max-width para caber dentro da bolha de 85% */
     width: 100%; 
-    max-width: 300px; 
+    max-width: 280px; /* Reduz ligeiramente para evitar transbordo no mobile */
 }
 .ia-action-button .button-link:hover {
     background-color: #44682c; 

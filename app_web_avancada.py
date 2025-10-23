@@ -1,4 +1,4 @@
-# app_web_avancada.py - VERSÃO V60.29 (Correções Finais de API e Histórico de Sessão)
+# app_web_avancada.py - VERSÃO V60.34 (Correção da Base de Conhecimento e Funcionalidade)
 
 import os
 import json
@@ -42,15 +42,22 @@ app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'sua_chave_secreta_padrao_mu
 KNOWLEDGE_FILE = 'conhecimento_esperancapontalsul.txt'
 
 def load_knowledge_base():
-    # ... (Função load_knowledge_base permanece a mesma)
+    """Tenta carregar o conteúdo do arquivo de conhecimento."""
     try:
+        # Usar um encoding mais robusto
         with open(KNOWLEDGE_FILE, 'r', encoding='utf-8') as f:
-            return f.read()
+            content = f.read()
+            # Adicionar uma verificação simples: se estiver vazio, retorna falha
+            if not content.strip():
+                 print("AVISO: Arquivo de conhecimento carregado, mas está vazio.")
+                 return ""
+            print("INFO: Arquivo de conhecimento carregado com sucesso.")
+            return content
     except FileNotFoundError:
-        print(f"AVISO: Arquivo de conhecimento '{KNOWLEDGE_FILE}' não encontrado.")
+        print(f"CRÍTICO: Arquivo de conhecimento '{KNOWLEDGE_FILE}' não encontrado.")
         return ""
     except Exception as e:
-        print(f"Erro ao ler o arquivo de conhecimento: {e}")
+        print(f"ERRO: Falha ao ler o arquivo de conhecimento: {e}")
         return ""
 
 KNOWLEDGE_CONTENT = load_knowledge_base()
@@ -61,12 +68,17 @@ BASE_SYSTEM_INSTRUCTION = (
     "Use Markdown para formatar suas respostas, como negrito e listas. Mantenha as respostas curtas."
 )
 
-FULL_SYSTEM_INSTRUCTION = (
-    BASE_SYSTEM_INSTRUCTION + 
-    "\n\n--- INFORMAÇÕES ADICIONAIS DE CONTEXTO ---\n" +
-    "USE ESTAS INFORMAÇÕES PRIMARIAMENTE para responder perguntas específicas da igreja (horários, eventos, etc.):\n" + 
-    KNOWLEDGE_CONTENT
-)
+# Adiciona o conteúdo do arquivo SE ele existir e não estiver vazio.
+if KNOWLEDGE_CONTENT:
+    FULL_SYSTEM_INSTRUCTION = (
+        BASE_SYSTEM_INSTRUCTION + 
+        "\n\n--- INFORMAÇÕES ADICIONAIS DE CONTEXTO ---\n" +
+        "USE ESTAS INFORMAÇÕES PRIMARIAMENTE para responder perguntas específicas da igreja (horários, eventos, nome do pastor, etc.):\n" + 
+        KNOWLEDGE_CONTENT
+    )
+else:
+    FULL_SYSTEM_INSTRUCTION = BASE_SYSTEM_INSTRUCTION
+
 
 INTENT_MODEL = 'gemini-2.5-flash'
 INTENT_SYSTEM_INSTRUCTION = "Você é um classificador de intenções. Sua única tarefa é identificar se a mensagem do usuário pede por 'whatsapp', 'instagram', 'localizacao' (que inclui endereço e mapa), ou 'secretaria'. Se a intenção for clara, responda APENAS com a palavra-chave (ex: 'whatsapp'). Caso contrário, responda APENAS com a palavra-chave 'chat'. Sua resposta deve ser sempre uma única palavra minúscula."
@@ -80,7 +92,7 @@ def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_IN
         history.append(types.Content(role="user", parts=[types.Part(text=user_message)]))
 
         config = types.GenerateContentConfig(
-            system_instruction=system_instruction
+            system_instruction=system_instruction # Garante que a instrução completa seja passada
         )
 
         response = client.models.generate_content(
@@ -89,20 +101,18 @@ def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_IN
             config=config,
         )
         
-        # CORREÇÃO CRÍTICA #1: Usa a sintaxe correta para adicionar a resposta da IA ao histórico.
-        # Evita o erro "Part.from_text() recebe 1 argumento posicional, mas 2 foram fornecidos"
+        # Correção Crítica de Histórico
         history.append(types.Content(role="model", parts=[types.Part(text=response.text)]))
         
         return response.text
     
     except Exception as e:
         print(f"Erro ao chamar a API Gemini: {e}")
-        return "Desculpe, estou com dificuldades técnicas no momento. Tente novamente mais tarde."
+        # Retorna uma mensagem amigável no caso de falha
+        return "Desculpe, estou com dificuldades técnicas no momento. Por favor, tente novamente mais tarde."
 
 def classify_intent(user_message):
-    """
-    Classifica a intenção do usuário para verificar se é um pedido de contato.
-    """
+    # ... (Função classify_intent permanece a mesma)
     history = [
         types.Content(role="user", parts=[types.Part(text=user_message)])
     ]
@@ -135,9 +145,7 @@ def home():
 
 @app.route("/api/chat", methods=["POST"])
 def chat_api():
-    """
-    Endpoint para comunicação AJAX com o front-end.
-    """
+    # ... (chat_api permanece a mesma - usa o novo get_gemini_response)
     data = request.json
     user_message = data.get("mensagem")
     
@@ -161,20 +169,16 @@ def chat_api():
     else:
         history_dicts = session.get('chat_history', [])
         
-        # Converte a lista de dicionários para objetos types.Content para a API
         history = []
         try:
             history = [types.Content(**h) for h in history_dicts]
         except Exception as e:
-            # Caso a sessão esteja corrompida, limpa e inicia novo chat.
             print(f"Erro ao carregar histórico da sessão: {e}. Reiniciando histórico.")
             session['chat_history'] = []
             history = []
 
         ia_response_text = get_gemini_response(history, user_message)
         
-        # CORREÇÃO CRÍTICA #2: Substitui h.to_dict() por h.model_dump() ou h.to_json()
-        # O Pydantic (usado pela Google GenAI SDK) renomeou to_dict() para model_dump()
         session['chat_history'] = [h.model_dump() for h in history]
         
         return jsonify({"type": "text", "resposta": ia_response_text})
