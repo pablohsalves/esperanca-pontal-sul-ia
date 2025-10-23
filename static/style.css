@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.44 (AJUSTE MÁXIMO DO ESPAÇAMENTO DO AVISO)
+ * style.css - VERSÃO V60.45 (AJUSTE FORÇADO FINAL DO ESPAÇAMENTO DO AVISO)
  */
 
 :root {
@@ -157,8 +157,8 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* CRÍTICO: AJUSTE MÁXIMO DO PADDING PARA EMPURRAR O AVISO PARA CIMA */
-    padding: 20px 20px 50px; /* NOVO: 50px para garantir que apareça */
+    /* CRÍTICO: AJUSTE FINAL FORÇADO DE PADDING PARA EMPURRAR O AVISO PARA CIMA */
+    padding: 20px 20px 70px; /* V60.45: 70px para garantir que apareça */
     background-color: var(--color-aviso-bg); 
     border-top: none; 
     flex-shrink: 0; 
