@@ -1,4 +1,4 @@
-// static/script.js - VERSÃO V60.47 (Suporte a *Negrito* e **Negrito**)
+// static/script.js - VERSÃO V60.50 (Saudação Restaurada)
 
 // --- Funções de Ajuda ---
 
@@ -8,7 +8,6 @@ function simpleMarkdownToHtml(text) {
     let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
     // 2. Converte *negrito* para <strong>negrito</strong> (Sintaxe WhatsApp/Telegram)
-    // Isso garante que tanto um quanto dois asteriscos funcionem.
     html = html.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
     
     // 3. Converte \n em <br> para quebras de linha
@@ -89,10 +88,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const input = document.getElementById('pergunta-input');
     
     // 1. Renderizar Saudação Inicial
-    const initialMessageText = "{{ saudacao }}"; 
-    // Usamos appendMessage para garantir que a saudação use a mesma formatação
-    appendMessage(initialMessageText, 'ia');
-
+    // V60.50: Usa a variável global (definida no HTML) para garantir a renderização
+    if (typeof INITIAL_SAUDACAO_TEXT !== 'undefined' && INITIAL_SAUDACAO_TEXT.trim() !== '') {
+        appendMessage(INITIAL_SAUDACAO_TEXT, 'ia');
+    }
 
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
