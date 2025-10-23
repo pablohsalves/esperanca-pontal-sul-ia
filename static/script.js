@@ -1,4 +1,4 @@
-// script.js - VERSÃO V60.13 (Lógica completa de Microfone/Envio e Redimensionamento)
+// script.js - VERSÃO V60.17 (Transcrição de Voz Direta para Envio)
 
 document.addEventListener('DOMContentLoaded', () => {
     const chatBox = document.getElementById('chat-box');
@@ -6,32 +6,89 @@ document.addEventListener('DOMContentLoaded', () => {
     const enviarBtn = document.getElementById('enviar-btn');
     const microphoneBtn = document.getElementById('microphone-btn');
 
-    let isThinking = false; // Flag para controlar o estado da IA
+    let isThinking = false; 
+    let recognition = null; 
+    let isListening = false; 
+
+    // --- Inicialização da API de Reconhecimento de Fala ---
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false; 
+        recognition.interimResults = false; 
+        recognition.lang = 'pt-BR'; 
+
+        recognition.onstart = function() {
+            isListening = true;
+            microphoneBtn.classList.add('mic-active'); 
+            microphoneBtn.innerHTML = '<i class="fas fa-microphone-alt-slash"></i>'; 
+            input.placeholder = "Escutando... Fale agora...";
+            input.focus();
+        };
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            
+            // CRÍTICO V60.17: Envia a transcrição DIRETAMENTE como mensagem do usuário
+            if (transcript.trim() !== '') {
+                // Chama a função de envio com o texto transcrito
+                sendMessage(transcript.trim()); 
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Erro de reconhecimento de fala: ', event.error);
+            alert(`Erro ao tentar usar o microfone: ${event.error}. Certifique-se de que o navegador tem permissão.`);
+            stopListening();
+        };
+
+        recognition.onend = function() {
+            stopListening();
+        };
+    } else {
+        microphoneBtn.style.display = 'none';
+        console.warn("A API de Reconhecimento de Fala do navegador não é suportada.");
+    }
+    
+    // Função para parar a escuta
+    function stopListening() {
+        if (recognition && isListening) {
+            recognition.stop();
+        }
+        isListening = false;
+        microphoneBtn.classList.remove('mic-active');
+        microphoneBtn.innerHTML = '<i class="fas fa-microphone"></i>'; 
+        input.placeholder = "Peça à Esperança...";
+        updateButtonVisibility();
+    }
+
 
     // --- Funções de Ajuda UI ---
 
+    // (As funções updateButtonVisibility, createMessage, show/removeTypingIndicator e autoResize permanecem as mesmas da V60.16)
+    
     // 1. Gerencia a visibilidade dos botões
     function updateButtonVisibility() {
         const hasText = input.value.trim().length > 0;
         
         if (isThinking) {
-            // IA está pensando: O Microfone some e o Enviar se torna o Stop
             microphoneBtn.style.display = 'none';
-            enviarBtn.style.display = 'flex'; // Garante que o botão de Stop esteja visível
+            enviarBtn.style.display = 'flex'; 
             enviarBtn.disabled = false; 
             enviarBtn.innerHTML = '<i class="fas fa-stop"></i>'; 
             enviarBtn.title = 'Parar Resposta';
         } else if (hasText) {
-            // Tem texto: O Microfone some e o Enviar é o avião (habilitado)
             microphoneBtn.style.display = 'none';
-            enviarBtn.style.display = 'flex'; // Garante que o avião esteja visível
+            enviarBtn.style.display = 'flex'; 
             enviarBtn.disabled = false;
             enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
             enviarBtn.title = 'Enviar Mensagem';
         } else {
-            // Sem texto: Mostra o Microfone e desabilita o Enviar (avião)
-            microphoneBtn.style.display = 'flex'; 
-            enviarBtn.style.display = 'flex'; // Mantém o botão de envio visível, mas desabilitado
+            if (recognition) {
+                 microphoneBtn.style.display = 'flex'; 
+            } else {
+                 microphoneBtn.style.display = 'none';
+            }
+            enviarBtn.style.display = 'flex'; 
             enviarBtn.disabled = true;
             enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
             enviarBtn.title = 'Digite uma mensagem';
@@ -50,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatBox.scrollTop = chatBox.scrollHeight;
         return mensagemDiv;
     }
-
+    
     // 3. Gerencia o "Digitando..." da IA
     function showTypingIndicator() {
         if (!document.getElementById('typing-indicator')) {
@@ -72,15 +129,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 5. Ajusta a altura da caixa de texto
-    function autoResize() {
-        input.style.height = 'auto';
-        input.style.height = input.scrollHeight + 'px'; 
+    function autoResize() { 
+         input.style.height = 'auto';
+         input.style.height = input.scrollHeight + 'px'; 
     }
+
 
     // --- Lógica Principal do Chat ---
 
-    async function sendMessage() {
-        const userMessage = input.value.trim();
+    // CRÍTICO V60.17: Função agora aceita um parâmetro (userMessage)
+    async function sendMessage(messageToSend = null) {
+        // Usa a mensagem passada como parâmetro OU o conteúdo da caixa de input
+        const userMessage = messageToSend || input.value.trim();
+        
         if (userMessage === '') return;
 
         // 1. Estado de envio
@@ -94,10 +155,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. Mostra o indicador de digitação
         showTypingIndicator();
 
-        // 4. Limpa e reseta o input
-        input.value = '';
+        // 4. Limpa e reseta o input (Apenas se não foi enviado diretamente do input)
+        if (!messageToSend) {
+            input.value = '';
+        }
         autoResize(); 
-        updateButtonVisibility(); 
+        // updateButtonVisibility() aqui não é estritamente necessário se o input foi limpo
 
         try {
             const response = await fetch('/api/chat', {
@@ -131,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Lógica de Stop (apenas front-end)
+    // Lógica de Stop (mantida)
     function stopResponse() {
         if (isThinking) {
             console.log("Comando de Parada de Resposta acionado (apenas UI).");
@@ -149,34 +212,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
     
-    // Enviar mensagem ao clicar no avião/stop
+    // Enviar mensagem ao clicar no avião/stop (mantida)
     enviarBtn.addEventListener('click', () => {
         if (isThinking) {
             stopResponse();
         } else {
+            // Envia o conteúdo do input
             sendMessage();
         }
     });
 
-    // Evento de click (apenas para simular o uso do microfone, já que a API de áudio é complexa)
+    // Inicia/Para o Reconhecimento de Fala (mantida)
     microphoneBtn.addEventListener('click', () => {
-        alert("Função de Microfone em desenvolvimento! Por favor, use a digitação por enquanto.");
+        if (!recognition) {
+             alert("A função de voz não é suportada ou não foi ativada neste navegador.");
+             return;
+        }
+
+        if (isListening) {
+            stopListening();
+        } else {
+            try {
+                recognition.start();
+            } catch (e) {
+                if (e.name !== 'InvalidStateError') {
+                    console.error("Erro ao iniciar reconhecimento de fala: ", e);
+                }
+            }
+        }
         input.focus();
     });
 
-    // Enviar mensagem ao pressionar ENTER
+    // Enviar mensagem ao pressionar ENTER (mantida)
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault(); 
             if (isThinking) {
                 stopResponse();
             } else {
+                // Envia o conteúdo do input
                 sendMessage();
             }
         }
     });
 
-    // Atualiza a visibilidade dos botões e a altura da caixa ao digitar
+    // Atualiza a visibilidade dos botões e a altura da caixa ao digitar (mantida)
     input.addEventListener('input', () => {
         updateButtonVisibility();
         autoResize();
