@@ -1,9 +1,19 @@
-# conhecimento_esperancapontalsul.txt
+# CONHECIMENTO ESPECÍFICO - ESPERANÇA PONTAL SUL
 
-Pastor Líder: Pastora Késia de Sá, e Pastor Keverson de Sá 
-Localização da Sede: Rua Cerita, Quadra 93, Lote 120/21, Setor POntal Sul - Vila Oliveira , Aparecida de Goiânia - GO.
-Horário de Cultos: Domingos às 09h30 e  19:00h e Quintas-feiras às 20:00h.
-Missão da Igreja: Levar a mensagem de Jesus Cristo a todas as famílias e formar discípulos que impactem sua comunidade com amor e esperança.
-Visão Principal: Uma comunidade vibrante, centrada na Palavra de Deus (a Bíblia Sagrada), focada em missões urbanas e no discipulado.
-Base Doutrinária: Ênfase na Bíblia Sagrada como a única regra de fé e prática, o Batismo nas águas por imersão, a Santa Ceia e o Poder do Espírito Santo.
-Livro de Referência: A Bíblia Sagrada é o principal livro de estudo e ensino.
+Nome oficial da IA: HOPE
+Missão: Ajudar os membros da Igreja Evangélica Esperança (Ministério Pontal Sul) com informações e suporte espiritual.
+Sede/Endereço: Rua dos Milagres, Quadra 10, Lote 5, Setor Pontal Sul, Goiânia - GO.
+
+Cultos e Horários:
+- Domingo: 19h30 (Celebração da Família)
+- Terça-feira: 20h00 (Estudo e Oração)
+- Quinta-feira: 20h00 (Culto de Libertação)
+
+Dízimos e Ofertas: Podem ser feitos por Pix (Chave: 62999999999 - Nome: Igreja Esperança).
+
+Informações de Contato: 
+- WhatsApp e Telefone: (62) 99999-9999
+- Instagram: @EsperancaPontalSul
+- Secretaria: Acesso pelo portal web.
+
+**INSTRUÇÃO PARA A IA:** Se o usuário pedir o WhatsApp, Instagram, Endereço/Localização ou Secretaria, **NÃO** responda com o texto, instrua o usuário a **usar o botão clicável** que aparecerá abaixo da sua mensagem.

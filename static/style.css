@@ -1,256 +1,234 @@
 /*
- * style.css - VERSÃO V60.13 (Correção FINAL: Ícones DENTRO da Caixa)
+ * style.css - VERSÃO V60.18 (Adicionando estilo para Botões de Contato)
  */
 
-/* 1. RESET E VARIAVEIS */
 :root {
-    --color-bg-main: #1B1C1D; /* Fundo Principal */
-    --color-bg-container: #1B1C1D; /* Container Principal */
-    --color-bg-input: #1B1C1D; /* Fundo do Input */
-    --color-text-light: #e0e0e0; 
-    --color-text-secondary: #aaaaaa;
-    
-    --color-highlight: #333537; /* Cor do Contorno, Botões e Destaque */
-    --color-send-bg: #333537; /* Fundo do botão de envio (igual à bolha do usuário) */
-    
-    --color-ia-bubble: #1a1a1a; /* Bolha da IA */
-    --color-user-bubble: #333537; /* Bolha do Usuário */
-
-    --border-radius-lg: 25px;
-    --border-radius-sm: 8px;
+    /* Cores ajustadas para o esquema cinza/verde */
+    --color-background: #f0f0f0; /* Fundo do corpo */
+    --color-chat-bg: #ffffff; /* Fundo da caixa de chat */
+    --color-ia-bg: #e0e0e0; /* Fundo da bolha da IA (um cinza claro) */
+    --color-ia-text: #212121; /* Texto da IA */
+    --color-user-bg: #3a7d44; /* Fundo da bolha do usuário (verde escuro) */
+    --color-user-text: #ffffff; /* Texto do usuário */
+    --color-input-bg: #ffffff; /* Fundo da caixa de input */
+    --color-border: #cccccc; /* Borda da caixa de input */
+    --color-text-secondary: #757575; /* Ícones, Placeholder */
+    --color-highlight: #558b2f; /* Cor principal de destaque (verde musgo) */
+    --color-text-light: #ffffff; /* Texto do botão */
 }
 
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
+/* 1. LAYOUT GERAL */
+body {
     font-family: Arial, sans-serif;
-    color: var(--color-text-light);
-    background-color: var(--color-bg-main);
-    overflow: hidden; 
-}
-
-/* 2. CONTAINER PRINCIPAL */
-.chat-container {
-    display: flex;
-    flex-direction: column; 
-    height: 100vh; 
-    max-width: 700px; 
-    margin: 0 auto; 
-    background-color: var(--color-bg-container);
-    overflow: hidden; 
-}
-
-/* 3. CABEÇALHO */
-.chat-header {
-    padding: 20px;
-    text-align: center;
-    background-color: var(--color-bg-container);
-    position: sticky; 
-    top: 0;
-    z-index: 100;
-}
-.chat-header h1 { margin: 0; font-size: 1.8em; font-weight: 500; }
-
-/* 4. ÁREA DE MENSAGENS (Scrollable) */
-#chat-box { 
-    flex-grow: 1; 
-    overflow-y: auto; 
-    padding: 20px 15px; 
-    padding-bottom: 200px; 
-    display: flex; 
-    flex-direction: column;
-    
-    /* OCULTAR A BARRA DE ROLAGEM */
-    &::-webkit-scrollbar {
-        width: 0;
-        height: 0;
-    }
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-/* 5. FOOTER / ÁREA DE INPUT (Input Fixo) */
-.chat-input-container {
-    position: fixed; 
-    bottom: 40px; 
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    max-width: 700px; 
-    
-    background-color: var(--color-bg-container); 
-    padding: 18px 20px; 
-    
-    display: flex; 
-    align-items: center; 
-    z-index: 10; 
-}
-
-/* 6. CAMPO DE TEXTO (Contorno e Fonte) */
-#pergunta-input {
-    /* Ocupa 100% do novo container #input-wrapper (definido no HTML) */
-    width: 100%;
-    
-    /* CRÍTICO V60.13: Remove position: relative e usa position: static para se comportar como um elemento normal */
-    position: static; 
-    
-    /* Aumento da Altura (padding) */
-    padding-top: 20px; 
-    padding-bottom: 20px; 
-    padding-left: 20px;
-    
-    /* CRÍTICO V60.13: Espaço para os 2 ícones + padding lateral (15px + 44px + 5px + 44px + 15px) = ~123px*/
-    padding-right: 125px; 
-    
-    border-radius: 28px;
-    
-    border: none;
-    box-shadow: inset 0 0 0 1px var(--color-highlight); 
-    background-color: var(--color-bg-input);
-    
-    color: var(--color-text-light);
-    font-size: 1.2em; 
-    
-    resize: none; 
-    max-height: 120px; 
-    
-    margin-right: 0; 
-    
-    line-height: 1.4;
-    box-sizing: border-box; 
-    transition: box-shadow 0.2s;
-}
-
-/* CRÍTICO V60.13: ESTILO DO PLACEHOLDER (Grande, Esquerda, e Centralizado) */
-/* Para WebKit (Chrome, Safari, Edge) */
-#pergunta-input::-webkit-input-placeholder {
-    color: var(--color-text-secondary); 
-    font-size: 1.2em; 
-    text-align: left;
-    
-    /* Posição absoluta para centralização vertical */
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 20px;
-    width: calc(100% - 125px); /* Largura para não sobrepor os ícones */
-    line-height: 1.4; 
-}
-
-/* Para Firefox (Posicionamento absoluto não funciona, mas alinhamento de texto e tamanho sim) */
-#pergunta-input:-moz-placeholder {
-    color: var(--color-text-secondary);
-    font-size: 1.2em;
-    text-align: left;
-    opacity: 1; 
-}
-
-/* Para IE/Edge (Posicionamento absoluto) */
-#pergunta-input:-ms-input-placeholder {
-    color: var(--color-text-secondary);
-    font-size: 1.2em; 
-    text-align: left;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    left: 20px;
-    width: calc(100% - 125px);
-    line-height: 1.4; 
-}
-
-
-/* Foco: Aumentar o Contorno para 2px ao focar */
-#pergunta-input:focus {
-    outline: none;
-    box-shadow: inset 0 0 0 2px var(--color-highlight); 
-}
-
-/* 7. BOTÕES (ÍCONES - MIC, AVIÃO, STOP) */
-/* CRÍTICO V60.13: Posicionamento absoluto DENTRO do #input-wrapper */
-.icon-btn {
-    border: none;
-    background-color: transparent; 
-    color: var(--color-text-light); 
-    
-    width: 44px; 
-    height: 44px;
-    border-radius: 50%;
+    background-color: var(--color-background);
     display: flex;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
-    transition: color 0.2s, background-color 0.2s;
-    flex-shrink: 0; 
-    font-size: 1.2em;
-    padding: 0; 
-    margin: 0; 
-    z-index: 11;
-    
-    /* Posição absoluta DENTRO do #input-wrapper */
-    position: absolute; 
-    top: 50%;
-    transform: translateY(-50%); /* Centraliza Verticalmente */
+    height: 100vh;
+    margin: 0;
 }
 
-/* Posicionamento do botão de Envio (o mais à direita, COM círculo cinza) */
+.chat-container {
+    width: 100%;
+    max-width: 450px; /* Largura máxima para simular tela de celular */
+    height: 100vh; 
+    max-height: 800px; /* Altura máxima */
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    background-color: var(--color-chat-bg);
+    overflow: hidden;
+}
+
+/* 2. CABEÇALHO */
+.chat-header {
+    background-color: var(--color-highlight);
+    color: var(--color-user-text);
+    padding: 15px;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* 3. ÁREA DE MENSAGENS (CHAT BOX) */
+#chat-box {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+    background-color: #f7f7f7; /* Fundo sutil para a área de chat */
+}
+
+/* 4. ESTILO DAS BOLHAS DE MENSAGEM */
+.mensagem {
+    padding: 10px 15px;
+    border-radius: 18px;
+    max-width: 85%;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+.mensagem.usuario {
+    align-self: flex-end;
+    background-color: var(--color-user-bg);
+    color: var(--color-user-text);
+    border-bottom-right-radius: 4px; /* Ponta triangular */
+}
+
+.mensagem.ia,
+#typing-indicator {
+    align-self: flex-start;
+    background-color: var(--color-ia-bg);
+    color: var(--color-ia-text);
+    border-bottom-left-radius: 4px; /* Ponta triangular */
+}
+
+.mensagem p {
+    margin: 0; /* Remove margem padrão de parágrafos */
+}
+
+/* Estilo para links dentro das bolhas da IA */
+.mensagem.ia a {
+    color: var(--color-highlight);
+    font-weight: bold;
+    text-decoration: none;
+}
+.mensagem.ia a:hover {
+    text-decoration: underline;
+}
+
+/* 5. ÁREA DE INPUT */
+.chat-input-container {
+    background-color: var(--color-input-bg);
+    padding: 10px;
+    display: flex;
+    align-items: flex-end;
+    border-top: 1px solid var(--color-border);
+}
+
+#input-wrapper {
+    flex-grow: 1;
+    display: flex; 
+    align-items: flex-end; 
+    position: relative;
+    padding-right: 90px; /* Espaço para o microfone e avião/stop */
+}
+
+#pergunta-input {
+    flex-grow: 1;
+    min-height: 44px; /* Altura mínima para o botão */
+    max-height: 150px; /* Altura máxima (aprox. 6 linhas) */
+    padding: 12px 45px 12px 15px; /* Padding para ícones e alinhamento */
+    border: 1px solid var(--color-border);
+    border-radius: 22px; 
+    resize: none; 
+    overflow-y: auto;
+    font-size: 1em;
+    box-sizing: border-box; 
+    line-height: 1.3;
+}
+
+/* Placeholder text color */
+#pergunta-input::placeholder {
+    color: var(--color-text-secondary);
+}
+
+/* 6. AVISO INFERIOR */
+.aviso-inferior {
+    font-size: 0.75em;
+    color: var(--color-text-secondary);
+    text-align: center;
+    padding: 5px 10px;
+    background-color: #f0f0f0;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* 7. BOTÕES (ÍCONES - MIC, AVIÃO, STOP) */
+.icon-btn {
+    position: absolute;
+    height: 44px; /* Altura do ícone */
+    width: 44px;  /* Largura do ícone */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: color 0.1s, background-color 0.1s;
+    top: 50%;
+    transform: translateY(-50%); /* Centraliza verticalmente */
+}
+
 #enviar-btn {
-    right: 5px; /* Posição próxima à borda direita do input */
-    background-color: var(--color-send-bg); 
+    right: 5px; /* Posição à direita do input-wrapper */
+    background-color: var(--color-highlight);
     color: var(--color-text-light);
 }
 
-/* Posicionamento do botão de Microfone (ao lado do Enviar, SEM círculo cinza) */
+#enviar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: var(--color-highlight); /* Mantém a cor */
+}
+
 #microphone-btn {
-    right: 50px; /* Posição à esquerda do botão de envio (5px + 44px) */
+    right: 50px; /* Posição à esquerda do botão de envio */
     background-color: transparent; 
     color: var(--color-text-secondary); 
 }
 
-/* Estado Desabilitado do botão de envio */
-#enviar-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+#microphone-btn:hover:not(.mic-active) {
+    color: var(--color-highlight);
+}
+
+/* Estilo quando o microfone está ATIVO */
+.icon-btn.mic-active {
+    color: var(--color-highlight); /* Cor principal de destaque */
+    background-color: rgba(76, 175, 80, 0.1); /* Um leve fundo cinza/verde */
+}
+
+/* CRÍTICO V60.18: Estilo para Botão de Ação dentro da bolha da IA */
+.ia-action-button {
+    /* Estilo do container do texto + botão */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ia-action-button .button-link {
+    /* Estilo do botão clicável */
+    display: inline-flex; /* Permite ícone e texto */
+    align-items: center;
+    justify-content: center;
+    
+    padding: 10px 15px;
+    border-radius: 20px;
+    
+    /* Cores de Destaque */
+    background-color: var(--color-highlight); 
     color: var(--color-text-light); 
-    background-color: var(--color-send-bg); 
+    
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1em;
+    cursor: pointer;
+    
+    transition: background-color 0.2s, opacity 0.2s;
+    /* Faz o botão ocupar a largura disponível na bolha */
+    width: 100%; 
+    max-width: 250px; /* Limita a largura dentro da bolha */
 }
 
-/* 8. ESTILOS DAS BOLHAS DE CHAT */
-.mensagem {
-    padding: 15px 20px;
-    border-radius: var(--border-radius-lg); 
-    max-width: 75%; 
-    margin-bottom: 10px; 
-    line-height: 1.4;
-    box-shadow: none; 
+.ia-action-button .button-link:hover {
+    background-color: #4a4d50; /* Um tom um pouco mais escuro no hover */
 }
 
-.mensagem.ia, .mensagem.ia.initial-message {
-    background-color: var(--color-ia-bubble);
-    color: var(--color-text-light);
-    align-self: flex-start; 
-    margin-right: auto; 
-}
-
-.mensagem.usuario {
-    background-color: var(--color-user-bubble);
-    color: var(--color-text-light);
-    align-self: flex-end; 
-    margin-left: auto; 
-}
-
-/* 9. AVISO INFERIOR FIXO */
-.aviso-inferior {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0 auto;
-    max-width: 700px;
-    padding: 10px 20px;
-    text-align: center;
-    font-size: 0.85em;
-    color: var(--color-text-secondary);
-    background-color: var(--color-bg-container);
-    z-index: 10; 
+.ia-action-button .button-link i {
+    /* Espaçamento do ícone */
+    margin-right: 8px;
 }
