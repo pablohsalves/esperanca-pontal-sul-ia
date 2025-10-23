@@ -22,8 +22,8 @@ GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 # Definição do modelo
 MODEL_NAME = "gemini-2.5-flash"
 
-class Assistente:
-    def __init__(self, nome_assistente="Esperança"):
+class Hope:
+    def __init__(self, nome_assistente="Hope"):
         self.nome_assistente = nome_assistente
         self.client = None
         self.conversas = {} # Para rastrear histórico

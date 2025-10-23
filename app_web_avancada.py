@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, session, jsonify, redirect, u
 import json
 import os
 import logging
-from assistente_avancada import ParceiroDeFeAvancado
+from assistente_avancada import Hope
 from dotenv import load_dotenv
 
 # --- Carregamento de Variáveis de Ambiente ---
