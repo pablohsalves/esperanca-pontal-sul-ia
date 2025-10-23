@@ -1,8 +1,10 @@
-# app_web_avancada.py - VERSÃO V60.38 (Sem alteração no Backend, apenas no Frontend)
+# app_web_avancada.py - VERSÃO V60.40 (Admin /conhecimento RESTAURADO)
 
 import os
 import json
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+
+# Importação do Google GenAI
 from google import genai
 from google.genai import types
 
@@ -34,8 +36,13 @@ CONTACT_LINKS = {
 if 'GEMINI_API_KEY' not in os.environ:
     raise ValueError("A variável de ambiente GEMINI_API_KEY não está configurada.")
 
+# Configuração de Admin BÁSICA
+ADMIN_USER = os.environ.get('ADMIN_USER', 'admin') # Usuário padrão
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'suasenhafacil') # Senha padrão (MUDE ISSO)
+
 client = genai.Client()
 app = Flask(__name__)
+# CRÍTICO: Garante que você tenha um FLASK_SECRET_KEY configurado para usar `flash` e `session`
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'sua_chave_secreta_padrao_muito_segura') 
 
 KNOWLEDGE_FILE = 'conhecimento_esperancapontalsul.txt'
@@ -45,9 +52,6 @@ def load_knowledge_base():
     try:
         with open(KNOWLEDGE_FILE, 'r', encoding='utf-8') as f:
             content = f.read()
-            if not content.strip():
-                 print("AVISO: Arquivo de conhecimento carregado, mas está vazio.")
-                 return ""
             print("INFO: Arquivo de conhecimento carregado com sucesso.")
             return content
     except FileNotFoundError:
@@ -56,6 +60,20 @@ def load_knowledge_base():
     except Exception as e:
         print(f"ERRO: Falha ao ler o arquivo de conhecimento: {e}")
         return ""
+    
+def save_knowledge_base(content):
+    """Tenta salvar o conteúdo no arquivo de conhecimento."""
+    try:
+        with open(KNOWLEDGE_FILE, 'w', encoding='utf-8') as f:
+            f.write(content)
+        # Recarrega o conteúdo global após a escrita
+        global KNOWLEDGE_CONTENT
+        KNOWLEDGE_CONTENT = content
+        print("INFO: Arquivo de conhecimento salvo e base recarregada com sucesso.")
+        return True
+    except Exception as e:
+        print(f"ERRO: Falha ao salvar o arquivo de conhecimento: {e}")
+        return False
 
 KNOWLEDGE_CONTENT = load_knowledge_base()
 MODEL = 'gemini-2.5-flash'
@@ -65,25 +83,28 @@ BASE_SYSTEM_INSTRUCTION = (
     "Use Markdown para formatar suas respostas, como negrito e listas. Mantenha as respostas curtas."
 )
 
-# Adiciona o conteúdo do arquivo SE ele existir e não estiver vazio.
-if KNOWLEDGE_CONTENT:
-    FULL_SYSTEM_INSTRUCTION = (
-        BASE_SYSTEM_INSTRUCTION + 
-        "\n\n--- INFORMAÇÕES ADICIONAIS DE CONTEXTO ---\n" +
-        "USE ESTAS INFORMAÇÕES PRIMARIAMENTE para responder perguntas específicas da igreja (horários, eventos, nome do pastor, etc.):\n" + 
-        KNOWLEDGE_CONTENT
-    )
-else:
-    FULL_SYSTEM_INSTRUCTION = BASE_SYSTEM_INSTRUCTION
+# Funções para IA (permanecem as mesmas)
+def update_system_instruction():
+    """Atualiza a instrução do sistema com o conteúdo da base de conhecimento."""
+    global FULL_SYSTEM_INSTRUCTION
+    if KNOWLEDGE_CONTENT:
+        FULL_SYSTEM_INSTRUCTION = (
+            BASE_SYSTEM_INSTRUCTION + 
+            "\n\n--- INFORMAÇÕES ADICIONAIS DE CONTEXTO ---\n" +
+            "USE ESTAS INFORMAÇÕES PRIMARIAMENTE para responder perguntas específicas da igreja (horários, eventos, nome do pastor, etc.):\n" + 
+            KNOWLEDGE_CONTENT
+        )
+    else:
+        FULL_SYSTEM_INSTRUCTION = BASE_SYSTEM_INSTRUCTION
 
+update_system_instruction() # Chama para inicializar
 
-INTENT_MODEL = 'gemini-2.5-flash'
-INTENT_SYSTEM_INSTRUCTION = "Você é um classificador de intenções. Sua única tarefa é identificar se a mensagem do usuário pede por 'whatsapp', 'instagram', 'localizacao' (que inclui endereço e mapa), ou 'secretaria'. Se a intenção for clara, responda APENAS com a palavra-chave (ex: 'whatsapp'). Caso contrário, responda APENAS com a palavra-chave 'chat'. Sua resposta deve ser sempre uma única palavra minúscula."
-
+# ... (o restante das funções get_gemini_response e classify_intent permanecem iguais) ...
 def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_INSTRUCTION):
     """
     Função principal para obter a resposta da IA.
     """
+    # ... (código da função) ...
     try:
         history.append(types.Content(role="user", parts=[types.Part(text=user_message)]))
 
@@ -111,12 +132,12 @@ def classify_intent(user_message):
     ]
     
     config = types.GenerateContentConfig(
-        system_instruction=INTENT_SYSTEM_INSTRUCTION
+        system_instruction="Você é um classificador de intenções. Sua única tarefa é identificar se a mensagem do usuário pede por 'whatsapp', 'instagram', 'localizacao' (que inclui endereço e mapa), ou 'secretaria'. Se a intenção for clara, responda APENAS com a palavra-chave (ex: 'whatsapp'). Caso contrário, responda APENAS com a palavra-chave 'chat'. Sua resposta deve ser sempre uma única palavra minúscula."
     )
     
     try:
         response = client.models.generate_content(
-            model=INTENT_MODEL,
+            model='gemini-2.5-flash',
             contents=history,
             config=config,
         )
@@ -125,6 +146,7 @@ def classify_intent(user_message):
     except Exception as e:
         print(f"Erro ao classificar a intenção: {e}")
         return "chat"
+
 
 @app.route("/")
 def home():
@@ -135,25 +157,70 @@ def home():
 
     return render_template("chat_interface.html", saudacao=saudacao)
 
-# Rota para verificar o status do carregamento da base de conhecimento
 @app.route("/knowledge_status")
 def knowledge_status():
     if KNOWLEDGE_CONTENT:
         return jsonify({
             "status": "OK",
-            "message": "Base de conhecimento carregada com sucesso. Verifique se o conteúdo abaixo está correto e se o arquivo está no diretório correto. Se sim, o problema está na forma como o modelo usa o contexto (tente refinar as informações no arquivo).",
+            "message": "Base de conhecimento carregada com sucesso. Verifique se o conteúdo abaixo está correto. Se sim, o modelo deve conseguir responder.",
             "content_snippet": KNOWLEDGE_CONTENT[:500] + ("..." if len(KNOWLEDGE_CONTENT) > 500 else ""),
             "content_length": len(KNOWLEDGE_CONTENT)
         })
     else:
         return jsonify({
             "status": "FALHA",
-            "message": "Base de conhecimento NÃO carregada. Verifique se o arquivo 'conhecimento_esperancapontalsul.txt' existe no diretório raiz do projeto e se está no formato UTF-8.",
+            "message": "Base de conhecimento NÃO carregada. Verifique se o arquivo 'conhecimento_esperancapontalsul.txt' existe.",
             "content_length": 0
         })
 
+# Rota para Login (Necessária para proteger /admin/conhecimento)
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        
+        if username == ADMIN_USER and password == ADMIN_PASSWORD:
+            session['logged_in'] = True
+            flash("Login realizado com sucesso!", "message")
+            return redirect(url_for('admin_conhecimento'))
+        else:
+            flash("Credenciais inválidas. Tente novamente.", "error")
+            
+    return render_template("admin_login.html")
+
+
+# V60.40: Rota de Admin RESTAURADA (agora protegida)
+@app.route("/admin/conhecimento", methods=["GET", "POST"])
+def admin_conhecimento():
+    if not session.get('logged_in'):
+        flash("Você precisa fazer login para acessar esta página.", "error")
+        return redirect(url_for('admin_login'))
+
+    if request.method == "POST":
+        novo_conhecimento = request.form.get("conhecimento")
+        if novo_conhecimento is not None:
+            if save_knowledge_base(novo_conhecimento):
+                update_system_instruction()
+                flash("Conhecimento salvo e IA recarregada com sucesso!", "message")
+            else:
+                flash("ERRO ao salvar o arquivo no servidor. Tente novamente.", "error")
+        return redirect(url_for('admin_conhecimento'))
+
+    # GET request
+    return render_template("admin_conhecimento.html", conhecimento=KNOWLEDGE_CONTENT)
+
+# Rota de Logout (Opcional, mas recomendado)
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop('logged_in', None)
+    flash("Você saiu da área administrativa.", "message")
+    return redirect(url_for('home'))
+
+
 @app.route("/api/chat", methods=["POST"])
 def chat_api():
+    # ... (código da rota API de chat permanece o mesmo) ...
     data = request.json
     user_message = data.get("mensagem")
     
