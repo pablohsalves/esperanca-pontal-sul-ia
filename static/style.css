@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.51 (CORREÇÃO FINAL DE LARGURA E ESPAÇAMENTO)
+ * style.css - VERSÃO V60.52 (CORREÇÃO DO CORTE HORIZONTAL DO INPUT)
  */
 
 :root {
@@ -110,8 +110,8 @@ body {
 /* 5. ÁREA DE INPUT */
 .chat-input-container {
     background-color: var(--color-background); 
-    /* AJUSTE V60.51: Remove padding horizontal e ajusta o inferior */
-    padding: 10px 0px 5px; 
+    /* AJUSTE V60.52: Reintroduz o padding horizontal para alinhamento e mantém o espaçamento reduzido */
+    padding: 10px 20px 5px; 
     display: flex;
     align-items: center; 
     border-top: none; 
@@ -129,15 +129,15 @@ body {
     position: relative;
     padding-right: 0; 
     width: 100%; 
-    /* AJUSTE V60.51: Adiciona o padding horizontal */
-    padding: 0 20px;
+    /* AJUSTE V60.52: Remove o padding horizontal. Ele está no container pai. */
+    padding: 0; 
 }
 
 #pergunta-input {
     flex-grow: 1;
     min-height: 55px; 
     max-height: 200px; 
-    /* Mantém o padding interno, mas sem o padding horizontal que duplicava */
+    
     padding: 15px 20px; 
     padding-right: 100px; 
     
@@ -151,7 +151,7 @@ body {
     font-size: 1.2em; 
     box-sizing: border-box; 
     line-height: 1.4;
-    width: 100%;
+    width: 100%; 
 
     /* Ocultar a barra de rolagem no campo de pesquisa */
     &::-webkit-scrollbar {
@@ -166,7 +166,7 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* AJUSTE V60.51: Reduz padding superior para aproximar do input. Mantém 70px inferior. */
+    /* AJUSTES V60.51/V60.52: Espaçamento reduzido e padding horizontal para alinhar com o chat/input */
     padding: 10px 20px 70px; 
     background-color: var(--color-aviso-bg); 
     border-top: none; 
