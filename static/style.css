@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.45 (AJUSTE FORÇADO FINAL DO ESPAÇAMENTO DO AVISO)
+ * style.css - VERSÃO V60.48 (CORREÇÃO DE LARGURA DO INPUT)
  */
 
 :root {
@@ -110,7 +110,6 @@ body {
 /* 5. ÁREA DE INPUT */
 .chat-input-container {
     background-color: var(--color-background); 
-    /* MANTIDO: Reduz o padding inferior para subir o input/aviso */
     padding: 10px 20px 0px; 
     display: flex;
     align-items: center; 
@@ -124,6 +123,8 @@ body {
     align-items: center; 
     position: relative;
     padding-right: 0; 
+    /* AJUSTE V60.48 */
+    width: 100%; 
 }
 
 #pergunta-input {
@@ -140,9 +141,11 @@ body {
     border-radius: 30px; 
     resize: none; 
     overflow-y: auto;
-    font-size: 1.2em; /* Tamanho da fonte aumentado */
+    font-size: 1.2em; 
     box-sizing: border-box; 
     line-height: 1.4;
+    /* AJUSTE V60.48 */
+    width: 100%;
 
     /* Ocultar a barra de rolagem no campo de pesquisa */
     &::-webkit-scrollbar {
@@ -157,8 +160,8 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* CRÍTICO: AJUSTE FINAL FORÇADO DE PADDING PARA EMPURRAR O AVISO PARA CIMA */
-    padding: 20px 20px 70px; /* V60.45: 70px para garantir que apareça */
+    /* MANTIDO AJUSTE FORÇADO DE PADDING para garantir visibilidade */
+    padding: 20px 20px 70px; 
     background-color: var(--color-aviso-bg); 
     border-top: none; 
     flex-shrink: 0; 
@@ -167,16 +170,12 @@ body {
 /* SOLUÇÃO PARA MOBILE (100vh) */
 @media screen and (max-width: 650px) {
     body {
-        /* Garante que a centralização vertical funcione mesmo no mobile */
         align-items: center;
-        /* Adiciona um padding inferior no body para afastar o chat do fundo da tela, dando espaço para o aviso */
         padding-bottom: 5px; 
     }
     .chat-container {
-        /* Usa -webkit-fill-available que é mais preciso no mobile */
         height: -webkit-fill-available;
         max-height: none; 
-        /* Tenta forçar a altura máxima de forma mais segura no mobile */
         min-height: 90vh;
     }
 }
