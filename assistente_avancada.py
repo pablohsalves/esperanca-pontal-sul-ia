@@ -1,120 +1,118 @@
-# assistente_avancada.py - PARCEIRO DE FÉ AVANÇADO (FINAL ESTÁVEL)
+# assistente_avancada.py - Versão V32.1 (Máxima Robustez na Leitura da Chave)
 
 import os
 import json
 import logging
+from dotenv import load_dotenv # Importa o dotenv para leitura local
 from google import genai
-from google.genai import types # Importação crucial para tipos de conteúdo
 from google.genai.errors import APIError
 
-logger = logging.getLogger(__name__)
+# Tenta carregar variáveis de ambiente do arquivo .env (apenas para teste local)
+load_dotenv() 
 
-# O texto inicial que define o comportamento do assistente
-INSTRUCAO_SISTEMA_PADRAO = """
-Você é Esperança, uma parceira de fé virtual, desenvolvida para auxiliar a Igreja Esperança Pontal Sul.
-Seu objetivo principal é oferecer informações sobre a igreja, seus horários, localização, 
-princípios e contatos, com uma abordagem acolhedora, cristã e inspirada na Bíblia.
+# Configuração do Logger
+logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
 
-Sua personalidade é:
-1. Acolhedora e Pastoral: Mantenha um tom de fé, esperança e amor.
-2. Informativa: Baseie-se nas informações de CONHECIMENTO_ATUAL.
-3. Objetiva: Responda diretamente ao que foi perguntado.
-4. Use emojis cristãos e de paz (ex: 🕊️, 🙏, 💖).
+# --- CONFIGURAÇÃO CRÍTICA DA CHAVE ---
+# O Render garante que 'GEMINI_API_KEY' está no os.environ
+# O load_dotenv garante que, localmente, ele leia do arquivo .env
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+# --------------------------------------
 
-INSTRUÇÕES ESPECÍFICAS:
-- Nunca gere imagens.
-- Mantenha respostas curtas e diretas. Se a resposta for longa, use parágrafos.
-- Sempre que a resposta for um link de contato ou localização (WhatsApp, Mapa, Horários),
-  sugira o link usando um 'chip' de link clicável no formato HTML:
-  <a href="{URL}" target="_blank" class="chip link-chip">{TEXTO}</a>
-  
-### CONHECIMENTO_ATUAL ###
-{CONHECIMENTO_TEXTO}
+# Definição do modelo
+MODEL_NAME = "gemini-2.5-flash"
 
-### LINKS_DE_CONTATO ###
-{LINKS_DE_CONTATO}
-
-"""
-
-class ParceiroDeFeAvancado:
-    def __init__(self, contatos, conhecimento_texto=None):
-        self.api_key = os.getenv('GEMINI_API_KEY')
-        if not self.api_key:
-            raise ValueError("A variável de ambiente GEMINI_API_KEY não está configurada.")
-
-        self.client = genai.Client(api_key=self.api_key)
-        self.model = 'gemini-2.5-flash'  # Modelo rápido para chat
+class Assistente:
+    def __init__(self, nome_assistente="Esperança"):
+        self.nome_assistente = nome_assistente
+        self.client = None
+        self.conversas = {} # Para rastrear histórico
+        self.inicializado = False
         
-        self.contatos = contatos
-        self.conhecimento_texto = conhecimento_texto if conhecimento_texto is not None else self._carregar_conhecimento_padrao()
-        
-        self._atualizar_instrucao_sistema()
-
-    def _carregar_conhecimento_padrao(self):
-        try:
-            with open('conhecimento_esperancapontalsul.txt', 'r', encoding='utf-8') as f:
-                return f.read()
-        except FileNotFoundError:
-            logger.warning("Arquivo 'conhecimento_esperancapontalsul.txt' não encontrado. Usando conhecimento vazio.")
-            return "Nenhum conhecimento base disponível."
-            
-    def _atualizar_instrucao_sistema(self):
-        links_json = json.dumps(self.contatos, indent=2, ensure_ascii=False)
-        self.instrucao_sistema = INSTRUCAO_SISTEMA_PADRAO.format(
-            CONHECIMENTO_TEXTO=self.conhecimento_texto,
-            LINKS_DE_CONTATO=links_json
-        )
-
-    def iniciar_novo_chat(self):
-        return []
-
-    def enviar_saudacao(self):
-        prompt = "Gere uma breve e calorosa mensagem de saudação inicial para um visitante do chat."
-        
-        chat = self.client.chats.create(
-            model=self.model,
-            system_instruction=self.instrucao_sistema
-        )
-        
-        try:
-            response = chat.send_message(prompt)
-            return response.text
-        except APIError as e:
-            logger.error(f"Erro na API ao gerar saudação: {e}")
-            return "Olá! Sou Esperança, sua parceira de fé virtual. Tivemos um pequeno erro técnico, mas estou aqui para te ajudar. Como posso servir?"
-        except Exception as e:
-            logger.error(f"Erro inesperado ao gerar saudação: {e}")
-            return "Olá! Sou Esperança, sua parceira de fé virtual. O servidor de IA falhou ao iniciar, mas estou aqui para te ajudar. Como posso servir?"
-
-
-    def obter_resposta_com_memoria(self, historico_serializado, pergunta):
-        """
-        Recebe o histórico serializado (lista de dicts), reconstrói o objeto Content (CORREÇÃO AQUI), 
-        envia a pergunta e retorna a resposta e o novo histórico serializável.
-        """
-        
-        # 1. Reconstruir o histórico de Content a partir do JSON serializado
-        historico_gemini = []
-        for item in historico_serializado:
+        # TENTA INICIALIZAR O CLIENTE GEMINI
+        if GEMINI_API_KEY:
             try:
-                # CORREÇÃO CRÍTICA DO ERRO 'from_dict': Usamos o construtor direto do Pydantic
-                historico_gemini.append(types.Content(**item))
+                # CRÍTICO: Inicializa o cliente com a chave.
+                self.client = genai.Client(api_key=GEMINI_API_KEY)
+                self.inicializado = True
+                logging.info(f"Assistente '{self.nome_assistente}' inicializado com sucesso.")
             except Exception as e:
-                # Se falhar (como o erro from_dict), retorna o erro para debug
-                logger.error(f"Falha ao reconstruir item do histórico: {item}. Erro: {e}")
-                raise e # Propaga o erro para o app_web_avancada.py logar o erro.
+                # Falha na inicialização por erro na chave/rede
+                logging.error(f"ERRO CRÍTICO: Falha ao inicializar o cliente Gemini com a chave: {e}")
+                self.inicializado = False
+        else:
+            # Falha se a chave não foi encontrada 
+            logging.error("ERRO CRÍTICO: GEMINI_API_KEY não encontrada no ambiente. Verifique o Render ou o arquivo .env.")
+            self.inicializado = False
 
-        # 2. Iniciar ou continuar o chat com o histórico reconstruído
-        chat = self.client.chats.create(
-            model=self.model,
-            system_instruction=self.instrucao_sistema,
-            history=historico_gemini
-        )
+    def iniciar_nova_conversa(self, user_id, historico=None):
+        if not self.inicializado:
+            logging.error(f"Não é possível iniciar conversa para {user_id}. IA não inicializada.")
+            return None
         
-        # 3. Enviar a nova mensagem
-        response = chat.send_message(pergunta)
+        # Sua lógica de iniciar ou retomar conversa aqui
+        # Exemplo:
+        if user_id not in self.conversas:
+             self.conversas[user_id] = self.client.chats.create(
+                 model=MODEL_NAME
+             )
+        return self.conversas[user_id]
+
+
+    def chat(self, user_id, mensagem):
+        if not self.inicializado:
+            logging.error("Placeholder assistente chamado, IA inoperante.")
+            # Retorna a mensagem de erro que aparece no chat
+            return {
+                "resposta": "IA Inoperante devido a um erro de inicialização. Por favor, contate o administrador.",
+                "links": {}
+            }
         
-        # 4. Preparar o histórico para a sessão (Serialização)
-        novo_historico_gemini = chat.get_history()
-        
-        return response.text, novo_historico_gemini
+        # 1. Inicia ou retoma a conversa
+        conversa = self.iniciar_nova_conversa(user_id)
+        if not conversa:
+             return {
+                "resposta": "Não foi possível iniciar a conversa. Serviço indisponível.",
+                "links": {}
+            }
+
+        # 2. Envio da mensagem
+        try:
+            # Envia a mensagem e obtém a resposta do modelo
+            response = conversa.send_message(mensagem)
+
+            # 3. Processamento da resposta e links (Seu código anterior deve fazer isso)
+            resposta_texto = response.text 
+            
+            # --- Exemplo de Processamento de Links (se for relevante para você) ---
+            links_encontrados = self._extrair_links_e_formatar(resposta_texto)
+            # ---------------------------------------------------------------------
+
+            logging.info(f"USUÁRIO: {user_id} | IA: {resposta_texto}")
+
+            return {
+                "resposta": resposta_texto,
+                "links": links_encontrados
+            }
+
+        except APIError as e:
+            logging.error(f"APIError ao chamar Gemini: {e}")
+            return {
+                "resposta": f"Desculpe, a comunicação com a IA falhou. Erro da API: {e}",
+                "links": {}
+            }
+        except Exception as e:
+            logging.error(f"Erro inesperado no chat: {e}")
+            return {
+                "resposta": "Ocorreu um erro inesperado durante o processamento da sua mensagem.",
+                "links": {}
+            }
+
+    # Você precisa manter este método auxiliar se estiver usando a lógica de chips de link
+    def _extrair_links_e_formatar(self, texto):
+        """ Extrai links do texto (exemplo) e os formata em JSON. """
+        # Adapte esta lógica para o seu projeto!
+        return {} # Retorna JSON vazio por simplicidade, substitua pelo seu código real.
+
+
+# --- FIM DA CLASSE ASSISTENTE ---
