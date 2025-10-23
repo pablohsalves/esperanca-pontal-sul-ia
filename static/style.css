@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.6 (Ajustes FINAIS: Fonte e Altura do Input + Ocultar Scrollbar)
+ * style.css - VERSÃO V60.7 (Ajustes FINAIS: UI/UX do Input: Círculo de Destaque, Microfone e Fonte)
  */
 
 /* 1. RESET E VARIAVEIS */
@@ -10,7 +10,8 @@
     --color-text-light: #e0e0e0; 
     --color-text-secondary: #aaaaaa;
     
-    --color-highlight: #333537; /* Cor do Contorno, Botões e Sombra */
+    --color-highlight: #333537; /* Cor do Contorno, Botões e Destaque */
+    --color-send-bg: #333537; /* Fundo do botão de envio (igual à bolha do usuário) */
     
     --color-ia-bubble: #1a1a1a; /* Bolha da IA */
     --color-user-bubble: #333537; /* Bolha do Usuário */
@@ -56,20 +57,16 @@ html, body {
     flex-grow: 1; 
     overflow-y: auto; 
     padding: 20px 15px; 
-    /* Garante que o conteúdo fique acima do input expandido e do aviso */
     padding-bottom: 200px; 
     display: flex; 
     flex-direction: column;
     
-    /* CRÍTICO V60.6: OCULTAR A BARRA DE ROLAGEM */
-    /* Para WebKit (Chrome, Safari, Edge) */
+    /* OCULTAR A BARRA DE ROLAGEM */
     &::-webkit-scrollbar {
         width: 0;
         height: 0;
     }
-    /* Para Firefox */
     scrollbar-width: none;
-    /* Para IE e Edge (antigo) */
     -ms-overflow-style: none;
 }
 
@@ -83,7 +80,6 @@ html, body {
     max-width: 700px; 
     
     background-color: var(--color-bg-container); 
-    /* CRÍTICO V60.6: Aumentar o padding vertical da *caixa externa* */
     padding: 18px 20px; 
     
     display: flex; 
@@ -94,7 +90,6 @@ html, body {
 /* 6. CAMPO DE TEXTO (Contorno e Fonte) */
 #pergunta-input {
     flex-grow: 1; 
-    /* CRÍTICO V60.6: Aumentar o padding interno do *campo de texto* */
     padding: 22px 20px; 
     border-radius: 28px;
     
@@ -103,28 +98,29 @@ html, body {
     background-color: var(--color-bg-input);
     
     color: var(--color-text-light);
-    /* CRÍTICO V60.6: Aumento adicional da fonte para 1.2em */
-    font-size: 1.2em; 
+    font-size: 1.2em; /* Fonte aumentada */
     
     resize: none; 
     max-height: 120px; 
-    margin-right: 8px; 
+    
+    /* CRÍTICO V60.7: Reduz margem direita para acomodar os dois botões */
+    margin-right: 5px; 
+    
     line-height: 1.4;
     box-sizing: border-box; 
     transition: box-shadow 0.2s;
 }
 
-/* Foco: Aumentar o Contorno para 2px ao focar */
 #pergunta-input:focus {
     outline: none;
     box-shadow: inset 0 0 0 2px var(--color-highlight); 
 }
 
-/* 7. BOTÕES (ÍCONES - MIC e AVIÃO) */
+/* 7. BOTÕES (ÍCONES - MIC, AVIÃO, STOP) */
 .icon-btn {
     border: none;
     background-color: transparent; 
-    color: var(--color-highlight); 
+    color: var(--color-text-light); /* Cor do ícone */
     
     width: 44px; 
     height: 44px;
@@ -137,13 +133,34 @@ html, body {
     flex-shrink: 0; 
     font-size: 1.2em;
     padding: 0; 
-    margin-left: -50px; 
+    margin: 0 0 0 5px; /* Adicionado margem entre botões */
     z-index: 11;
 }
 
-#enviar-btn:not(:disabled) {
-    color: var(--color-highlight); 
+/* CRÍTICO V60.7: Estilo do botão de envio */
+#enviar-btn {
+    background-color: var(--color-send-bg); /* Fundo cinza escuro */
+    color: var(--color-text-light);
+    /* Mantido 44px de largura/altura */
 }
+
+/* Estado Desabilitado do botão de envio (Quando o campo está vazio) */
+#enviar-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: var(--color-text-light); 
+    background-color: var(--color-send-bg); 
+}
+
+/* CRÍTICO V60.7: Botão de Microfone (Apenas o ícone, sem fundo) */
+#microphone-btn {
+    background-color: transparent; 
+    color: var(--color-text-secondary); /* Cor mais sutil */
+    
+    /* Posição no lado direito, perto do avião */
+    margin-left: 0; /* Remove a margem negativa do V60.6 */
+}
+
 
 /* 8. ESTILOS DAS BOLHAS DE CHAT */
 .mensagem {

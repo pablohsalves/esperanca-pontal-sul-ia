@@ -1,164 +1,188 @@
-// script.js - VERSÃO V60.0-FINAL (Tratamento de Erro de "Digitando..." Corrigido)
+// script.js - VERSÃO V60.7 (Lógica UI/UX: Microfone/Enviar/Stop)
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
+    const chatBox = document.getElementById('chat-box');
     const input = document.getElementById('pergunta-input');
     const enviarBtn = document.getElementById('enviar-btn');
     const microphoneBtn = document.getElementById('microphone-btn');
-    const chatBox = document.getElementById('chat-box');
 
-    // --- Lógica de Habilitar/Desabilitar Botão Enviar ---
-    function updateSendButton() {
-        // ... (código mantido) ...
-        if (input.value.trim().length > 0) {
-            enviarBtn.style.display = 'flex'; 
-            microphoneBtn.style.display = 'none'; 
+    let isThinking = false; // Flag para controlar o estado da IA
+
+    // --- Funções de Ajuda UI ---
+
+    // 1. Gerencia a visibilidade dos botões
+    function updateButtonVisibility() {
+        const hasText = input.value.trim().length > 0;
+        
+        if (isThinking) {
+            // Se a IA está pensando, o Microfone deve sumir e o Enviar deve ser o Stop
+            microphoneBtn.style.display = 'none';
+            enviarBtn.disabled = false; // Permite clicar para PARAR
+            enviarBtn.innerHTML = '<i class="fas fa-stop"></i>'; 
+            enviarBtn.title = 'Parar Resposta';
+        } else if (hasText) {
+            // Se tem texto, o Microfone some e o Enviar é o avião (habilitado)
+            microphoneBtn.style.display = 'none';
             enviarBtn.disabled = false;
+            enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            enviarBtn.title = 'Enviar Mensagem';
         } else {
-            enviarBtn.style.display = 'none'; 
-            microphoneBtn.style.display = 'flex'; 
+            // Se não tem texto e não está pensando, mostra o Microfone e desabilita o Enviar (avião)
+            microphoneBtn.style.display = 'flex'; // Usamos 'flex' pois é o estilo definido no CSS
             enviarBtn.disabled = true;
+            enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            enviarBtn.title = 'Digite uma mensagem';
         }
     }
 
-    input.addEventListener('input', updateSendButton);
-    input.addEventListener('keydown', function(e) {
-        // ... (código mantido) ...
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            if (input.value.trim().length > 0) {
-                enviarBtn.click();
-            }
+    // 2. Cria uma nova bolha de mensagem
+    function createMessage(texto, tipo) {
+        const mensagemDiv = document.createElement('div');
+        mensagemDiv.classList.add('mensagem', tipo);
+        
+        // Permite o uso de Markdown simples (linhas duplas = parágrafo)
+        const htmlContent = texto.replace(/\n\n/g, '<p>').replace(/\n/g, '<br>');
+        mensagemDiv.innerHTML = htmlContent;
+        chatBox.appendChild(mensagemDiv);
+        
+        // Rola automaticamente para baixo após adicionar a mensagem
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return mensagemDiv;
+    }
+
+    // 3. Gerencia o "Digitando..." da IA
+    function showTypingIndicator() {
+        if (!document.getElementById('typing-indicator')) {
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.classList.add('mensagem', 'ia');
+            typingDiv.innerHTML = 'Digitando...';
+            chatBox.appendChild(typingDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
-        input.style.height = 'auto';
-        input.style.height = input.scrollHeight + 'px';
+    }
+
+    // 4. Remove o "Digitando..." da IA
+    function removeTypingIndicator() {
+        const typingDiv = document.getElementById('typing-indicator');
+        if (typingDiv) {
+            typingDiv.remove();
+        }
+    }
+
+    // 5. Ajusta a altura da caixa de texto
+    function autoResize() {
+        input.style.height = 'auto'; // Reseta a altura
+        // Define a altura para o scrollHeight, limitado pelo max-height em CSS
+        input.style.height = input.scrollHeight + 'px'; 
+    }
+
+    // --- Lógica Principal do Chat ---
+
+    async function sendMessage() {
+        const userMessage = input.value.trim();
+        if (userMessage === '') return;
+
+        // 1. Estado de envio
+        isThinking = true;
+        updateButtonVisibility(); 
+        input.disabled = true; // Desabilita o input enquanto a IA pensa
+
+        // 2. Adiciona a mensagem do usuário
+        createMessage(userMessage, 'usuario');
+        
+        // 3. Mostra o indicador de digitação
+        showTypingIndicator();
+
+        // 4. Limpa e reseta o input
+        input.value = '';
+        autoResize(); // Reseta a altura para uma linha
+        updateButtonVisibility(); // Atualiza novamente, pois o input está vazio
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ mensagem: userMessage }),
+            });
+
+            // Se for clicado no Stop (ainda não implementado no backend, mas prepara o front)
+            if (!isThinking) return;
+
+            const data = await response.json();
+            
+            // 5. Remove o indicador de digitação
+            removeTypingIndicator();
+            
+            // 6. Adiciona a resposta da IA
+            createMessage(data.resposta, 'ia');
+            
+        } catch (error) {
+            console.error('Erro ao enviar mensagem:', error);
+            removeTypingIndicator();
+            createMessage('Desculpe, ocorreu um erro de conexão. Por favor, tente novamente.', 'ia');
+        } finally {
+            // 7. Volta ao estado normal
+            isThinking = false;
+            input.disabled = false;
+            updateButtonVisibility();
+            input.focus();
+        }
+    }
+    
+    // NOTA: A funcionalidade real de "Parar Resposta" (Stop) exige lógica de streaming e interrupção no Backend (Python),
+    // o que é complexo de implementar com a API Gemini de forma simples. O código acima apenas muda o ícone.
+    // Para fins deste projeto, o botão de Stop simplesmente reverte o estado do UI.
+
+    function stopResponse() {
+        if (isThinking) {
+            console.log("Comando de Parada de Resposta acionado (apenas UI).");
+            
+            // 1. Força a remoção do indicador e reverte o estado
+            removeTypingIndicator();
+            isThinking = false;
+            input.disabled = false;
+            updateButtonVisibility();
+            
+            // 2. Opcional: Adiciona uma mensagem para feedback visual
+            createMessage("A resposta foi interrompida, mas a IA continua pronta para conversar.", 'ia');
+            input.focus();
+        }
+    }
+
+
+    // --- Event Listeners ---
+    
+    // Enviar mensagem ao clicar no avião/stop
+    enviarBtn.addEventListener('click', () => {
+        if (isThinking) {
+            stopResponse();
+        } else {
+            sendMessage();
+        }
     });
 
-    // --- Criação de Bolhas de Mensagem ---
-    function criarBolha(texto, tipo) {
-        const div = document.createElement('div');
-        div.classList.add('mensagem', tipo);
-        // CRÍTICO: Usar innerText ou textContent se o texto for puro.
-        // Se a IA retornar formatação, usamos innerHTML (como está no seu código)
-        div.innerHTML = texto; 
-        chatBox.appendChild(div);
-        
-        chatBox.scrollTop = chatBox.scrollHeight;
-        return div; // Retorna a div para que possa ser atualizada
-    }
-
-    // --- Lógica Principal de Envio ---
-    function enviarMensagem() {
-        const pergunta = input.value.trim();
-        if (!pergunta) return;
-
-        // 1. Adiciona a mensagem do usuário
-        criarBolha(pergunta, 'usuario');
-        
-        // 2. Limpa o input e atualiza botões
-        input.value = '';
-        input.style.height = 'auto'; 
-        updateSendButton();
-        
-        // 3. Adiciona um placeholder de resposta da IA
-        const iaPlaceholder = criarBolha('<i class="fas fa-spinner fa-spin"></i> Digitanto...', 'ia');
-
-        // 4. Envia para a API Flask
-        fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ pergunta: pergunta })
-        })
-        .then(response => {
-            // CRÍTICO: Verifica o status HTTP da resposta do Flask
-            if (!response.ok) {
-                // Se o Flask retornar um erro HTTP (4xx ou 5xx), tratamos aqui
-                throw new Error(`Erro de rede do servidor: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // 5. Substitui o placeholder pela resposta real
-            // Se o Flask retornar o JSON com a chave 'resposta', exibe
-            if (data && data.resposta) {
-                 iaPlaceholder.innerHTML = data.resposta;
+    // Enviar mensagem ao pressionar ENTER
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); 
+            if (isThinking) {
+                stopResponse();
             } else {
-                // Caso o JSON esteja vazio ou mal-formado (improvável com as últimas correções)
-                iaPlaceholder.innerHTML = 'Desculpe, a IA retornou um formato de resposta inesperado.';
+                sendMessage();
             }
-           
-        })
-        .catch(error => {
-            // 6. TRATAMENTO DE ERRO CRÍTICO (Resolve o problema do "Digitando...")
-            console.error('Erro ao comunicar com a API ou servidor:', error);
-            
-            // Mensagem de erro amigável, indicando sobrecarga ou falha de conexão
-            iaPlaceholder.innerHTML = 'Desculpe, ocorreu um erro temporário (API sobrecarregada ou falha de rede). Por favor, tente novamente em alguns segundos.';
-        });
-    }
+        }
+    });
 
-    enviarBtn.addEventListener('click', enviarMensagem);
-    
-    // --- Lógica do Microfone (Web Speech API) ---
-    // ... (código do microfone mantido) ...
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
-    let isListening = false;
-    
-    if (SpeechRecognition) {
-        // ... (código de inicialização e eventos do microfone mantido) ...
-        recognition = new SpeechRecognition();
-        recognition.lang = 'pt-BR'; 
-        recognition.interimResults = false; 
-        recognition.maxAlternatives = 1;
+    // Atualiza a visibilidade dos botões e a altura da caixa ao digitar
+    input.addEventListener('input', () => {
+        updateButtonVisibility();
+        autoResize();
+    });
 
-        recognition.onstart = function() {
-            isListening = true;
-            microphoneBtn.querySelector('i').classList.remove('fa-microphone');
-            microphoneBtn.querySelector('i').classList.add('fa-microphone-alt', 'fa-beat-fade'); 
-            microphoneBtn.style.color = '#FF4500'; 
-            input.placeholder = "Escutando... Fale agora.";
-        };
-
-        recognition.onresult = function(event) {
-            const transcript = event.results[0][0].transcript;
-            input.value = transcript;
-            updateSendButton();
-            // Envia a mensagem automaticamente após o resultado
-            enviarMensagem(); 
-        };
-
-        recognition.onend = function() {
-            isListening = false;
-            microphoneBtn.querySelector('i').classList.remove('fa-microphone-alt', 'fa-beat-fade');
-            microphoneBtn.querySelector('i').classList.add('fa-microphone');
-            microphoneBtn.style.color = ''; 
-            input.placeholder = "Peça à Hope...";
-        };
-
-        recognition.onerror = function(event) {
-            console.error('Erro no reconhecimento de fala:', event.error);
-            input.placeholder = "Erro no Microfone. Tente digitar.";
-            recognition.stop(); 
-        };
-
-        microphoneBtn.addEventListener('click', function() {
-            if (isListening) {
-                recognition.stop();
-            } else {
-                input.value = ''; 
-                updateSendButton();
-                recognition.start();
-            }
-        });
-        
-    } else {
-        microphoneBtn.style.display = 'none';
-        enviarBtn.style.display = 'flex';
-        enviarBtn.disabled = true; 
-        console.warn('Reconhecimento de fala não suportado neste navegador.');
-    }
-
-    updateSendButton();
+    // Garante que o estado inicial é carregado corretamente
+    updateButtonVisibility();
+    autoResize(); 
 });

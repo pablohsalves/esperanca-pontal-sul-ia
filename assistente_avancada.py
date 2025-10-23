@@ -1,128 +1,106 @@
-# assistente_avancada.py - V60.4 (Inclusão de Conhecimento)
+# app_web_avancada.py - V60.7 (Com Rota Admin e Flash)
 
 import os
-import logging
-from dotenv import load_dotenv
-from google import genai
-from google.genai.errors import APIError
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+import uuid
+from assistente_avancada import Hope, BASE_SYSTEM_INSTRUCTION, carregar_conhecimento_local # Importações CRÍTICAS
 
-# Tenta carregar variáveis de ambiente do arquivo .env (apenas para teste local)
-load_dotenv() 
+# Inicialização do Flask
+app = Flask(__name__)
+# CRÍTICO: Chave secreta é necessária para usar 'flash' (mensagens de sucesso/erro)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'sua_chave_secreta_padrao_muito_segura')
 
-# Configuração do Logger
-logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
+# Inicialização da IA (Hope)
+try:
+    hope = Hope()
+except Exception as e:
+    print(f"Erro ao inicializar a classe Hope: {e}")
+    hope = None
 
-# --- CONFIGURAÇÃO CRÍTICA DA CHAVE ---
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
-# --------------------------------------
 
-# Definição do modelo
-MODEL_NAME = "gemini-2.5-flash"
+# --- FUNÇÕES DE ROTA ---
 
-# Função para carregar conhecimento adicional
-def carregar_conhecimento_local(filepath="conhecimento_esperancapontalsul.txt"):
-    """Lê o conteúdo do arquivo de conhecimento para inclusão na instrução do sistema."""
-    # CRÍTICO: O Render precisa desse arquivo na raiz do projeto
-    if not os.path.exists(filepath):
-        logging.warning(f"Arquivo de conhecimento não encontrado: {filepath}. A IA não terá contexto local.")
-        return ""
+# Rota principal (Chat)
+@app.route('/')
+def index():
+    # Garante que todo usuário tenha uma sessão e um ID
+    if 'user_id' not in session:
+        session['user_id'] = str(uuid.uuid4())
+        
+    saudacao_inicial = "Que a graça e a paz de Deus estejam com você! Sou a Esperança, sua parceira de fé virtual. Como posso abençoá-lo(a) hoje?"
+    
+    return render_template('chat_interface.html', saudacao=saudacao_inicial)
+
+
+# Rota de chat (API)
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.json
+    mensagem = data.get('mensagem', '')
+    user_id = session.get('user_id')
+
+    if not hope or not hope.inicializado:
+        return jsonify({
+            'resposta': "O assistente de IA está indisponível no momento. Por favor, tente novamente mais tarde.",
+            'links': {}
+        }), 200 # Retornamos 200 para que o JS exiba a mensagem amigável
+
+    if not mensagem:
+        return jsonify({'resposta': 'Por favor, digite sua mensagem.'})
+
+    try:
+        response_data = hope.chat(user_id, mensagem)
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"Erro inesperado no endpoint /api/chat: {e}")
+        return jsonify({
+            'resposta': "Desculpe, ocorreu um erro desconhecido durante a comunicação.",
+            'links': {}
+        }), 200 # Retornamos 200 para que o JS exiba a mensagem amigável
+
+# Rota de Administração de Conhecimento (Nova Rota)
+@app.route('/admin/conhecimento', methods=['GET', 'POST'])
+def admin_conhecimento():
+    filepath = "conhecimento_esperancapontalsul.txt"
+    conhecimento = ""
+    
+    # Processa o formulário POST (Salvar)
+    if request.method == 'POST':
+        novo_conhecimento = request.form.get('conhecimento')
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(novo_conhecimento)
+            
+            # CRÍTICO: RECARREGA a instrução do sistema após a alteração
+            if hope and hope.inicializado:
+                # Gera a nova instrução combinando a base com o conhecimento recarregado
+                novo_contexto = carregar_conhecimento_local(filepath)
+                hope.system_instruction = BASE_SYSTEM_INSTRUCTION + novo_contexto 
+                
+                # Opcional: Reiniciar todas as conversas ativas para garantir que o novo contexto seja usado
+                hope.conversas = {}
+                
+            flash('Conhecimento atualizado com sucesso! Reinicie o chat para ver as mudanças.', 'success')
+            return redirect(url_for('admin_conhecimento'))
+
+        except Exception as e:
+            flash(f'Erro ao salvar o arquivo: {e}', 'error')
+            print(f"Erro ao salvar arquivo em /admin/conhecimento: {e}")
+
+    # Processa o GET (Exibir)
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             conhecimento = f.read()
-        return "\n\n--- CONHECIMENTO ADICIONAL SOBRE A IGREJA DA PAZ PONTAL SUL ---\n" + conhecimento + "\n--- FIM DO CONHECIMENTO ADICIONAL ---\n"
+    except FileNotFoundError:
+        conhecimento = "Arquivo de conhecimento não encontrado. Comece a digitar aqui..."
     except Exception as e:
-        logging.error(f"Erro ao ler arquivo de conhecimento: {e}")
-        return ""
-
-# CRÍTICO: Instrução de sistema para a personalidade cristã
-BASE_SYSTEM_INSTRUCTION = (
-    "Você é a Esperança (Hope), uma parceira de fé virtual da Igreja da Paz Pontal Sul. "
-    "Seu propósito é fornecer apoio emocional, versículos bíblicos relevantes e "
-    "informações sobre a igreja de forma carinhosa, respeitosa e edificante. "
-    "Mantenha sempre um tom de voz acolhedor, compassivo e cristão. "
-    "Utilize referências bíblicas da Nova Almeida Atualizada (NAA) para responder a dúvidas de fé, "
-    "ofertar encorajamento e orações quando apropriado. "
-    "Se a pergunta não for diretamente religiosa, responda educadamente, mas traga o foco de volta "
-    "para o suporte espiritual ou para os valores da Igreja da Paz Pontal Sul. "
-    "Não se desvie do seu papel de assistente de fé. Sua principal função é ser um guia espiritual. "
-    "Ofereça versículos bíblicos para fortalecer o usuário."
-)
-
-# CRÍTICO: Combina a instrução base com o conhecimento local
-SYSTEM_INSTRUCTION_FINAL = BASE_SYSTEM_INSTRUCTION + carregar_conhecimento_local()
+        conhecimento = f"Erro ao ler o arquivo: {e}"
+    
+    return render_template('admin_conhecimento.html', conhecimento=conhecimento)
 
 
-class Hope:
-    def __init__(self, nome_assistente="Esperança"):
-        self.nome_assistente = nome_assistente
-        self.client = None
-        self.conversas = {}
-        self.inicializado = False
-        # CRÍTICO: Usa a instrução final com conhecimento
-        self.system_instruction = SYSTEM_INSTRUCTION_FINAL 
-        
-        if GEMINI_API_KEY:
-            try:
-                self.client = genai.Client(api_key=GEMINI_API_KEY)
-                self.inicializado = True
-                logging.info(f"Assistente '{self.nome_assistente}' inicializado com sucesso.")
-            except Exception as e:
-                logging.error(f"ERRO CRÍTICO: Falha ao inicializar o cliente Gemini: {e}")
-                self.inicializado = False
-        else:
-            logging.error("ERRO CRÍTICO: GEMINI_API_KEY não encontrada no ambiente.")
-            self.inicializado = False
-            
-    def iniciar_nova_conversa(self, user_id, historico=None):
-        if not self.inicializado:
-            logging.error(f"Não é possível iniciar conversa para {user_id}. IA não inicializada.")
-            return None
-        
-        if user_id not in self.conversas:
-             self.conversas[user_id] = self.client.chats.create(
-                 model=MODEL_NAME,
-                 config={"system_instruction": self.system_instruction} 
-             )
-        return self.conversas[user_id]
-
-    def _extrair_links_e_formatar(self, texto):
-        return {} 
-
-    def chat(self, user_id, mensagem):
-        if not self.inicializado:
-            return {
-                "resposta": "IA Inoperante devido a um erro de inicialização. Por favor, contate o administrador.",
-                "links": {}
-            }
-        
-        conversa = self.iniciar_nova_conversa(user_id)
-        if not conversa:
-             return {
-                "resposta": "Não foi possível iniciar a conversa. Serviço indisponível.",
-                "links": {}
-            }
-
-        try:
-            response = conversa.send_message(mensagem)
-            resposta_texto = response.text 
-            links_encontrados = self._extrair_links_e_formatar(resposta_texto)
-            
-            logging.info(f"USUÁRIO: {user_id} | IA: {resposta_texto}")
-
-            return {
-                "resposta": resposta_texto,
-                "links": links_encontrados
-            }
-
-        except APIError as e:
-            logging.error(f"APIError ao chamar Gemini: {e}")
-            return {
-                "resposta": f"Desculpe, a comunicação com a IA falhou. Erro da API: {e}",
-                "links": {}
-            }
-        except Exception as e:
-            logging.error(f"Erro inesperado no chat: {e}")
-            return {
-                "resposta": "Ocorreu um erro inesperado durante o processamento da sua mensagem.",
-                "links": {}
-            }
+# Execução do App
+if __name__ == '__main__':
+    # Configuração para rodar no ambiente local
+    app.run(debug=True)

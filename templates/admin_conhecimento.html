@@ -1,98 +1,99 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Conhecimento da IA</title>
+    <title>Administrar Conhecimento - HOPE</title>
     <style>
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #000000;
-            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            background-color: #1B1C1D; /* Cor do fundo do chat */
+            color: #e0e0e0; /* Cor do texto do chat */
             margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .container {
-            background-color: #1a1a1a;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #252526; /* Fundo do container Admin */
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 900px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
-        h2 {
-            color: #a8c7fa;
-            margin-bottom: 20px;
-            font-weight: 500;
-            border-bottom: 1px solid #333;
+        h1 {
+            color: #61afef; /* Azul claro para destaque */
+            border-bottom: 2px solid #333537;
             padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #aaaaaa;
         }
         textarea {
             width: 100%;
-            height: 500px;
+            height: 400px;
             padding: 15px;
-            border: 1px solid #333;
+            margin-bottom: 20px;
+            border: 1px solid #333537;
             border-radius: 4px;
-            background-color: #2a2a2a;
-            color: #e0e0e0;
             box-sizing: border-box;
             font-size: 16px;
             resize: vertical;
-            margin-bottom: 20px;
+            background-color: #1B1C1D;
+            color: #e0e0e0;
         }
-        input[type="submit"] {
-            padding: 12px 25px;
-            background-color: #4ac994; /* Verde de sucesso */
-            color: #000000;
+        button {
+            background-color: #61afef;
+            color: white;
+            padding: 10px 20px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.2s;
-            margin-right: 15px;
         }
-        input[type="submit"]:hover {
-            background-color: #38b07d;
+        button:hover {
+            background-color: #4a90e2;
         }
-        .message {
-            margin-bottom: 20px;
+        .flash-message {
             padding: 10px;
+            margin-bottom: 15px;
             border-radius: 4px;
-            font-weight: 500;
-            background-color: #3e3e3e;
-            color: #ffffff;
+            background-color: #38761d;
+            color: #e6ffe6;
+            border: 1px solid #38761d;
         }
-        .back-link {
-            color: #a8c7fa;
+        .flash-error {
+            background-color: #cc0000;
+            color: #ffe6e6;
+            border: 1px solid #990000;
+        }
+        a {
+            color: #61afef;
             text-decoration: none;
-            font-size: 16px;
-            margin-left: 20px;
         }
-        .back-link:hover {
+        a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Administração do Conhecimento da IA (Acesso Aberto)</h2>
-        {% if mensagem %}
-            <p class="message">{{ mensagem }}</p>
-        {% endif %}
-        
-        <p>Edite o conteúdo abaixo para atualizar a base de conhecimento da Esperança. Use o formato Markdown.</p>
+        <h1>Administrar Conhecimento da HOPE</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <form method="POST">
-            <textarea name="novo_conhecimento" required>{{ conteudo_atual }}</textarea>
-            <div>
-                <input type="submit" value="Salvar e Atualizar Conhecimento">
-                <a href="{{ url_for('index') }}" class="back-link">← Voltar para o Chat</a>
-            </div>
+            <p>Edite o conteúdo que a IA usará como conhecimento local (informações sobre pastores, horários, etc.).</p>
+            <textarea name="conhecimento" id="conhecimento">{{ conhecimento }}</textarea>
+            <button type="submit">Salvar Conhecimento</button>
         </form>
+        <p><a href="/">Voltar para o Chat</a></p>
     </div>
 </body>
 </html>
