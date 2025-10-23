@@ -1,61 +1,109 @@
-from flask import Flask, render_template, request, jsonify, session
-from assistente_avancada import Hope 
-import os 
-import logging # Adicionar logging para depuração
+# app_web_avancada.py - V60.9 (Correção de Case Sensitivity e Imports)
 
-# Configuração do Flask
+import os
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
+import uuid # CRÍTICO: Necessário para gerar IDs de usuário
+
+# CRÍTICO V60.9: Importa Hope (classe correta), BASE_SYSTEM_INSTRUCTION e carregar_conhecimento_local
+from assistente_avancada import Hope, BASE_SYSTEM_INSTRUCTION, carregar_conhecimento_local 
+
+# Inicialização do Flask
 app = Flask(__name__)
-app.secret_key = 'chave_secreta_muito_forte_e_aleatoria' 
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-logging.basicConfig(level=logging.INFO, format='%(asctime)s | %(levelname)s | %(message)s')
+# CRÍTICO: Chave secreta é necessária para usar 'flash' (mensagens de sucesso/erro)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'sua_chave_secreta_padrao_muito_segura')
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' # Adicionei isto para compatibilidade de cookies/sessão
 
-# Inicializa o Assistente (Hope)
-assistente = Hope() 
+# Inicialização da IA (Hope)
+try:
+    hope = Hope()
+except Exception as e:
+    print(f"Erro ao inicializar a classe Hope: {e}")
+    hope = None
 
-# --- Rota Principal (index) -- MANTIDA --
+
+# --- FUNÇÕES DE ROTA ---
+
+# Rota principal (Chat)
 @app.route('/')
 def index():
+    # Garante que todo usuário tenha uma sessão e um ID
     if 'user_id' not in session:
-        session['user_id'] = os.urandom(16).hex() 
-
-    if assistente.inicializado:
-        saudacao = "Olá! Eu sou a Hope, sua parceira de fé da Igreja da Paz Pontal Sul. Como posso te ajudar hoje?"
-    else:
-        saudacao = "Bem-vindo à Hope. Estamos online, mas nosso serviço de inteligência artificial está temporariamente inoperante. Por favor, tente novamente mais tarde."
+        session['user_id'] = str(uuid.uuid4())
+        
+    saudacao_inicial = "Que a graça e a paz de Deus estejam com você! Sou a Esperança, sua parceira de fé virtual. Como posso abençoá-lo(a) hoje?"
     
-    return render_template('chat_interface.html', saudacao=saudacao, nome_app="HOPE")
+    return render_template('chat_interface.html', saudacao=saudacao_inicial)
 
-# --- Rota API para o Chat (Chamada pelo script.js) ---
+
+# Rota de chat (API)
 @app.route('/api/chat', methods=['POST'])
-def chat_api():
-    data = request.get_json()
-    pergunta = data.get('pergunta')
-    
-    if not pergunta:
-        return jsonify({"resposta": "Por favor, digite uma mensagem."}), 400
-
+def chat():
+    data = request.json
+    mensagem = data.get('mensagem', '')
     user_id = session.get('user_id')
-    # CRÍTICO: Se por algum motivo o user_id falhar (expiração de sessão), cria um novo.
-    if not user_id:
-        user_id = os.urandom(16).hex()
-        session['user_id'] = user_id
-        logging.warning("Sessão expirada ou não encontrada. Novo user_id criado.")
-        
+
+    if not hope or not hope.inicializado:
+        return jsonify({
+            'resposta': "O assistente de IA está indisponível no momento. Por favor, contate o administrador.",
+            'links': {}
+        }), 200 
+
+    if not mensagem:
+        return jsonify({'resposta': 'Por favor, digite sua mensagem.'})
+
     try:
-        # A resposta_final é um dicionário {"resposta": "texto", "links": {}}
-        resposta_final = assistente.chat(user_id, pergunta)
+        response_data = hope.chat(user_id, mensagem)
+        return jsonify(response_data)
         
-        # CRÍTICO: Garante que o objeto retornado seja JSON-serializável
-        if isinstance(resposta_final, dict) and 'resposta' in resposta_final:
-             return jsonify(resposta_final)
-        else:
-             logging.error(f"Retorno do assistente inválido: {resposta_final}")
-             return jsonify({"resposta": "Erro interno: A IA retornou um formato inesperado."}), 500
-
     except Exception as e:
-        logging.error(f"Erro CRÍTICO no processamento do chat_api: {e}")
-        return jsonify({"resposta": f"Desculpe, ocorreu um erro no servidor ao processar a resposta. ({e})"}), 500
+        print(f"Erro inesperado no endpoint /api/chat: {e}")
+        return jsonify({
+            'resposta': "Desculpe, ocorreu um erro desconhecido durante a comunicação.",
+            'links': {}
+        }), 200 
 
-# --- Bloco de Execução ---
+# Rota de Administração de Conhecimento (Funcional)
+@app.route('/admin/conhecimento', methods=['GET', 'POST'])
+def admin_conhecimento():
+    filepath = "conhecimento_esperancapontalsul.txt"
+    conhecimento = ""
+    
+    # Processa o formulário POST (Salvar)
+    if request.method == 'POST':
+        novo_conhecimento = request.form.get('conhecimento')
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(novo_conhecimento)
+            
+            # CRÍTICO: RECARREGA a instrução do sistema após a alteração
+            if hope and hope.inicializado:
+                # Gera a nova instrução combinando a base com o conhecimento recarregado
+                novo_contexto = carregar_conhecimento_local(filepath)
+                hope.system_instruction = BASE_SYSTEM_INSTRUCTION + novo_contexto 
+                
+                # Opcional: Reiniciar todas as conversas ativas para garantir que o novo contexto seja usado
+                hope.conversas = {}
+                
+            flash('Conhecimento atualizado com sucesso! Reinicie o chat para ver as mudanças.', 'success')
+            return redirect(url_for('admin_conhecimento'))
+
+        except Exception as e:
+            flash(f'Erro ao salvar o arquivo: {e}', 'error')
+            print(f"Erro ao salvar arquivo em /admin/conhecimento: {e}")
+
+    # Processa o GET (Exibir)
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            conhecimento = f.read()
+    except FileNotFoundError:
+        conhecimento = "Arquivo de conhecimento não encontrado. Comece a digitar aqui..."
+    except Exception as e:
+        conhecimento = f"Erro ao ler o arquivo: {e}"
+    
+    return render_template('admin_conhecimento.html', conhecimento=conhecimento)
+
+
+# Execução do App
 if __name__ == '__main__':
+    # Configuração para rodar no ambiente local
     app.run(debug=True)
