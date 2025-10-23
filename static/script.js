@@ -1,4 +1,4 @@
-// static/script.js - VERSÃO V60.54 (Funcionalidade Restaurada: Saudação, Envio e Microfone)
+// static/script.js - VERSÃO V60.55 (Envio de Áudio Restaurado)
 
 // --- Funções de Ajuda ---
 
@@ -77,11 +77,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatBox = document.getElementById('chat-box');
     const form = document.getElementById('chat-form');
     const input = document.getElementById('pergunta-input');
-    // CRÍTICO: Referência correta ao botão do microfone
     const microphoneBtn = document.getElementById('microphone-btn'); 
     
-    // 1. Renderizar Saudação Inicial (Funciona se as funções auxiliares estiverem ok)
-    // A variável INITIAL_SAUDACAO_TEXT deve ser definida no HTML (V60.50)
+    // 1. Renderizar Saudação Inicial
     if (typeof INITIAL_SAUDACAO_TEXT !== 'undefined' && INITIAL_SAUDACAO_TEXT.trim() !== '') {
         appendMessage(INITIAL_SAUDACAO_TEXT, 'ia');
     }
@@ -102,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isListening) {
                 recognition.stop();
             } else {
-                // Remove o valor atual do input para receber a fala
                 input.value = ''; 
                 recognition.start();
                 // Altera o visual
@@ -119,9 +116,9 @@ document.addEventListener('DOMContentLoaded', function() {
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
             input.value = transcript;
-            // IMPORTANTE: Não enviar automaticamente. O usuário deve clicar Enviar para ter controle.
-            // Para manter a funcionalidade original de envio automático:
-            // form.dispatchEvent(new Event('submit')); 
+            
+            // AJUSTE V60.55: Dispara o envio do formulário
+            form.dispatchEvent(new Event('submit')); 
         };
 
         recognition.onend = () => {
@@ -146,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
         microphoneBtn.style.display = 'none';
     }
     
-    // 3. Lógica de envio do formulário (Funciona se o fetch for bem-sucedido)
+    // 3. Lógica de envio do formulário
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         const userMessage = input.value.trim();
@@ -170,7 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ mensagem: userMessage })
             });
 
-            // Se a resposta da rede não for bem-sucedida, lançar um erro
             if (!response.ok) {
                 throw new Error(`Erro de rede: ${response.status}`);
             }
