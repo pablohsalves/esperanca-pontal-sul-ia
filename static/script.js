@@ -1,281 +1,142 @@
-// script.js - VERSÃO V60.20 (Processamento de Resposta com Botão de Contato e Voz Direta)
+// static/script.js - VERSÃO V60.47 (Suporte a *Negrito* e **Negrito**)
 
-document.addEventListener('DOMContentLoaded', () => {
-    const chatBox = document.getElementById('chat-box');
-    const input = document.getElementById('pergunta-input');
-    const enviarBtn = document.getElementById('enviar-btn');
-    const microphoneBtn = document.getElementById('microphone-btn');
+// --- Funções de Ajuda ---
 
-    let isThinking = false; 
-    let recognition = null; 
-    let isListening = false; 
+// Função de conversão que suporta **negrito** (Markdown) e *negrito* (WhatsApp/Telegram)
+function simpleMarkdownToHtml(text) {
+    // 1. Converte **negrito** para <strong>negrito</strong> (Markdown Padrão)
+    let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // 2. Converte *negrito* para <strong>negrito</strong> (Sintaxe WhatsApp/Telegram)
+    // Isso garante que tanto um quanto dois asteriscos funcionem.
+    html = html.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+    
+    // 3. Converte \n em <br> para quebras de linha
+    html = html.replace(/\n/g, '<br>');
+    
+    return html;
+}
 
-    // --- Inicialização da API de Reconhecimento de Fala ---
-    if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
-        recognition.continuous = false; 
-        recognition.interimResults = false; 
-        recognition.lang = 'pt-BR'; 
+function createMessageElement(text, sender, type = 'text', data = null) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('mensagem', sender);
+    
+    if (type === 'button' && data) {
+        // Renderiza mensagem de pré-texto (opcional) e botão de ação
+        const preText = document.createElement('p');
+        preText.innerHTML = simpleMarkdownToHtml(data.pre_text);
+        messageElement.appendChild(preText);
 
-        recognition.onstart = function() {
-            isListening = true;
-            microphoneBtn.classList.add('mic-active'); 
-            microphoneBtn.innerHTML = '<i class="fas fa-microphone-alt-slash"></i>'; 
-            input.placeholder = "Escutando... Fale agora...";
-            input.focus();
-        };
+        const actionContainer = document.createElement('div');
+        actionContainer.classList.add('ia-action-button');
 
-        recognition.onresult = function(event) {
-            const transcript = event.results[0][0].transcript;
-            
-            // Transcrição de Voz: Envia a mensagem DIRETAMENTE
-            if (transcript.trim() !== '') {
-                sendMessage(transcript.trim()); 
-            }
-        };
-
-        recognition.onerror = function(event) {
-            console.error('Erro de reconhecimento de fala: ', event.error);
-            alert(`Erro ao tentar usar o microfone: ${event.error}. Certifique-se de que o navegador tem permissão.`);
-            stopListening();
-        };
-
-        recognition.onend = function() {
-            stopListening();
-        };
+        const buttonLink = document.createElement('a');
+        buttonLink.href = data.button_url;
+        buttonLink.target = '_blank';
+        buttonLink.classList.add('button-link');
+        
+        const icon = document.createElement('i');
+        icon.className = data.button_icon;
+        
+        buttonLink.appendChild(icon);
+        buttonLink.appendChild(document.createTextNode(data.button_text));
+        
+        actionContainer.appendChild(buttonLink);
+        messageElement.appendChild(actionContainer);
+        
     } else {
-        microphoneBtn.style.display = 'none';
-        console.warn("A API de Reconhecimento de Fala do navegador não é suportada.");
+        // Renderiza mensagem de texto padrão, convertendo Markdown
+        messageElement.innerHTML = simpleMarkdownToHtml(text);
     }
+
+    return messageElement;
+}
+
+function appendMessage(text, sender, type = 'text', data = null) {
+    const chatBox = document.getElementById('chat-box');
+    const messageElement = createMessageElement(text, sender, type, data);
     
-    // Função para parar a escuta
-    function stopListening() {
-        if (recognition && isListening) {
-            recognition.stop();
-        }
-        isListening = false;
-        microphoneBtn.classList.remove('mic-active');
-        microphoneBtn.innerHTML = '<i class="fas fa-microphone"></i>'; 
-        input.placeholder = "Peça à Esperança...";
-        updateButtonVisibility();
+    // Remove o indicador de digitação se existir antes de adicionar a resposta
+    const typingIndicator = document.getElementById('typing-indicator');
+    if (typingIndicator) {
+        chatBox.removeChild(typingIndicator);
     }
 
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
 
-    // --- Funções de Ajuda UI ---
+function showTypingIndicator() {
+    const chatBox = document.getElementById('chat-box');
+    let typingIndicator = document.getElementById('typing-indicator');
 
-    // 1. Gerencia a visibilidade dos botões
-    function updateButtonVisibility() {
-        const hasText = input.value.trim().length > 0;
-        
-        if (isThinking) {
-            microphoneBtn.style.display = 'none';
-            enviarBtn.style.display = 'flex'; 
-            enviarBtn.disabled = false; 
-            enviarBtn.innerHTML = '<i class="fas fa-stop"></i>'; 
-            enviarBtn.title = 'Parar Resposta';
-        } else if (hasText) {
-            microphoneBtn.style.display = 'none';
-            enviarBtn.style.display = 'flex'; 
-            enviarBtn.disabled = false;
-            enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
-            enviarBtn.title = 'Enviar Mensagem';
-        } else {
-            if (recognition) {
-                 microphoneBtn.style.display = 'flex'; 
-            } else {
-                 microphoneBtn.style.display = 'none';
-            }
-            enviarBtn.style.display = 'flex'; 
-            enviarBtn.disabled = true;
-            enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
-            enviarBtn.title = 'Digite uma mensagem';
-        }
+    if (!typingIndicator) {
+        typingIndicator = document.createElement('div');
+        typingIndicator.id = 'typing-indicator';
+        typingIndicator.classList.add('mensagem', 'ia');
+        typingIndicator.innerHTML = '<i class="fas fa-ellipsis-h"></i>';
+        chatBox.appendChild(typingIndicator);
     }
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
 
-    // 2. Cria uma bolha de mensagem (agora pode criar botões)
-    function createMessage(content, tipo) {
-        const mensagemDiv = document.createElement('div');
-        mensagemDiv.classList.add('mensagem', tipo);
-        
-        // Verifica se o conteúdo é um objeto (resposta estruturada do backend: o BOTÃO)
-        if (typeof content === 'object' && content.type === 'button') {
-            const wrapperDiv = document.createElement('div');
-            wrapperDiv.classList.add('ia-action-button');
 
-            // 1. Texto de introdução (usando innerHTML para permitir o Markdown que vem do Flask)
-            const preText = document.createElement('p');
-            preText.innerHTML = content.pre_text;
-            wrapperDiv.appendChild(preText);
+// --- Lógica Principal ---
 
-            // 2. Botão Clicável (Link)
-            const buttonLink = document.createElement('a');
-            buttonLink.classList.add('button-link');
-            buttonLink.href = content.button_url;
-            buttonLink.target = '_blank'; // Abrir em nova aba
-
-            // Ícone + Texto do Botão
-            buttonLink.innerHTML = `<i class="${content.button_icon}"></i> ${content.button_text}`;
-            wrapperDiv.appendChild(buttonLink);
-            
-            mensagemDiv.appendChild(wrapperDiv);
-
-        } else {
-            // Se for string ou objeto tipo 'text' (resposta normal da IA)
-            const textContent = (typeof content === 'string') ? content : content.resposta;
-            // Processa o Markdown e quebras de linha
-            const htmlContent = textContent.replace(/\n\n/g, '<p>').replace(/\n/g, '<br>');
-            mensagemDiv.innerHTML = htmlContent;
-        }
-        
-        chatBox.appendChild(mensagemDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        return mensagemDiv;
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    const chatBox = document.getElementById('chat-box');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('pergunta-input');
     
-    // 3. Gerencia o "Digitando..." da IA
-    function showTypingIndicator() {
-        if (!document.getElementById('typing-indicator')) {
-            const typingDiv = document.createElement('div');
-            typingDiv.id = 'typing-indicator';
-            typingDiv.classList.add('mensagem', 'ia');
-            typingDiv.innerHTML = 'Digitando...';
-            chatBox.appendChild(typingDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    }
-
-    // 4. Remove o "Digitando..." da IA
-    function removeTypingIndicator() {
-        const typingDiv = document.getElementById('typing-indicator');
-        if (typingDiv) {
-            typingDiv.remove();
-        }
-    }
-
-    // 5. Ajusta a altura da caixa de texto
-    function autoResize() { 
-         input.style.height = 'auto';
-         input.style.height = input.scrollHeight + 'px'; 
-    }
+    // 1. Renderizar Saudação Inicial
+    const initialMessageText = "{{ saudacao }}"; 
+    // Usamos appendMessage para garantir que a saudação use a mesma formatação
+    appendMessage(initialMessageText, 'ia');
 
 
-    // --- Lógica Principal do Chat ---
-
-    async function sendMessage(messageToSend = null) {
-        const userMessage = messageToSend || input.value.trim();
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const userMessage = input.value.trim();
         
-        if (userMessage === '') return;
+        if (userMessage === "") return;
 
-        isThinking = true;
-        updateButtonVisibility(); 
-        input.disabled = true; 
-
-        createMessage(userMessage, 'usuario');
+        // 1. Exibir mensagem do usuário
+        appendMessage(userMessage, 'usuario');
+        input.value = ''; // Limpa o input
         
+        // 2. Exibir indicador de digitação
         showTypingIndicator();
 
-        if (!messageToSend) {
-            input.value = '';
-        }
-        autoResize(); 
-
+        // 3. Enviar mensagem para a API
         try {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ mensagem: userMessage }),
+                body: JSON.stringify({ mensagem: userMessage })
             });
-
-            if (!isThinking) return;
 
             const data = await response.json();
             
-            removeTypingIndicator();
-            
-            // Envia o objeto JSON completo (data) para o createMessage
-            createMessage(data, 'ia');
+            // 4. Exibir resposta da IA
+            if (data.type === 'button') {
+                appendMessage(null, 'ia', 'button', data);
+            } else {
+                appendMessage(data.resposta, 'ia');
+            }
             
         } catch (error) {
-            console.error('Erro ao enviar mensagem:', error);
-            removeTypingIndicator();
-            createMessage({"resposta": "Desculpe, ocorreu um erro de conexão. Por favor, tente novamente."}, 'ia');
-        } finally {
-            isThinking = false;
-            input.disabled = false;
-            updateButtonVisibility();
-            input.focus();
+            console.error('Erro ao comunicar com a API:', error);
+            appendMessage("Desculpe, houve um erro ao processar sua solicitação. Tente novamente.", 'ia');
         }
-    }
+    });
     
-    // Lógica de Stop (apenas para UI, o backend continua a processar)
-    function stopResponse() {
-        if (isThinking) {
-            console.log("Comando de Parada de Resposta acionado (apenas UI).");
-            
-            removeTypingIndicator();
-            isThinking = false;
-            input.disabled = false;
-            updateButtonVisibility();
-            
-            createMessage("A resposta foi interrompida, mas a IA continua pronta para conversar.", 'ia');
-            input.focus();
-        }
-    }
-
-
-    // --- Event Listeners ---
-    
-    // Enviar mensagem ao clicar no avião/stop 
-    enviarBtn.addEventListener('click', () => {
-        if (isThinking) {
-            stopResponse();
-        } else {
-            sendMessage();
+    // Ajuste: Permite o envio da mensagem ao pressionar ENTER no campo de texto
+    input.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault(); // Impede a quebra de linha
+            form.dispatchEvent(new Event('submit')); // Dispara o evento de submit
         }
     });
-
-    // Inicia/Para o Reconhecimento de Fala 
-    microphoneBtn.addEventListener('click', () => {
-        if (!recognition) {
-             alert("A função de voz não é suportada ou não foi ativada neste navegador.");
-             return;
-        }
-
-        if (isListening) {
-            stopListening();
-        } else {
-            try {
-                recognition.start();
-            } catch (e) {
-                if (e.name !== 'InvalidStateError') {
-                    console.error("Erro ao iniciar reconhecimento de fala: ", e);
-                }
-            }
-        }
-        input.focus();
-    });
-
-    // Enviar mensagem ao pressionar ENTER
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault(); 
-            if (isThinking) {
-                stopResponse();
-            } else {
-                sendMessage();
-            }
-        }
-    });
-
-    // Atualiza a visibilidade dos botões e a altura da caixa ao digitar
-    input.addEventListener('input', () => {
-        updateButtonVisibility();
-        autoResize();
-    });
-
-    // Garante que o estado inicial é carregado corretamente
-    updateButtonVisibility();
-    autoResize(); 
 });

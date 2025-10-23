@@ -1,4 +1,4 @@
-# app_web_avancada.py - VERSÃO V60.40 (Admin /conhecimento RESTAURADO)
+# app_web_avancada.py - VERSÃO V60.47 (Suporte a *Negrito* e Admin Restaurado)
 
 import os
 import json
@@ -104,7 +104,6 @@ def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_IN
     """
     Função principal para obter a resposta da IA.
     """
-    # ... (código da função) ...
     try:
         history.append(types.Content(role="user", parts=[types.Part(text=user_message)]))
 
@@ -152,8 +151,9 @@ def classify_intent(user_message):
 def home():
     if 'chat_history' not in session or not isinstance(session['chat_history'], list):
         session['chat_history'] = []
-        
-    saudacao = "Olá! Eu sou **HOPE**, sua parceira de fé. Como posso te ajudar hoje?"
+    
+    # V60.47: Mudei para *HOPE* pois o JS agora suporta (mas **HOPE** também funcionaria)
+    saudacao = "Olá! Eu sou *HOPE*, sua parceira de fé. Como posso te ajudar hoje?"
 
     return render_template("chat_interface.html", saudacao=saudacao)
 
@@ -190,7 +190,7 @@ def admin_login():
     return render_template("admin_login.html")
 
 
-# V60.40: Rota de Admin RESTAURADA (agora protegida)
+# Rota de Admin RESTAURADA (agora protegida)
 @app.route("/admin/conhecimento", methods=["GET", "POST"])
 def admin_conhecimento():
     if not session.get('logged_in'):
@@ -220,7 +220,6 @@ def admin_logout():
 
 @app.route("/api/chat", methods=["POST"])
 def chat_api():
-    # ... (código da rota API de chat permanece o mesmo) ...
     data = request.json
     user_message = data.get("mensagem")
     
