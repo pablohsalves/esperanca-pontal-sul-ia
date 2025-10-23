@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.5 (Ajustes FINAIS: Ocultar Scrollbar, Aumentar Input e Fonte)
+ * style.css - VERSÃO V60.6 (Ajustes FINAIS: Fonte e Altura do Input + Ocultar Scrollbar)
  */
 
 /* 1. RESET E VARIAVEIS */
@@ -61,7 +61,7 @@ html, body {
     display: flex; 
     flex-direction: column;
     
-    /* CRÍTICO V60.5: OCULTAR A BARRA DE ROLAGEM */
+    /* CRÍTICO V60.6: OCULTAR A BARRA DE ROLAGEM */
     /* Para WebKit (Chrome, Safari, Edge) */
     &::-webkit-scrollbar {
         width: 0;
@@ -83,8 +83,8 @@ html, body {
     max-width: 700px; 
     
     background-color: var(--color-bg-container); 
-    /* CRÍTICO V60.5: Aumenta o padding vertical para aumentar a altura da caixa */
-    padding: 15px 20px; 
+    /* CRÍTICO V60.6: Aumentar o padding vertical da *caixa externa* */
+    padding: 18px 20px; 
     
     display: flex; 
     align-items: center; 
@@ -94,8 +94,8 @@ html, body {
 /* 6. CAMPO DE TEXTO (Contorno e Fonte) */
 #pergunta-input {
     flex-grow: 1; 
-    /* CRÍTICO V60.5: Aumenta o padding interno para aumentar a altura e centralizar o texto */
-    padding: 20px 20px; 
+    /* CRÍTICO V60.6: Aumentar o padding interno do *campo de texto* */
+    padding: 22px 20px; 
     border-radius: 28px;
     
     border: none;
@@ -103,8 +103,8 @@ html, body {
     background-color: var(--color-bg-input);
     
     color: var(--color-text-light);
-    /* CRÍTICO V60.5: Aumento da fonte do texto e placeholder */
-    font-size: 1.1em; 
+    /* CRÍTICO V60.6: Aumento adicional da fonte para 1.2em */
+    font-size: 1.2em; 
     
     resize: none; 
     max-height: 120px; 
