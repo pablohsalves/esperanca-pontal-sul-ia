@@ -17,7 +17,7 @@
 
         <main id="chat-box" class="chat-box">
             <div class="mensagem ia initial-message">
-                {{ saudacao | safe }}
+                {{ saudacao | safe }} 
             </div>
             
             <div class="suggestion-chips">
@@ -48,9 +48,9 @@
     <script src="https://kit.fontawesome.com/c4051b8c25.js" crossorigin="anonymous"></script>
 
     <script>
-        // CRÍTICO: Log de verificação dentro do HTML
         console.log("Teste de Carga: O script está rodando NO HTML.");
     </script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
+    <script src="/static/script.js"></script>
 </body>
 </html>

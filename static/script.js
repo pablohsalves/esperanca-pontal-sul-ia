@@ -6,9 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const microphoneBtn = document.getElementById('microphone-btn');
     const chatBox = document.getElementById('chat-box');
     
+    // CRÍTICO: Log de verificação do script
+    console.log("script.js carregado e event listeners anexados.");
+
     // CRÍTICO: Verifica se todos os elementos foram encontrados.
     if (!input || !enviarBtn || !microphoneBtn || !chatBox) {
-        console.error("ERRO CRÍTICO JS: Um ou mais elementos essenciais não foram encontrados no DOM (IDs: pergunta-input, enviar-btn, microphone-btn, chat-box).");
+        console.error("ERRO CRÍTICO JS: Um ou mais elementos essenciais não foram encontrados no DOM (IDs: pergunta-input, enviar-btn, microphone-btn, chat-box). O envio não funcionará.");
         return; // Para a execução se o DOM estiver quebrado
     }
     
@@ -30,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function autoExpand() {
-        // ... (Lógica de autoExpand mantida)
         if (singleRowHeight === 0) {
             input.style.height = 'auto';
             singleRowHeight = input.scrollHeight; 
@@ -115,10 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('ERRO FATAL NO FETCH:', error);
             let erroDisplay = error.message;
             if (erroDisplay.includes('Erro HTTP')) {
-                // Se for Erro HTTP, significa que o Flask respondeu, mas algo deu errado (ex: CORS, JSON quebrado)
                 erroDisplay = `Erro do Servidor. Verifique os logs do Render.`;
             } else if (erroDisplay.includes('Failed to fetch')) {
-                // Se for Failed to fetch, o front-end não conseguiu nem se conectar (Rede ou Flask Travado)
                 erroDisplay = "Erro de conexão: Não foi possível alcançar o servidor. (Verifique o log do Gunicorn/Render).";
             }
             adicionarMensagem(`<p style="color: #ff5555;">Erro: ${erroDisplay}</p>`, 'ia'); 
@@ -145,11 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // CRÍTICO: Event Listener de Clique
     enviarBtn.addEventListener('click', enviarMensagem);
     
-    // 2. MICROFONE (Lógica mantida, com verificação de elemento já no topo)
+    // 2. MICROFONE 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
-        // ... (todo o código do microfone)
         recognition = new SpeechRecognition();
         recognition.lang = 'pt-BR'; 
         recognition.interimResults = false; 
@@ -169,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         recognition.onstart = () => {
-             // ... (Lógica de onstart)
             microphoneBtn.classList.add('recording');
             microphoneBtn.style.color = '#ff5555'; 
             input.placeholder = 'Escutando... Fale agora.';
@@ -178,13 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         recognition.onresult = (event) => {
-             // ... (Lógica de onresult)
             const speechResult = event.results[0][0].transcript;
             input.value = speechResult;
         };
 
         recognition.onend = () => {
-             // ... (Lógica de onend)
             microphoneBtn.classList.remove('recording');
             microphoneBtn.style.color = 'var(--color-highlight)';
             input.placeholder = 'Peça à Esperança';
@@ -197,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         recognition.onerror = (event) => {
-             // ... (Lógica de onerror)
             console.error('Erro no reconhecimento de voz:', event.error);
             recognition.onend(); 
             if (event.error === 'not-allowed') {
@@ -205,16 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
             } 
         };
 
-
     } else {
         microphoneBtn.style.display = 'none';
     }
     
-    // 3. CHIPS CLICÁVEIS (Lógica mantida)
+    // 3. CHIPS CLICÁVEIS 
     chatBox.addEventListener('click', (e) => {
         const chip = e.target.closest('.chip'); 
         if (chip) {
-            // ... (Lógica dos Chips mantida)
             const url = chip.getAttribute('data-url');
             const isSuggestion = chip.classList.contains('suggestion-chip');
             
@@ -246,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // Inicialização final do estado
-    console.log("script.js carregado e event listeners anexados.");
     resetarEstadoInput();
     rolarParaBaixo();
 });
