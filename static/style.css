@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.36 (CORREÇÃO FINAL: Logo Centralizada e Placeholder)
+ * style.css - VERSÃO V60.37 (CORREÇÃO FINAL DO CORTE NO MOBILE)
  */
 
 :root {
@@ -25,30 +25,30 @@ body {
     display: flex;
     justify-content: center;
     align-items: center; 
-    /* CRÍTICO: Altura garantida para que o aviso inferior não seja cortado */
-    min-height: 100vh;
-    height: 100vh;
     margin: 0;
     padding: 0;
     width: 100%;
+    /* CRÍTICO: Usa 100% da altura da viewport. */
+    height: 100vh; 
     overflow: hidden; 
 }
 
 .chat-container {
     width: 100%;
     max-width: 650px; 
+    /* CRÍTICO: Altura total para preencher a tela */
     height: 100%; 
+    max-height: 100vh;
     display: flex;
     flex-direction: column;
     box-shadow: none; 
     background-color: var(--color-chat-bg); 
-    overflow: hidden;
+    overflow: hidden; 
     border-radius: 0; 
 }
 
-/* 2. LOGO CENTRALIZADA (NOVO) */
+/* 2. LOGO CENTRALIZADA */
 .central-logo-container {
-    /* Padding topo/fundo para dar espaço à logo */
     padding: 20px 0 10px 0; 
     text-align: center;
     flex-shrink: 0;
@@ -136,7 +136,7 @@ body {
     border-radius: 30px; 
     resize: none; 
     overflow-y: auto;
-    font-size: 1.2em; /* CRÍTICO: Tamanho da fonte aumentado */
+    font-size: 1.2em; /* Tamanho da fonte aumentado */
     box-sizing: border-box; 
     line-height: 1.4;
 
@@ -153,11 +153,20 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* CRÍTICO: Aumenta o padding inferior para garantir que a mensagem não seja cortada */
-    padding: 5px 20px 15px; 
+    /* CRÍTICO: Aumenta o padding inferior final para garantir que não seja cortado */
+    padding: 5px 20px 20px; /* Aumentado para 20px */
     background-color: var(--color-aviso-bg); 
     border-top: none; 
     flex-shrink: 0; 
+}
+
+/* NOVO: Hack para iOS/Android que tem problemas com 100vh */
+@media screen and (max-width: 650px) {
+    .chat-container {
+        /* Usa -webkit-fill-available que é mais preciso no mobile */
+        height: -webkit-fill-available;
+        max-height: none; 
+    }
 }
 
 /* 7. BOTÕES (ÍCONES DENTRO DO INPUT) */
