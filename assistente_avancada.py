@@ -1,10 +1,10 @@
-# assistente_avancada.py - PARCEIRO DE FÉ AVANÇADO (FINAL)
+# assistente_avancada.py - PARCEIRO DE FÉ AVANÇADO (FINAL ESTÁVEL)
 
 import os
 import json
 import logging
 from google import genai
-from google.genai import types
+from google.genai import types # Importação crucial para tipos de conteúdo
 from google.genai.errors import APIError
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,6 @@ Sua personalidade é:
 
 INSTRUÇÕES ESPECÍFICAS:
 - Nunca gere imagens.
-- Não crie ou sugira rituais ou dogmas que não estejam explicitamente no CONHECIMENTO_ATUAL.
 - Mantenha respostas curtas e diretas. Se a resposta for longa, use parágrafos.
 - Sempre que a resposta for um link de contato ou localização (WhatsApp, Mapa, Horários),
   sugira o link usando um 'chip' de link clicável no formato HTML:
@@ -46,15 +45,12 @@ class ParceiroDeFeAvancado:
         self.client = genai.Client(api_key=self.api_key)
         self.model = 'gemini-2.5-flash'  # Modelo rápido para chat
         
-        # Dados de contexto
         self.contatos = contatos
         self.conhecimento_texto = conhecimento_texto if conhecimento_texto is not None else self._carregar_conhecimento_padrao()
         
-        # Atualiza a instrução do sistema com o conhecimento carregado
         self._atualizar_instrucao_sistema()
 
     def _carregar_conhecimento_padrao(self):
-        """Carrega o conhecimento do arquivo padrão."""
         try:
             with open('conhecimento_esperancapontalsul.txt', 'r', encoding='utf-8') as f:
                 return f.read()
@@ -63,7 +59,6 @@ class ParceiroDeFeAvancado:
             return "Nenhum conhecimento base disponível."
             
     def _atualizar_instrucao_sistema(self):
-        """Gera a instrução completa do sistema com contexto."""
         links_json = json.dumps(self.contatos, indent=2, ensure_ascii=False)
         self.instrucao_sistema = INSTRUCAO_SISTEMA_PADRAO.format(
             CONHECIMENTO_TEXTO=self.conhecimento_texto,
@@ -71,15 +66,11 @@ class ParceiroDeFeAvancado:
         )
 
     def iniciar_novo_chat(self):
-        """Inicia um novo histórico de chat."""
-        # Retorna o formato serializável (lista de dicionários)
         return []
 
     def enviar_saudacao(self):
-        """Gera a saudação inicial usando o modelo."""
         prompt = "Gere uma breve e calorosa mensagem de saudação inicial para um visitante do chat."
         
-        # Cria uma sessão temporária de chat apenas para a saudação
         chat = self.client.chats.create(
             model=self.model,
             system_instruction=self.instrucao_sistema
@@ -98,7 +89,7 @@ class ParceiroDeFeAvancado:
 
     def obter_resposta_com_memoria(self, historico_serializado, pergunta):
         """
-        Recebe o histórico serializado (lista de dicts), reconstrói o objeto Content, 
+        Recebe o histórico serializado (lista de dicts), reconstrói o objeto Content (CORREÇÃO AQUI), 
         envia a pergunta e retorna a resposta e o novo histórico serializável.
         """
         
@@ -106,13 +97,12 @@ class ParceiroDeFeAvancado:
         historico_gemini = []
         for item in historico_serializado:
             try:
-                # CORREÇÃO CRÍTICA: Tenta reconstruir o objeto Content passando o dicionário.
-                # A classe types.Content (ou types.Content) suporta o construtor direto
+                # CORREÇÃO CRÍTICA DO ERRO 'from_dict': Usamos o construtor direto do Pydantic
                 historico_gemini.append(types.Content(**item))
             except Exception as e:
                 # Se falhar (como o erro from_dict), retorna o erro para debug
                 logger.error(f"Falha ao reconstruir item do histórico: {item}. Erro: {e}")
-                raise e # Propaga o erro para que o log do render o pegue.
+                raise e # Propaga o erro para o app_web_avancada.py logar o erro.
 
         # 2. Iniciar ou continuar o chat com o histórico reconstruído
         chat = self.client.chats.create(
@@ -125,7 +115,6 @@ class ParceiroDeFeAvancado:
         response = chat.send_message(pergunta)
         
         # 4. Preparar o histórico para a sessão (Serialização)
-        # O objeto de histórico do chat.get_history() contém os Content gerados pelo modelo.
         novo_historico_gemini = chat.get_history()
         
         return response.text, novo_historico_gemini

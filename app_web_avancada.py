@@ -1,10 +1,10 @@
-# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (FINAL)
+# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (FINAL ESTÁVEL)
 
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import json
 import os
 import logging
-from assistente_avancada import ParceiroDeFeAvancado # Importa a classe do assistente
+from assistente_avancada import ParceiroDeFeAvancado
 from dotenv import load_dotenv
 
 # --- Carregamento de Variáveis de Ambiente ---
@@ -68,7 +68,6 @@ class PlaceholderAssistente:
     def iniciar_novo_chat(self): return []
     def enviar_saudacao(self): return "<h1>ERRO CRÍTICO</h1><p>O assistente de IA não pôde ser inicializado.</p>"
     def obter_resposta_com_memoria(self, hist, perg): 
-        # Simula o erro para o log
         logger.error("Placeholder assistente chamado, IA inoperante.")
         return "IA Inoperante devido a erro de inicialização.", hist
     def __setattr__(self, name, value):
@@ -118,7 +117,6 @@ def chat():
     if not pergunta:
         return jsonify({'erro': 'Pergunta vazia.'}), 400
 
-    # Adiciona a nova pergunta ao histórico serializado
     historico_serializado.append({
         "role": "user",
         "parts": [{"text": pergunta}]
@@ -128,12 +126,11 @@ def chat():
     
     try:
         resposta_ia, novo_historico_gemini = assistente.obter_resposta_com_memoria(
-            historico_serializado, # Enviamos o histórico serializado
+            historico_serializado, 
             pergunta
         )
         
-        # AQUI FOI O ERRO: Precisamos garantir que o histórico retornado pelo assistente
-        # seja serializável para a sessão. Se a IA retornou objetos Content, serializamos novamente.
+        # Serializa o histórico retornado (que são objetos Content) para JSON (dicionários)
         novo_historico_serializado = [
             item.to_dict() if hasattr(item, 'to_dict') else item
             for item in novo_historico_gemini
@@ -143,7 +140,7 @@ def chat():
         
     except Exception as e:
         logger.error(f"Erro na API Gemini para a pergunta '{pergunta[:50]}...': {e}", exc_info=True)
-        # O detalhe do erro 'from_dict' é o que aparece para o usuário no front-end.
+        # O detalhe do erro 'from_dict' é o que aparecerá aqui se a correção falhar.
         resposta_ia = f"Erro Interno: Falha de comunicação com o modelo de IA. Detalhe: {str(e)[:100]}..." 
         pass 
     finally:
