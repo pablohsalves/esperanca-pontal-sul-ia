@@ -3,53 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hope - Parceira de Fé</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <title>Esperança - Parceira de Fé</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    
-    <div id="header-fixed">
-        <div id="header-content">
-            <span id="app-name">Hope</span>
-            <span id="model-dropdown">2.5 Flash ▼</span>
-        </div>
-    </div>
-
-    <div id="chat-box">
+    <div class="chat-container">
         
-        <div class="mensagem ia">
-            {{ saudacao | safe }}
-            
-            {% if links %}
-            <div class="chip-container suggestion-chips">
-                <div class="chip suggestion-chip" data-url="#horarios" data-text="Horários dos Cultos">Horários dos Cultos</div>
-                <div class="chip suggestion-chip" data-url="#local" data-text="Onde fica a igreja (Mapa)">Onde fica a igreja (Mapa)</div>
-                <div class="chip suggestion-chip" data-url="#whatsapp" data-text="Falar no WhatsApp">Falar no WhatsApp</div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
+        <header class="chat-header">
+            <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Logo da Igreja" class="logo">
+            <h1>Esperança</h1>
+            <p>Parceira de Fé da Igreja da Paz Pontal Sul</p>
+        </header>
 
-    <div id="fixed-bottom-area">
-        <div id="input-area-wrapper">
+        <main id="chat-box" class="chat-box">
+            <div class="mensagem ia initial-message">
+                {{ saudacao | safe }}
+            </div>
             
-            <button id="microphone-btn" title="Falar por voz">
+            <div class="suggestion-chips">
+                <div class="chip suggestion-chip" data-url="{{ links.whatsapp }}" data-text="WhatsApp">Contato WhatsApp</div>
+                <div class="chip suggestion-chip" data-url="{{ links.localizacao }}" data-text="Localização">Ver no Mapa</div>
+                <div class="chip suggestion-chip" data-url="{{ links.cultos_horarios }}" data-text="Horários">Horários dos Cultos</div>
+            </div>
+            
+            </main>
+
+        <footer class="chat-input-container">
+            <textarea 
+                id="pergunta-input" 
+                placeholder="Peça à Esperança..." 
+                rows="1"
+            ></textarea>
+            
+            <button id="microphone-btn" class="icon-btn" title="Enviar Áudio">
                 <i class="fas fa-microphone"></i>
             </button>
             
-            <textarea id="pergunta-input" placeholder="Peça à Esperança" rows="1"></textarea>
-            
-            <button id="enviar-btn" title="Enviar">
+            <button id="enviar-btn" class="icon-btn" disabled title="Enviar Mensagem">
                 <i class="fas fa-paper-plane"></i>
             </button>
-            
-        </div>
-        <div id="aviso-ia">
-            O Hope pode cometer erros. Por isso, é bom checar as respostas.
-        </div>
+        </footer>
     </div>
     
+    <script src="https://kit.fontawesome.com/c4051b8c25.js" crossorigin="anonymous"></script>
+
+    <script>
+        // CRÍTICO: Log de verificação dentro do HTML
+        console.log("Teste de Carga: O script está rodando NO HTML.");
+    </script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
