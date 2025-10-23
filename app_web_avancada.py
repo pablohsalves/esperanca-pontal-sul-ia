@@ -1,8 +1,6 @@
-# app_web_avancada.py - Versão V36.0 (CORREÇÃO FINAL: Importação de 'os')
-
 from flask import Flask, render_template, request, jsonify, session
 from assistente_avancada import Hope 
-import os # <--- CRÍTICO: Importação necessária para usar os.urandom()
+import os # CRÍTICO: Importação adicionada para corrigir o NameError
 
 # --- Configuração do Flask ---
 app = Flask(__name__)
@@ -19,21 +17,18 @@ assistente = Hope()
 def index():
     # Garante que um ID de sessão único seja criado para o usuário
     if 'user_id' not in session:
-        # CRÍTICO: os.urandom agora funciona
         session['user_id'] = os.urandom(16).hex() 
 
-    # Lógica para exibir mensagem de saudação (amigável ou erro)
+    # CRÍTICO: Lógica para exibir mensagem de saudação (amigável ou erro)
     if assistente.inicializado:
-        # Se a IA foi inicializada com sucesso.
         saudacao = "Olá! Eu sou a Esperança, sua parceira de fé da Igreja da Paz Pontal Sul. Como posso te ajudar hoje?"
     else:
-        # Se a IA falhou (Erro da Chave/Render), exibe uma mensagem amigável.
+        # Mensagem amigável quando a IA falha na inicialização (chave incorreta, etc.)
         saudacao = "Bem-vindo à Esperança. Estamos online, mas nosso serviço de inteligência artificial está temporariamente inoperante. Por favor, tente novamente mais tarde."
     
-    # Renderiza o template HTML.
     return render_template('chat_interface.html', saudacao=saudacao)
 
-# --- Rota API para o Chat ---
+# --- Rota API para o Chat (Chamada pelo script.js) ---
 @app.route('/api/chat', methods=['POST'])
 def chat_api():
     data = request.get_json()
@@ -52,12 +47,13 @@ def chat_api():
         return jsonify(resposta_final)
 
     except Exception as e:
+        # Erro genérico na API
+        import logging
         logging.error(f"Erro inesperado na rota /api/chat: {e}")
         return jsonify({"resposta": f"Desculpe, ocorreu um erro inesperado no servidor. ({e})"}), 500
 
 # --- Bloco de Execução ---
 if __name__ == '__main__':
-    # O Gunicorn ignora esta seção, mas é bom para testes locais.
     import logging
     logging.basicConfig(level=logging.INFO)
     app.run(debug=True)

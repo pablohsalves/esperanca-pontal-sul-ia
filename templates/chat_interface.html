@@ -1,43 +1,39 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Esperança - Parceira de Fé</title>
-    <script src="https://kit.fontawesome.com/c4051b8c25.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=20251022_v31">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=20251022_v50">
 </head>
 <body>
     <div class="chat-container">
-        
         <header class="chat-header">
             <h1>Esperança</h1>
-            <p>Parceira de Fé da Igreja da Paz Pontal Sul</p>
+            <p>Parceira de Fé Virtual da Igreja da Paz Pontal Sul</p>
         </header>
 
-        <main id="chat-box" class="chat-box">
-            <div class="mensagem ia initial-message">
-                {{ saudacao | safe }} 
+        <div id="chat-box">
+            <div class="mensagem ia initial-message" id="saudacao-inicial">
+                {{ saudacao | safe }}
             </div>
-            
-            </main>
+            </div>
 
         <footer class="chat-input-container">
-            <textarea 
-                id="pergunta-input" 
-                placeholder="Peça à Esperança..." 
-                rows="1"
-            ></textarea>
+            <textarea id="pergunta-input" placeholder="Pergunte à Esperança... (Digite 'oi' para começar)" rows="1"></textarea>
             
-            <button id="microphone-btn" class="icon-btn" title="Enviar Áudio">
-                <i class="fas fa-microphone"></i> </button>
-            
-            <button id="enviar-btn" class="icon-btn" disabled title="Enviar Mensagem">
-                <i class="fas fa-paper-plane"></i> </button>
+            <button id="microphone-btn" class="icon-btn">
+                <i class="fas fa-microphone"></i>
+            </button>
+
+            <button id="enviar-btn" class="icon-btn" disabled>
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </footer>
     </div>
     
-    <script src="{{ url_for('static', filename='script.js') }}?v=20251022_v31"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=20251022_v50"></script>
 </body>
 </html>

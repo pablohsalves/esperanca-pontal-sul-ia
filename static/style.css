@@ -1,6 +1,5 @@
 /*
- * style.css - VERSÃO FINAL BLACK/GRAY MINIMALISTA (V31.0)
- * Contorno CINZA, Input mais alto, Header centralizado.
+ * style.css - VERSÃO V50.0 (Layout Final - Bolhas, Alinhamento, Espaçamento, Contorno Azul)
  */
 
 /* 1. RESET E VARIAVEIS */
@@ -10,10 +9,13 @@
     --color-bg-input: #000000;
     --color-text-light: #e0e0e0; 
     --color-text-secondary: #aaaaaa;
-    --color-highlight: #4285F4; /* Azul (para o contorno de foco e avião) */
-    --color-border-gray: #444444; /* CINZA para o contorno do input */
-    --color-user-bubble: #1a1a1a;
-    --color-ia-bubble: #111111;
+    --color-highlight: #4285F4; /* AZUL para destaque (Google padrão) */
+    --color-border-gray: #444444; 
+    
+    /* CRÍTICO: Cores das Bolhas */
+    --color-user-bubble: #1a1a1a; /* Escuro para o usuário */
+    --color-ia-bubble: #0d0d0d; /* Mais escuro para a IA */
+
     --border-radius-lg: 25px;
     --border-radius-sm: 8px;
 }
@@ -25,6 +27,7 @@ html, body {
     font-family: Arial, sans-serif;
     color: var(--color-text-light);
     background-color: var(--color-bg-main);
+    overflow: hidden; 
 }
 
 /* 2. CONTAINER PRINCIPAL */
@@ -32,42 +35,58 @@ html, body {
     display: flex;
     flex-direction: column; 
     min-height: 100vh; 
-    max-width: 700px;
+    max-width: 700px; 
     margin: 0 auto; 
     background-color: var(--color-bg-container);
+    border: 1px solid #333; 
+    box-shadow: 0 0 10px rgba(0,0,0,0.5); 
 }
 
-/* 3. CABEÇALHO (CRÍTICO: CENTRALIZAÇÃO) */
+/* 3. CABEÇALHO */
 .chat-header {
     padding: 20px;
-    text-align: center; /* CRÍTICO: Centraliza os elementos do cabeçalho */
+    text-align: center;
     background-color: var(--color-bg-container);
     border-bottom: 1px solid #333;
+    position: sticky; 
+    top: 0;
+    z-index: 100;
 }
 .chat-header h1 { margin: 0; font-size: 1.8em; font-weight: 500; }
 .chat-header p { margin: 5px 0 0; font-size: 0.9em; color: var(--color-text-secondary); }
 
-
-/* 4. ÁREA DE MENSAGENS e 5. MENSAGEM INICIAL (Removendo estilos de chips aqui) */
-#chat-box { flex-grow: 1; overflow-y: auto; padding: 20px 15px; padding-bottom: 90px; }
-.mensagem.ia.initial-message {
-    /* Centraliza a bolha inicial para o ERRO CRÍTICO e a saudação */
-    margin: 50px auto 20px; 
-    max-width: 80%;
-    text-align: center;
-    background-color: var(--color-ia-bubble);
-    padding: 20px;
-    border-radius: var(--border-radius-lg); 
+/* 4. ÁREA DE MENSAGENS (Scrollable) */
+#chat-box { 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    padding: 20px 15px; 
+    padding-bottom: 100px; /* Espaço para o input fixo */
+    display: flex; 
+    flex-direction: column;
 }
 
-/* 6. FOOTER / ÁREA DE INPUT (INPUT FIXO COM BOTÕES INTEGRADOS) */
+/* 5. MENSAGEM INICIAL (Adaptada para nova estrutura de bolhas) */
+.mensagem.ia.initial-message {
+    margin-bottom: 20px; 
+    align-self: flex-start; 
+    background-color: var(--color-ia-bubble);
+    color: var(--color-text-light);
+    padding: 15px 20px;
+    border-radius: var(--border-radius-lg); 
+    max-width: 75%; 
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+
+/* 6. FOOTER / ÁREA DE INPUT (Input Fixo) */
 .chat-input-container {
     position: fixed; 
     bottom: 0;
     left: 0;
     right: 0;
     margin: 0 auto;
-    max-width: 700px; 
+    max-width: 700px; /* Igual ao chat-container */
     
     background-color: var(--color-bg-container); 
     padding: 10px 20px; 
@@ -75,17 +94,17 @@ html, body {
     display: flex; 
     align-items: center; 
     z-index: 10;
+    border-top: 1px solid #333; 
 }
 
-/* 7. CAMPO DE TEXTO (CINZA E MAIS ALTO) */
+/* 7. CAMPO DE TEXTO (Contorno Azul e Mais Alto) */
 #pergunta-input {
     flex-grow: 1; 
     padding: 18px 20px; 
     border-radius: 28px;
     
-    /* Contorno CINZA */
     border: none;
-    box-shadow: inset 0 0 0 1px var(--color-border-gray); 
+    box-shadow: inset 0 0 0 1px var(--color-highlight); /* AZUL 1px como padrão */
     background-color: var(--color-bg-input);
     
     color: var(--color-text-light);
@@ -97,10 +116,10 @@ html, body {
     transition: box-shadow 0.2s;
 }
 
-/* Foco: Mudar o Contorno para AZUL ao focar */
+/* Foco: Aumentar o Contorno para 2px ao focar (AZUL MAIS VISÍVEL) */
 #pergunta-input:focus {
     outline: none;
-    box-shadow: inset 0 0 0 2px var(--color-highlight), 0 0 0 1px var(--color-highlight); 
+    box-shadow: inset 0 0 0 2px var(--color-highlight); /* AZUL 2px no foco */
 }
 
 /* 8. BOTÕES (ÍCONES - MIC e AVIÃO) */
@@ -120,19 +139,50 @@ html, body {
     flex-shrink: 0; 
     font-size: 1.2em;
     padding: 0; 
-    margin-left: -50px; /* Puxa o botão para dentro do input */
+    margin-left: -50px; 
     z-index: 11;
 }
 
 /* Ajuste de cor para MIC/Avião */
 #microphone-btn {
-    color: var(--color-text-secondary); /* Cinza suave para o ícone MIC */
+    color: var(--color-text-secondary); 
 }
 #enviar-btn {
-    color: var(--color-text-secondary); /* Cinza padrão para inativo */
+    color: var(--color-text-secondary); 
 }
 #enviar-btn:not(:disabled) {
-    color: var(--color-highlight); /* AZUL quando ativo */
+    color: var(--color-highlight); 
 }
 
-/* ... (demais estilos de bolha, etc. mantidos) ... */
+/* 9. ESTILOS DAS BOLHAS DE CHAT (CRÍTICO: Alinhamento e Aparência) */
+.mensagem {
+    padding: 15px 20px;
+    border-radius: var(--border-radius-lg); 
+    max-width: 75%; /* Limita a largura da bolha */
+    margin-bottom: 10px; /* Espaçamento entre as bolhas */
+    line-height: 1.4;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.mensagem.ia {
+    background-color: var(--color-ia-bubble);
+    color: var(--color-text-light);
+    align-self: flex-start; /* Alinha à esquerda */
+    margin-right: auto; 
+}
+
+.mensagem.usuario {
+    background-color: var(--color-user-bubble);
+    color: var(--color-text-light);
+    align-self: flex-end; /* Alinha à direita */
+    margin-left: auto; 
+}
+
+/* 10. LINKS DENTRO DAS MENSAGENS (se houver) */
+.mensagem a {
+    color: var(--color-highlight); 
+    text-decoration: none;
+}
+.mensagem a:hover {
+    text-decoration: underline;
+}
