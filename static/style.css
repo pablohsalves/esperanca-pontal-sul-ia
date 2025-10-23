@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.38 (REPOSICIONAMENTO DA LOGO E CHAT PARA O CENTRO DA PÁGINA)
+ * style.css - VERSÃO V60.41 (SOLUÇÃO FORÇADA DE LAYOUT MOBILE)
  */
 
 :root {
@@ -24,11 +24,12 @@ body {
     background-color: var(--color-background); 
     display: flex;
     justify-content: center;
-    /* CRÍTICO: Centraliza verticalmente o chat-container no desktop */
+    /* CRÍTICO: Centraliza verticalmente o chat-container. */
     align-items: center; 
     margin: 0;
     padding: 0;
     width: 100%;
+    /* Usa 100% da altura da viewport */
     height: 100vh; 
     overflow: hidden; 
 }
@@ -36,13 +37,14 @@ body {
 .chat-container {
     width: 100%;
     max-width: 650px; 
-    /* CRÍTICO: Altura para flutuar ao centro. Ajustado para 95% para não encostar nas bordas. */
+    /* CRÍTICO: Reduz a altura máxima para que ele possa flutuar ao centro. */
     height: 95vh; 
     max-height: 95vh;
     display: flex;
     flex-direction: column;
     box-shadow: none; 
     background-color: var(--color-chat-bg); 
+    /* Garante que o container inteiro fique visível */
     overflow: hidden; 
     border-radius: 0; 
 }
@@ -72,6 +74,7 @@ body {
     gap: 15px; 
     background-color: var(--color-chat-bg); 
     
+    /* Ocultar barra de rolagem da caixa de chat */
     &::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -79,7 +82,7 @@ body {
     scrollbar-width: none; 
 }
 
-/* 4. ESTILO DAS BOLHAS DE MENSAGEM (sem alterações) */
+/* 4. ESTILO DAS BOLHAS DE MENSAGEM */
 .mensagem {
     padding: 12px 18px; 
     border-radius: 20px; 
@@ -154,25 +157,31 @@ body {
     color: var(--color-text-secondary);
     text-align: center;
     /* CRÍTICO: PADDING FINAL AGRESSIVO PARA GARANTIR VISIBILIDADE NO MOBILE */
-    padding: 5px 20px 20px; 
+    padding: 10px 20px 25px; /* AUMENTADO O INFERIOR PARA 25PX */
     background-color: var(--color-aviso-bg); 
     border-top: none; 
     flex-shrink: 0; 
 }
 
-/* NOVO: Hack para iOS/Android que tem problemas com 100vh */
+/* SOLUÇÃO PARA MOBILE (100vh) - CRÍTICO */
 @media screen and (max-width: 650px) {
     body {
-        /* Desativa a centralização vertical no mobile para maximizar o espaço */
-        align-items: flex-end; 
+        /* Garante que a centralização vertical funcione mesmo no mobile */
+        align-items: center;
+        /* Adiciona um padding inferior no body para afastar o chat do fundo da tela, dando espaço para o aviso */
+        padding-bottom: 5px; 
     }
     .chat-container {
         /* Usa -webkit-fill-available que é mais preciso no mobile */
         height: -webkit-fill-available;
         max-height: none; 
+        /* Tenta forçar a altura máxima de forma mais segura no mobile */
+        min-height: 90vh;
     }
 }
-/* ... (Restante do CSS, botões) ... */
+
+
+/* 7. BOTÕES (ÍCONES DENTRO DO INPUT) */
 .icon-btn {
     position: absolute;
     height: 40px; 
