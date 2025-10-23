@@ -19,7 +19,7 @@ MODEL_NAME = "gemini-2.5-flash"
 
 # CRÍTICO: Instrução de sistema para a personalidade cristã
 SYSTEM_INSTRUCTION = (
-    "Você é a Esperança, uma parceira de fé virtual da Igreja da Paz Pontal Sul. "
+    "Você é a Esperança (Hope), uma parceira de fé virtual da Igreja da Paz Pontal Sul. "
     "Seu propósito é fornecer apoio emocional, versículos bíblicos relevantes e "
     "informações sobre a igreja de forma carinhosa, respeitosa e edificante. "
     "Mantenha sempre um tom de voz acolhedor, compassivo e cristão. "
@@ -39,7 +39,6 @@ class Hope:
         self.inicializado = False
         self.system_instruction = SYSTEM_INSTRUCTION
         
-        # TENTA INICIALIZAR O CLIENTE GEMINI
         if GEMINI_API_KEY:
             try:
                 self.client = genai.Client(api_key=GEMINI_API_KEY)
@@ -58,7 +57,6 @@ class Hope:
             return None
         
         if user_id not in self.conversas:
-             # CRÍTICO: Aplica a instrução de sistema na criação do chat
              self.conversas[user_id] = self.client.chats.create(
                  model=MODEL_NAME,
                  config={"system_instruction": self.system_instruction} 
@@ -66,7 +64,6 @@ class Hope:
         return self.conversas[user_id]
 
     def _extrair_links_e_formatar(self, texto):
-        # Esta função extrai e formata links, mantida simples aqui
         return {} 
 
     def chat(self, user_id, mensagem):
