@@ -1,4 +1,4 @@
-// static/script.js - Versão FINAL E FUNCIONAL (V10.1 - Debug de Envio Forçado)
+// static/script.js - Versão FINAL E FUNCIONAL (FINAL - Com Debug de Envio)
 
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('pergunta-input'); 
@@ -6,13 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const microphoneBtn = document.getElementById('microphone-btn');
     const chatBox = document.getElementById('chat-box');
     
-    // CRÍTICO: Log de verificação do script
+    // Log de verificação do script
     console.log("script.js carregado e event listeners anexados.");
 
-    // CRÍTICO: Verifica se todos os elementos foram encontrados.
+    // Verifica se os IDs CRÍTICOS foram encontrados no DOM (Se houver erro, loga e para)
     if (!input || !enviarBtn || !microphoneBtn || !chatBox) {
-        console.error("ERRO CRÍTICO JS: Um ou mais elementos essenciais não foram encontrados no DOM (IDs: pergunta-input, enviar-btn, microphone-btn, chat-box). O envio não funcionará.");
-        return; // Para a execução se o DOM estiver quebrado
+        console.error("ERRO CRÍTICO JS: Um ou mais elementos essenciais não foram encontrados no DOM.");
+        return; 
     }
     
     let singleRowHeight = 0; 
@@ -21,8 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- FUNÇÕES DE ESTADO E UTILS ---
     
     function resetarEstadoInput() {
+        // Garante que o input e microfone estão sempre habilitados
         input.disabled = false;
         microphoneBtn.disabled = false;
+        // Habilita o botão de envio SOMENTE se houver texto
         enviarBtn.disabled = input.value.trim() === ''; 
     }
 
@@ -50,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function adicionarMensagem(texto, remetente) {
         const div = document.createElement('div');
         div.className = `mensagem ${remetente}`;
+        // Usa innerHTML para permitir a formatação de links/chips
         div.innerHTML = texto; 
         chatBox.appendChild(div);
         rolarParaBaixo();
@@ -58,12 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FUNÇÃO PRINCIPAL DE ENVIO (START POINT) ---
     async function enviarMensagem() {
-        // CRÍTICO: Este log deve aparecer quando você clica em Enviar ou aperta Enter
-        console.log('ENVIARMENSAGEM INICIADA - Pergunta detectada.'); 
+        // NOVO CRÍTICO: Loga sempre que a função é chamada pelo evento
+        console.log('EVENTO DE ENVIO DISPARADO.'); 
         
         const pergunta = input.value.trim();
         
         if (pergunta === '') { 
+             console.log('Pergunda vazia. Retornando imediatamente.');
              resetarEstadoInput(); 
              return; 
         }
@@ -78,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.value = ''; 
         input.style.height = singleRowHeight + 'px';
         
+        // Bloqueia o envio enquanto processa
         input.disabled = true;
         enviarBtn.disabled = true;
         microphoneBtn.disabled = true;
@@ -87,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const loadingDiv = adicionarMensagem('<span class="loading-indicator"></span>Esperança está processando...', 'ia');
 
         try {
-            // CRÍTICO: Log antes da chamada fetch
+            // Log antes da chamada fetch
             console.log(`Enviando POST para /api/chat com a pergunta: "${pergunta}"`);
             
             const response = await fetch('/api/chat', {
@@ -97,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                // Log de resposta não-ok
                 console.error(`Resposta HTTP não OK: ${response.status}`);
                 const errorData = await response.json().catch(() => ({ erro: 'Erro de comunicação desconhecido.' }));
                 throw new Error(errorData.erro || `Erro HTTP: ${response.status}`);
@@ -114,16 +118,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if(loadingDiv.parentNode) {
                 chatBox.removeChild(loadingDiv);
             }
-            console.error('ERRO FATAL NO FETCH:', error);
+            console.error('ERRO FATAL NO FETCH (Verifique Logs do Servidor):', error);
             let erroDisplay = error.message;
             if (erroDisplay.includes('Erro HTTP')) {
                 erroDisplay = `Erro do Servidor. Verifique os logs do Render.`;
             } else if (erroDisplay.includes('Failed to fetch')) {
-                erroDisplay = "Erro de conexão: Não foi possível alcançar o servidor. (Verifique o log do Gunicorn/Render).";
+                erroDisplay = "Erro de conexão: Não foi possível alcançar o servidor.";
             }
             adicionarMensagem(`<p style="color: #ff5555;">Erro: ${erroDisplay}</p>`, 'ia'); 
             
         } finally {
+            // Reabilita o estado
             resetarEstadoInput(); 
             input.focus();
             rolarParaBaixo();
@@ -136,16 +141,17 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('input', autoExpand);
 
     input.addEventListener('keydown', (e) => {
+        // Dispara em Enter (se não for Shift+Enter)
         if (e.key === 'Enter' && !e.shiftKey) { 
             e.preventDefault(); 
             enviarMensagem();
         }
     });
-    
-    // CRÍTICO: Event Listener de Clique
+
+    // Anexa o evento de clique ao botão de envio
     enviarBtn.addEventListener('click', enviarMensagem);
     
-    // 2. MICROFONE 
+    // 2. MICROFONE (Lógica de reconhecimento de voz)
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
@@ -213,11 +219,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (url) {
                 if (!isSuggestion) {
+                    // Clicks em chips normais (como links gerados pela IA)
                     e.preventDefault(); 
                     window.open(url, '_blank');
                     return;
                 } 
                 else {
+                    // Clicks em suggestion-chips (que preenchem o input)
                     const text = chip.getAttribute('data-text');
                     
                     let perguntaSugerida = text;
