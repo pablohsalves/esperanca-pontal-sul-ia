@@ -1,4 +1,4 @@
-# app_web_avancada.py - ARQUIVO PRINCIPAL DO FLASK (FINAL ESTÁVEL)
+# app_web_avancada.py - Versão V24.0 (CORREÇÃO DE ESTRUTURA DE CONTATOS)
 
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import json
@@ -52,14 +52,30 @@ def salvar_novo_conhecimento(novo_conteudo):
         return False
         
 def carregar_links_contatos():
-    """Carrega os links de contatos do JSON."""
+    """
+    Carrega os dados de contatos do JSON.
+    Retorna:
+      - contatos_full: O dicionário JSON completo (usado para instrução da IA).
+      - links_simplificados: Um dicionário com apenas a URL (usado para o HTML).
+    """
     caminho_completo = os.path.join(os.path.dirname(os.path.abspath(__file__)), CONTATOS_PATH)
     try:
         with open(caminho_completo, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            contatos_full = json.load(f)
+            
+            # CRÍTICO: Extrai apenas a URL para o front-end
+            links_simplificados = {k: v.get('url', '#') for k, v in contatos_full.items()}
+            
+            # Garante que 'cultos_horarios' (usado no HTML) exista se 'cultos' existir
+            if 'cultos_horarios' not in links_simplificados and 'cultos' in contatos_full:
+                 links_simplificados['cultos_horarios'] = contatos_full['cultos'].get('url', '#')
+            
+            return contatos_full, links_simplificados
+            
     except Exception as e:
         logger.error(f"ERRO ao carregar links de contatos: {e}")
-        return {}
+        # Retorna dicionários vazios para evitar quebra total do servidor
+        return {}, {}
 
 
 # --- INICIALIZAÇÃO DA ASSISTENTE ---
@@ -77,7 +93,9 @@ class PlaceholderAssistente:
             super().__setattr__(self, name, value)
     
 try:
-    assistente = ParceiroDeFeAvancado(contatos=carregar_links_contatos())
+    # CRÍTICO: Carrega a versão COMPLETA do JSON para a IA
+    contatos_ia, _ = carregar_links_contatos()
+    assistente = ParceiroDeFeAvancado(contatos=contatos_ia)
 except Exception as e:
     logger.critical(f"ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. {e}")
     assistente = PlaceholderAssistente()
@@ -97,10 +115,11 @@ def index():
             session.pop('historico', None)
             session['historico'] = []
              
-    links = carregar_links_contatos()
+    # CRÍTICO: Chama a função e usa a versão simplificada dos links
+    _, links_simplificados = carregar_links_contatos()
     saudacao_html = assistente.enviar_saudacao()
     
-    return render_template('chat_interface.html', saudacao=saudacao_html, links=links)
+    return render_template('chat_interface.html', saudacao=saudacao_html, links=links_simplificados)
 
 
 @app.route('/api/chat', methods=['POST'])
@@ -140,7 +159,6 @@ def chat():
         
     except Exception as e:
         logger.error(f"Erro na API Gemini para a pergunta '{pergunta[:50]}...': {e}", exc_info=True)
-        # O detalhe do erro 'from_dict' é o que aparecerá aqui se a correção falhar.
         resposta_ia = f"Erro Interno: Falha de comunicação com o modelo de IA. Detalhe: {str(e)[:100]}..." 
         pass 
     finally:
@@ -156,7 +174,9 @@ def admin_conhecimento():
     if request.method == 'POST':
         novo_conteudo = request.form['novo_conhecimento']
         
-        assistente.contatos = carregar_links_contatos()
+        # O assistente deve receber a estrutura COMPLETA para a instrução
+        contatos_ia, _ = carregar_links_contatos()
+        assistente.contatos = contatos_ia
         
         if salvar_novo_conhecimento(novo_conteudo):
             assistente.conhecimento_texto = ler_conhecimento_atual()

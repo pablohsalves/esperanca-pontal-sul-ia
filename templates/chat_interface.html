@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Esperança - Parceira de Fé</title>
-    <link rel="stylesheet" href="/static/style.css?v=20251023_final">
+    <script src="https://kit.fontawesome.com/c4051b8c25.js" crossorigin="anonymous"></script>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=20251022_v31">
 </head>
 <body>
     <div class="chat-container">
@@ -19,12 +21,7 @@
                 {{ saudacao | safe }} 
             </div>
             
-            <div class="suggestion-chips">
-                <div class="chip suggestion-chip" data-url="{{ links.whatsapp }}" data-text="WhatsApp">Contato WhatsApp</div>
-                <div class="chip suggestion-chip" data-url="{{ links.localizacao }}" data-text="Localização">Ver no Mapa</div>
-                <div class="chip suggestion-chip" data-url="{{ links.cultos_horarios }}" data-text="Horários">Horários dos Cultos</div>
-            </div>
-        </main>
+            </main>
 
         <footer class="chat-input-container">
             <textarea 
@@ -34,17 +31,13 @@
             ></textarea>
             
             <button id="microphone-btn" class="icon-btn" title="Enviar Áudio">
-                <i class="fas fa-microphone"></i> 
-            </button>
+                <i class="fas fa-microphone"></i> </button>
             
             <button id="enviar-btn" class="icon-btn" disabled title="Enviar Mensagem">
-                <i class="fas fa-paper-plane"></i>
-            </button>
+                <i class="fas fa-paper-plane"></i> </button>
         </footer>
     </div>
     
-    <script src="https://kit.fontawesome.com/c4051b8c25.js" crossorigin="anonymous"></script>
-
-    <script src="/static/script.js?v=20251023_final"></script>
+    <script src="{{ url_for('static', filename='script.js') }}?v=20251022_v31"></script>
 </body>
 </html>
