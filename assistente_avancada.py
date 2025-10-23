@@ -3,7 +3,7 @@
 import os
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
 import uuid
-from assistente_avancada import Hope, BASE_SYSTEM_INSTRUCTION, carregar_conhecimento_local # Importações CRÍTICAS
+
 
 # Inicialização do Flask
 app = Flask(__name__)
