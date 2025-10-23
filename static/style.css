@@ -1,23 +1,23 @@
 /*
- * style.css - VERSÃO V60.31 (Dark Mode FINAL - Correção de Mobile e Bordas)
+ * style.css - VERSÃO V60.32 (Dark Mode FINAL - Correção de Mobile/Desktop e Estilo Gemini)
  */
 
 :root {
     /* Cores Customizadas pelo Usuário */
-    --color-background: #1B1C1D; /* Fundo do corpo (CORRIGIDO) */
-    --color-ia-bg: #333537; /* Fundo da bolha da IA (CORRIGIDO) */
+    --color-background: #1B1C1D; /* Fundo do corpo e da área de chat (NOVO REQUISITO) */
+    --color-ia-bg: #333537; /* Fundo da bolha da IA */
     
     /* Cores Derivadas/Padrão */
-    --color-chat-bg: #262626; /* Fundo da caixa de chat (mais claro que o fundo) */
+    --color-chat-bg: var(--color-background); /* AGORA IGUAL AO BACKGROUND */
     --color-ia-text: #ffffff; 
-    --color-user-bg: #4A4A4A; /* Bolha do usuário */
+    --color-user-bg: #4A4A4A; 
     --color-user-text: #ffffff; 
-    --color-input-bg: var(--color-chat-bg); 
-    --color-border: #505050; /* Borda (apenas para o input) */
+    --color-input-bg: var(--color-background); /* Input também tem o fundo escuro */
+    --color-border: #505050; 
     --color-text-secondary: #aaaaaa; 
     --color-highlight: #558B2F; 
     --color-text-light: #ffffff; 
-    --color-aviso-bg: #222222; 
+    --color-aviso-bg: var(--color-background); /* Aviso também tem o fundo escuro */
 }
 
 /* 1. LAYOUT GERAL E RESPONSIVIDADE */
@@ -27,40 +27,37 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* CRÍTICO: Usa 100vh para ocupar a tela, mas remove margens e paddings */
+    /* Usa 100vh de forma segura para Mobile/Desktop */
     min-height: 100vh;
     height: 100vh;
     margin: 0;
     padding: 0;
     width: 100%;
-    overflow: hidden; /* Oculta a barra de rolagem principal do navegador */
+    overflow: hidden; 
 }
 
 .chat-container {
     width: 100%;
-    max-width: 450px; 
-    /* CRÍTICO: Usa 100% da altura do body (100vh) */
+    max-width: 650px; /* AUMENTADO para desktop (Gemini-like) */
+    /* CRÍTICO: Usa altura total, mas garantindo que no desktop não passe de um limite */
     height: 100%; 
-    max-height: 800px; 
+    max-height: 90vh; /* AUMENTADO: Proporção maior no desktop */
     display: flex;
     flex-direction: column;
-    /* REMOVER: Nenhuma sombra no chat-container */
     box-shadow: none; 
-    background-color: var(--color-chat-bg);
+    background-color: var(--color-chat-bg); /* GARANTIDO: #1B1C1D */
     overflow: hidden;
-    /* REMOVER: Nenhuma borda arredondada */
-    border-radius: 0; 
+    border-radius: 12px; /* Adiciona um pequeno raio para desktop */
 }
 
 /* 2. CABEÇALHO */
 .chat-header {
     background-color: var(--color-chat-bg); 
     color: var(--color-user-text);
-    padding: 10px 15px;
+    padding: 15px 20px; /* Mais espaçamento */
     text-align: center; 
-    font-size: 1.2em; 
+    font-size: 1.3em; /* Levemente maior */
     font-weight: bold;
-    /* REMOVER: Nenhuma borda abaixo do cabeçalho */
     border-bottom: none; 
     flex-shrink: 0; 
 }
@@ -68,13 +65,12 @@ body {
 /* 3. ÁREA DE MENSAGENS (CHAT BOX) */
 #chat-box {
     flex-grow: 1;
-    padding: 15px;
+    padding: 15px 20px;
     overflow-y: auto; 
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    scroll-behavior: smooth;
-    background-color: var(--color-chat-bg); 
+    gap: 15px; /* Mais espaço entre mensagens */
+    background-color: var(--color-chat-bg); /* GARANTIDO: #1B1C1D */
     
     /* Esconder barra de rolagem */
     &::-webkit-scrollbar {
@@ -86,20 +82,18 @@ body {
 
 /* 4. ESTILO DAS BOLHAS DE MENSAGEM */
 .mensagem {
-    padding: 10px 15px;
-    border-radius: 10px; 
+    padding: 12px 18px; /* Mais espaçamento interno */
+    border-radius: 20px; /* Mais arredondado (Gemini-like) */
     max-width: 85%;
-    word-wrap: break-word;
-    line-height: 1.4;
-    /* Remover sombra das bolhas */
     box-shadow: none; 
+    font-size: 1.05em; /* Levemente maior */
 }
 
 .mensagem.usuario {
     align-self: flex-end;
     background-color: var(--color-user-bg); 
     color: var(--color-user-text);
-    border-bottom-right-radius: 2px; 
+    border-top-right-radius: 4px; /* Ponta sutil */
 }
 
 .mensagem.ia,
@@ -107,20 +101,16 @@ body {
     align-self: flex-start;
     background-color: var(--color-ia-bg); /* GARANTIDO: #333537 */
     color: var(--color-ia-text);
-    border-bottom-left-radius: 2px;
-}
-
-.mensagem p {
-    margin: 0; 
+    border-top-left-radius: 4px; /* Ponta sutil */
 }
 
 /* 5. ÁREA DE INPUT */
 .chat-input-container {
-    background-color: var(--color-chat-bg);
-    padding: 8px 10px; 
+    background-color: var(--color-background); /* Fundo do corpo */
+    /* CRÍTICO: Adiciona Padding Vertical para corrigir corte no mobile e Padding Lateral para estética */
+    padding: 15px 20px; 
     display: flex;
     align-items: center; 
-    /* REMOVER: Nenhuma borda acima do input */
     border-top: none; 
     flex-shrink: 0; 
 }
@@ -135,32 +125,31 @@ body {
 
 #pergunta-input {
     flex-grow: 1;
-    min-height: 50px; 
-    max-height: 150px; 
-    padding: 15px; 
+    min-height: 55px; /* Altura mínima maior */
+    max-height: 200px; 
+    padding: 15px 20px; 
     padding-right: 100px; 
     
-    /* MANTER SOMENTE ESTA BORDA: Contorno do campo de pesquisa */
-    border: 1px solid var(--color-border);
-    background-color: var(--color-chat-bg); 
+    border: 1px solid var(--color-border); /* ÚNICA BORDA MANTIDA */
+    background-color: var(--color-input-bg); 
     color: var(--color-ia-text);
     
-    border-radius: 25px; 
+    border-radius: 30px; /* Mais arredondado */
     resize: none; 
     overflow-y: auto;
-    font-size: 1em;
+    font-size: 1.1em; /* AUMENTADO */
     box-sizing: border-box; 
-    line-height: 1.3;
+    line-height: 1.4;
 }
 
 /* 6. AVISO INFERIOR */
 .aviso-inferior {
-    font-size: 0.75em;
+    /* CRÍTICO: Garantir que ele seja visível e tenha o padding correto */
+    font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    padding: 5px 10px;
-    background-color: var(--color-aviso-bg);
-    /* REMOVER: Nenhuma borda acima do aviso */
+    padding: 10px 20px; /* Aumenta o padding */
+    background-color: var(--color-aviso-bg); /* Fundo #1B1C1D */
     border-top: none; 
     flex-shrink: 0; 
 }
@@ -170,68 +159,48 @@ body {
     position: absolute;
     height: 40px; 
     width: 40px;  
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    border-radius: 50%; 
-    cursor: pointer;
-    font-size: 1.1em;
-    transition: all 0.1s;
+    /* Resto do posicionamento permanece igual (dentro do input) */
     top: 50%;
     transform: translateY(-50%); 
     
     background-color: transparent; 
     color: var(--color-text-secondary); 
+    font-size: 1.2em;
 }
 
 #microphone-btn {
-    right: 50px; 
+    right: 55px; /* Ajusta o posicionamento devido ao aumento do padding */
 }
 
 #enviar-btn {
-    right: 5px; 
+    right: 10px; 
     background-color: var(--color-highlight); 
     color: var(--color-text-light);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
-    font-size: 1.3em;
+    font-size: 1.4em; /* Levemente maior */
 }
 
-/* Estilos de Botão e Ação (mantidos) */
-#enviar-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background-color: var(--color-border); 
-    color: var(--color-text-secondary);
-}
+/* Estilos de Botão de Ação dentro da bolha da IA */
 .ia-action-button {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 .ia-action-button .button-link {
     display: inline-flex; 
     align-items: center;
     justify-content: center;
-    
-    padding: 10px 15px;
-    border-radius: 20px;
-    
+    padding: 12px 18px;
+    border-radius: 25px;
     background-color: var(--color-highlight); 
     color: var(--color-text-light); 
-    
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1em;
-    cursor: pointer;
-    
-    transition: background-color 0.2s, opacity 0.2s;
+    font-size: 1.05em;
     width: 100%; 
-    max-width: 250px; 
+    max-width: 300px; 
 }
 .ia-action-button .button-link:hover {
     background-color: #44682c; 
 }
 .ia-action-button .button-link i {
-    margin-right: 8px;
+    margin-right: 10px;
 }
