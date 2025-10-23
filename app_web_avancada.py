@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, session, jsonify, redirect, u
 import json
 import os
 import logging
-from assistente_avancada import ParceiroDeFeAvancado
+from assistente_avancada import ParceiroDeFeAvancado # Importa a classe do assistente
 from dotenv import load_dotenv
 
 # --- Carregamento de Variáveis de Ambiente ---
@@ -29,7 +29,7 @@ CONHECIMENTO_PATH = 'conhecimento_esperancapontalsul.txt'
 CONTATOS_PATH = 'contatos_igreja.json'
 
 
-# --- 1. FUNÇÕES DE DADOS (Mantidas as funções de leitura/escrita) ---
+# --- FUNÇÕES DE DADOS ---
 
 def ler_conhecimento_atual():
     """Lê o conteúdo atual do arquivo de conhecimento."""
@@ -62,12 +62,15 @@ def carregar_links_contatos():
         return {}
 
 
-# --- 2. INICIALIZAÇÃO DA ASSISTENTE (Mantida a estrutura robusta) ---
+# --- INICIALIZAÇÃO DA ASSISTENTE ---
 
 class PlaceholderAssistente:
     def iniciar_novo_chat(self): return []
-    def enviar_saudacao(self): return "<h1>ERRO CRÍTICO</h1><p>O assistente de IA não pôde ser inicializado. Verifique logs e chaves API.</p>"
-    def obter_resposta_com_memoria(self, hist, perg): return "IA Inoperante devido a erro de inicialização.", hist
+    def enviar_saudacao(self): return "<h1>ERRO CRÍTICO</h1><p>O assistente de IA não pôde ser inicializado.</p>"
+    def obter_resposta_com_memoria(self, hist, perg): 
+        # Simula o erro para o log
+        logger.error("Placeholder assistente chamado, IA inoperante.")
+        return "IA Inoperante devido a erro de inicialização.", hist
     def __setattr__(self, name, value):
         if name in ['contatos', 'conhecimento_texto']:
             pass
@@ -82,12 +85,11 @@ except Exception as e:
 
 
 # ----------------------------------------------------
-# 3. ROTAS DO FLASK
+# ROTAS DO FLASK
 # ----------------------------------------------------
 
 @app.route('/')
 def index():
-    # Bloco robusto de inicialização de sessão para evitar Erro 500
     if 'historico' not in session:
         try:
             session['historico'] = assistente.iniciar_novo_chat() 
@@ -108,7 +110,7 @@ def chat():
     pergunta = data.get('pergunta')
     
     historico_serializado = session.get('historico')
-    # CRÍTICO: Se o histórico não existir na sessão, inicia novamente
+    
     if historico_serializado is None:
          historico_serializado = assistente.iniciar_novo_chat()
          session['historico'] = historico_serializado
@@ -116,6 +118,7 @@ def chat():
     if not pergunta:
         return jsonify({'erro': 'Pergunta vazia.'}), 400
 
+    # Adiciona a nova pergunta ao histórico serializado
     historico_serializado.append({
         "role": "user",
         "parts": [{"text": pergunta}]
@@ -125,19 +128,22 @@ def chat():
     
     try:
         resposta_ia, novo_historico_gemini = assistente.obter_resposta_com_memoria(
-            historico_serializado, 
+            historico_serializado, # Enviamos o histórico serializado
             pergunta
         )
         
-        # Converte o histórico Gemini (objeto) para o formato JSON (serializável)
+        # AQUI FOI O ERRO: Precisamos garantir que o histórico retornado pelo assistente
+        # seja serializável para a sessão. Se a IA retornou objetos Content, serializamos novamente.
         novo_historico_serializado = [
-            json.loads(item.model_dump_json()) 
+            item.to_dict() if hasattr(item, 'to_dict') else item
             for item in novo_historico_gemini
         ]
+        
         session['historico'] = novo_historico_serializado
         
     except Exception as e:
         logger.error(f"Erro na API Gemini para a pergunta '{pergunta[:50]}...': {e}", exc_info=True)
+        # O detalhe do erro 'from_dict' é o que aparece para o usuário no front-end.
         resposta_ia = f"Erro Interno: Falha de comunicação com o modelo de IA. Detalhe: {str(e)[:100]}..." 
         pass 
     finally:
@@ -148,7 +154,6 @@ def chat():
 
 @app.route('/admin/conhecimento', methods=['GET', 'POST'])
 def admin_conhecimento():
-    # Nota: Esta rota pressupõe que a segurança (login) foi removida.
     mensagem = ""
     
     if request.method == 'POST':
@@ -173,5 +178,4 @@ def admin_conhecimento():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    # CRÍTICO: Mantenha host='0.0.0.0' para o Render
     app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_ENV') == 'development')
