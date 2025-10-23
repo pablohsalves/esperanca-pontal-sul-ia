@@ -1,10 +1,10 @@
-# app_web_avancada.py - VERSÃO V60.27 (Dark Mode Estável + Correção Crítica de Sintaxe da API)
+# app_web_avancada.py - VERSÃO V60.29 (Correções Finais de API e Histórico de Sessão)
 
 import os
 import json
 from flask import Flask, render_template, request, jsonify, session
 from google import genai
-from google.genai import types # Importação da biblioteca
+from google.genai import types
 
 # --- Configuração de Links de Contato ---
 CONTACT_LINKS = {
@@ -27,7 +27,7 @@ CONTACT_LINKS = {
     "secretaria": {
         "text": "Ir para o Portal da Secretaria",
         "url": "http://portal.suasecretaria.com.br",
-        "icon": "fas fa-laptop"
+        "icon": "fas fas fa-laptop"
     }
 }
 # --- Fim Configuração de Links ---
@@ -76,7 +76,7 @@ def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_IN
     Função principal para obter a resposta da IA.
     """
     try:
-        # CORREÇÃO CRÍTICA APLICADA AQUI (Evita o TypeError: Part.from_text() aceita 1 argumento posicional, mas 2 foram fornecidos)
+        # A sintaxe de Part(text=...) para a mensagem do usuário está correta
         history.append(types.Content(role="user", parts=[types.Part(text=user_message)]))
 
         config = types.GenerateContentConfig(
@@ -89,7 +89,9 @@ def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_IN
             config=config,
         )
         
-        history.append(types.Content(role="model", parts=[types.Part.from_text(response.text)]))
+        # CORREÇÃO CRÍTICA #1: Usa a sintaxe correta para adicionar a resposta da IA ao histórico.
+        # Evita o erro "Part.from_text() recebe 1 argumento posicional, mas 2 foram fornecidos"
+        history.append(types.Content(role="model", parts=[types.Part(text=response.text)]))
         
         return response.text
     
@@ -101,7 +103,6 @@ def classify_intent(user_message):
     """
     Classifica a intenção do usuário para verificar se é um pedido de contato.
     """
-    # CORREÇÃO CRÍTICA APLICADA AQUI
     history = [
         types.Content(role="user", parts=[types.Part(text=user_message)])
     ]
@@ -134,7 +135,9 @@ def home():
 
 @app.route("/api/chat", methods=["POST"])
 def chat_api():
-    # ... (chat_api permanece a mesma - Lógica dos Botões)
+    """
+    Endpoint para comunicação AJAX com o front-end.
+    """
     data = request.json
     user_message = data.get("mensagem")
     
@@ -158,17 +161,21 @@ def chat_api():
     else:
         history_dicts = session.get('chat_history', [])
         
+        # Converte a lista de dicionários para objetos types.Content para a API
         history = []
         try:
             history = [types.Content(**h) for h in history_dicts]
         except Exception as e:
+            # Caso a sessão esteja corrompida, limpa e inicia novo chat.
             print(f"Erro ao carregar histórico da sessão: {e}. Reiniciando histórico.")
             session['chat_history'] = []
             history = []
 
         ia_response_text = get_gemini_response(history, user_message)
         
-        session['chat_history'] = [h.to_dict() for h in history]
+        # CORREÇÃO CRÍTICA #2: Substitui h.to_dict() por h.model_dump() ou h.to_json()
+        # O Pydantic (usado pela Google GenAI SDK) renomeou to_dict() para model_dump()
+        session['chat_history'] = [h.model_dump() for h in history]
         
         return jsonify({"type": "text", "resposta": ia_response_text})
 
