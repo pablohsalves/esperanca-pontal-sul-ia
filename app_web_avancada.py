@@ -1,4 +1,4 @@
-# app_web_avancada.py - VERSÃO V60.34 (Correção da Base de Conhecimento e Funcionalidade)
+# app_web_avancada.py - VERSÃO V60.36 (Debugging e Correção de Layout)
 
 import os
 import json
@@ -8,7 +8,6 @@ from google.genai import types
 
 # --- Configuração de Links de Contato ---
 CONTACT_LINKS = {
-    # ... (Seus links permanecem os mesmos)
     "whatsapp": {
         "text": "Falar com a Equipe",
         "url": "https://wa.me/5562999999999?text=Ol%C3%A1%2C%20gostaria%20de%20informa%C3%A7%C3%B5es%20sobre%20a%20Hope.",
@@ -44,10 +43,8 @@ KNOWLEDGE_FILE = 'conhecimento_esperancapontalsul.txt'
 def load_knowledge_base():
     """Tenta carregar o conteúdo do arquivo de conhecimento."""
     try:
-        # Usar um encoding mais robusto
         with open(KNOWLEDGE_FILE, 'r', encoding='utf-8') as f:
             content = f.read()
-            # Adicionar uma verificação simples: se estiver vazio, retorna falha
             if not content.strip():
                  print("AVISO: Arquivo de conhecimento carregado, mas está vazio.")
                  return ""
@@ -88,11 +85,10 @@ def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_IN
     Função principal para obter a resposta da IA.
     """
     try:
-        # A sintaxe de Part(text=...) para a mensagem do usuário está correta
         history.append(types.Content(role="user", parts=[types.Part(text=user_message)]))
 
         config = types.GenerateContentConfig(
-            system_instruction=system_instruction # Garante que a instrução completa seja passada
+            system_instruction=system_instruction
         )
 
         response = client.models.generate_content(
@@ -101,18 +97,15 @@ def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_IN
             config=config,
         )
         
-        # Correção Crítica de Histórico
         history.append(types.Content(role="model", parts=[types.Part(text=response.text)]))
         
         return response.text
     
     except Exception as e:
         print(f"Erro ao chamar a API Gemini: {e}")
-        # Retorna uma mensagem amigável no caso de falha
         return "Desculpe, estou com dificuldades técnicas no momento. Por favor, tente novamente mais tarde."
 
 def classify_intent(user_message):
-    # ... (Função classify_intent permanece a mesma)
     history = [
         types.Content(role="user", parts=[types.Part(text=user_message)])
     ]
@@ -135,7 +128,6 @@ def classify_intent(user_message):
 
 @app.route("/")
 def home():
-    # ... (Rota home permanece a mesma)
     if 'chat_history' not in session or not isinstance(session['chat_history'], list):
         session['chat_history'] = []
         
@@ -143,9 +135,25 @@ def home():
 
     return render_template("chat_interface.html", saudacao=saudacao)
 
+# V60.36 NOVO: Rota para verificar o status do carregamento da base de conhecimento
+@app.route("/knowledge_status")
+def knowledge_status():
+    if KNOWLEDGE_CONTENT:
+        return jsonify({
+            "status": "OK",
+            "message": "Base de conhecimento carregada com sucesso. Verifique se o conteúdo abaixo está correto e se o arquivo está no diretório correto. Se sim, o problema está na forma como o modelo usa o contexto (tente refinar as informações no arquivo).",
+            "content_snippet": KNOWLEDGE_CONTENT[:500] + ("..." if len(KNOWLEDGE_CONTENT) > 500 else ""),
+            "content_length": len(KNOWLEDGE_CONTENT)
+        })
+    else:
+        return jsonify({
+            "status": "FALHA",
+            "message": "Base de conhecimento NÃO carregada. Verifique se o arquivo 'conhecimento_esperancapontalsul.txt' existe no diretório raiz do projeto e se está no formato UTF-8.",
+            "content_length": 0
+        })
+
 @app.route("/api/chat", methods=["POST"])
 def chat_api():
-    # ... (chat_api permanece a mesma - usa o novo get_gemini_response)
     data = request.json
     user_message = data.get("mensagem")
     

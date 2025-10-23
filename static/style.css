@@ -1,13 +1,10 @@
 /*
- * style.css - VERSÃO V60.35 (CORREÇÃO FINAL DE BORDAS, ROLAGEM E LOGO)
+ * style.css - VERSÃO V60.36 (CORREÇÃO FINAL: Logo Centralizada e Placeholder)
  */
 
 :root {
-    /* Cores Customizadas pelo Usuário */
     --color-background: #1B1C1D; 
     --color-ia-bg: var(--color-background); 
-    
-    /* Cores Derivadas/Padrão */
     --color-chat-bg: var(--color-background); 
     --color-ia-text: #ffffff; 
     --color-user-bg: #4A4A4A; 
@@ -27,7 +24,7 @@ body {
     background-color: var(--color-background); 
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: center; 
     min-height: 100vh;
     height: 100vh;
     margin: 0;
@@ -40,7 +37,6 @@ body {
     width: 100%;
     max-width: 650px; 
     height: 100%; 
-    max-height: 90vh; 
     display: flex;
     flex-direction: column;
     box-shadow: none; 
@@ -49,27 +45,19 @@ body {
     border-radius: 0; 
 }
 
-/* 2. CABEÇALHO (LOGO) */
-.chat-header {
-    background-color: var(--color-chat-bg); 
-    color: var(--color-user-text);
-    /* Remove padding lateral, centraliza o conteúdo */
-    padding: 15px 0 10px 0; 
-    text-align: center; 
-    border-bottom: none; 
-    flex-shrink: 0; 
-    display: flex; /* Permite centralização vertical/horizontal da logo */
-    justify-content: center;
-    align-items: center;
+/* 2. LOGO CENTRALIZADA (NOVO) */
+.central-logo-container {
+    padding: 20px 0 10px 0; 
+    text-align: center;
+    flex-shrink: 0;
 }
 
-.chat-logo {
-    /* Estilo da sua Logo */
-    max-height: 40px; 
+.central-logo {
+    max-height: 50px; 
     width: auto;
-    filter: brightness(1.2); /* Opcional: para logo branca se destacar no fundo escuro */
+    filter: brightness(1.2); 
+    margin-bottom: 10px;
 }
-
 
 /* 3. ÁREA DE MENSAGENS (CHAT BOX) */
 #chat-box {
@@ -81,7 +69,6 @@ body {
     gap: 15px; 
     background-color: var(--color-chat-bg); 
     
-    /* Ocultar barra de rolagem da caixa de chat */
     &::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -117,8 +104,7 @@ body {
 /* 5. ÁREA DE INPUT */
 .chat-input-container {
     background-color: var(--color-background); 
-    /* CRÍTICO: Ajuste final do padding para mobile */
-    padding: 10px 20px 5px; /* Sobe o input um pouco mais */
+    padding: 10px 20px 5px; 
     display: flex;
     align-items: center; 
     border-top: none; 
@@ -147,11 +133,11 @@ body {
     border-radius: 30px; 
     resize: none; 
     overflow-y: auto;
-    font-size: 1.1em; 
+    font-size: 1.2em; /* CRÍTICO: Tamanho da fonte aumentado */
     box-sizing: border-box; 
     line-height: 1.4;
 
-    /* CRÍTICO: Ocultar a barra de rolagem no campo de pesquisa */
+    /* Ocultar a barra de rolagem no campo de pesquisa */
     &::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -164,8 +150,8 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* CRÍTICO: Ajuste final de padding inferior para garantir que não seja cortado */
-    padding: 5px 20px 10px; 
+    /* CRÍTICO: Padding final ajustado para garantir visibilidade */
+    padding: 5px 20px 15px; 
     background-color: var(--color-aviso-bg); 
     border-top: none; 
     flex-shrink: 0; 
@@ -229,7 +215,6 @@ body {
     
     transition: background-color 0.2s, opacity 0.2s;
     width: 100%; 
-    /* CRÍTICO: Reduz o max-width para garantir que caiba no balão de 85% e não transborde */
     max-width: 250px; 
 }
 .ia-action-button .button-link:hover {
