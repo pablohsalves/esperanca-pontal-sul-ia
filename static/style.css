@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.37 (CORREÇÃO FINAL DO CORTE NO MOBILE)
+ * style.css - VERSÃO V60.38 (REPOSICIONAMENTO DA LOGO E CHAT PARA O CENTRO DA PÁGINA)
  */
 
 :root {
@@ -24,11 +24,11 @@ body {
     background-color: var(--color-background); 
     display: flex;
     justify-content: center;
+    /* CRÍTICO: Centraliza verticalmente o chat-container no desktop */
     align-items: center; 
     margin: 0;
     padding: 0;
     width: 100%;
-    /* CRÍTICO: Usa 100% da altura da viewport. */
     height: 100vh; 
     overflow: hidden; 
 }
@@ -36,9 +36,9 @@ body {
 .chat-container {
     width: 100%;
     max-width: 650px; 
-    /* CRÍTICO: Altura total para preencher a tela */
-    height: 100%; 
-    max-height: 100vh;
+    /* CRÍTICO: Altura para flutuar ao centro. Ajustado para 95% para não encostar nas bordas. */
+    height: 95vh; 
+    max-height: 95vh;
     display: flex;
     flex-direction: column;
     box-shadow: none; 
@@ -47,9 +47,10 @@ body {
     border-radius: 0; 
 }
 
-/* 2. LOGO CENTRALIZADA */
+/* 2. LOGO CENTRALIZADA (Topo da Caixa de Chat, mas a Caixa está no Centro da Tela) */
 .central-logo-container {
-    padding: 20px 0 10px 0; 
+    /* Aumenta o padding vertical para dar mais espaço */
+    padding: 25px 0 15px 0; 
     text-align: center;
     flex-shrink: 0;
 }
@@ -71,7 +72,6 @@ body {
     gap: 15px; 
     background-color: var(--color-chat-bg); 
     
-    /* Ocultar barra de rolagem da caixa de chat */
     &::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -79,7 +79,7 @@ body {
     scrollbar-width: none; 
 }
 
-/* 4. ESTILO DAS BOLHAS DE MENSAGEM */
+/* 4. ESTILO DAS BOLHAS DE MENSAGEM (sem alterações) */
 .mensagem {
     padding: 12px 18px; 
     border-radius: 20px; 
@@ -153,8 +153,8 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* CRÍTICO: Aumenta o padding inferior final para garantir que não seja cortado */
-    padding: 5px 20px 20px; /* Aumentado para 20px */
+    /* CRÍTICO: PADDING FINAL AGRESSIVO PARA GARANTIR VISIBILIDADE NO MOBILE */
+    padding: 5px 20px 20px; 
     background-color: var(--color-aviso-bg); 
     border-top: none; 
     flex-shrink: 0; 
@@ -162,14 +162,17 @@ body {
 
 /* NOVO: Hack para iOS/Android que tem problemas com 100vh */
 @media screen and (max-width: 650px) {
+    body {
+        /* Desativa a centralização vertical no mobile para maximizar o espaço */
+        align-items: flex-end; 
+    }
     .chat-container {
         /* Usa -webkit-fill-available que é mais preciso no mobile */
         height: -webkit-fill-available;
         max-height: none; 
     }
 }
-
-/* 7. BOTÕES (ÍCONES DENTRO DO INPUT) */
+/* ... (Restante do CSS, botões) ... */
 .icon-btn {
     position: absolute;
     height: 40px; 

@@ -1,4 +1,4 @@
-# app_web_avancada.py - VERSÃO V60.36 (Debugging e Correção de Layout)
+# app_web_avancada.py - VERSÃO V60.38 (Sem alteração no Backend, apenas no Frontend)
 
 import os
 import json
@@ -135,7 +135,7 @@ def home():
 
     return render_template("chat_interface.html", saudacao=saudacao)
 
-# V60.36 NOVO: Rota para verificar o status do carregamento da base de conhecimento
+# Rota para verificar o status do carregamento da base de conhecimento
 @app.route("/knowledge_status")
 def knowledge_status():
     if KNOWLEDGE_CONTENT:
