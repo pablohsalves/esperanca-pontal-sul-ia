@@ -1,23 +1,23 @@
 /*
- * style.css - VERSÃO V60.28 (TEMA DARK MODE CUSTOMIZADO E LAYOUT FINAL)
+ * style.css - VERSÃO V60.30 (Dark Mode Proporcional e Cores Finais)
  */
 
 :root {
-    /* Cores Customizadas pelo Usuário */
-    --color-background: #1B1C1D; /* Fundo do corpo */
-    --color-chat-bg: #262626; /* Fundo da caixa de chat (um pouco mais claro que o fundo) */
+    /* Cores Customizadas pelo Usuário (Novos Códigos de Cores) */
+    --color-background: #1B1C1D; /* Fundo do corpo (COR PERSONALIZADA) */
     --color-ia-bg: #333537; /* Fundo da bolha da IA (COR PERSONALIZADA) */
     
-    /* Cores Derivadas/Padrão */
+    /* Cores Derivadas/Padrão (do Dark Mode) */
+    --color-chat-bg: #262626; /* Fundo da caixa de chat */
     --color-ia-text: #ffffff; 
-    --color-user-bg: #4A4A4A; /* Bolha do usuário (um cinza mais escuro para contraste) */
+    --color-user-bg: #4A4A4A; 
     --color-user-text: #ffffff; 
-    --color-input-bg: var(--color-chat-bg); /* O input tem o mesmo fundo da área de chat */
+    --color-input-bg: var(--color-chat-bg); 
     --color-border: #505050; 
     --color-text-secondary: #aaaaaa; 
-    --color-highlight: #558B2F; /* Verde principal para destaque (botão, links) */
+    --color-highlight: #558B2F; 
     --color-text-light: #ffffff; 
-    --color-aviso-bg: #222222; /* Fundo do aviso inferior */
+    --color-aviso-bg: #222222; 
 }
 
 /* 1. LAYOUT GERAL E RESPONSIVIDADE */
@@ -27,46 +27,60 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh; /* Garante tela cheia em mobile */
+    /* CRÍTICO: Usa 100vh e oculta a barra de rolagem do navegador para Mobile/Desktop */
+    min-height: 100vh;
+    height: 100vh;
     margin: 0;
     width: 100%;
+    overflow: hidden; /* Oculta a barra de rolagem principal do navegador */
 }
 
 .chat-container {
     width: 100%;
-    max-width: 450px; /* Largura máxima para PC */
-    height: 100vh; /* Altura total em mobile */
-    max-height: 800px; /* Altura máxima em PC */
+    max-width: 450px; 
+    /* CRÍTICO: Usa altura total do viewport no mobile e máxima no desktop */
+    height: 100%; /* Ajusta para 100% da altura do body (100vh) */
+    max-height: 800px; 
     display: flex;
     flex-direction: column;
     box-shadow: none; 
     background-color: var(--color-chat-bg);
+    /* Remove overflow: hidden; aqui para deixar o #chat-box gerenciar a rolagem */
     overflow: hidden;
-    /* Remove border-radius para cobrir toda a tela em mobile, mas mantém em PC */
-    border-radius: max(0px, min(8px, (100vh - 800px) / 2)); 
+    /* Ajuste para desktop: remove bordas arredondadas em mobile */
+    border-radius: 8px; 
 }
 
 /* 2. CABEÇALHO */
 .chat-header {
     background-color: var(--color-chat-bg); 
     color: var(--color-user-text);
-    padding: 10px 15px; /* Padding menor */
-    text-align: center; /* CENTRALIZADO */
-    font-size: 1.2em; /* TAMANHO PEQUENO */
+    padding: 10px 15px;
+    text-align: center; 
+    font-size: 1.2em; 
     font-weight: bold;
     border-bottom: 1px solid var(--color-border); 
+    /* Garante que o cabeçalho não encolha */
+    flex-shrink: 0; 
 }
 
 /* 3. ÁREA DE MENSAGENS (CHAT BOX) */
 #chat-box {
     flex-grow: 1;
     padding: 15px;
-    overflow-y: auto;
+    overflow-y: auto; /* CRÍTICO: A rolagem acontece AQUI, dentro da caixa de chat */
     display: flex;
     flex-direction: column;
     gap: 10px;
     scroll-behavior: smooth;
     background-color: var(--color-chat-bg); 
+    /* Esconder barra de rolagem no Webkit (Chrome, Safari) */
+    &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+    /* Esconder barra de rolagem no Firefox */
+    scrollbar-width: none; 
 }
 
 /* 4. ESTILO DAS BOLHAS DE MENSAGEM */
@@ -105,6 +119,7 @@ body {
     display: flex;
     align-items: center; 
     border-top: 1px solid var(--color-border); 
+    flex-shrink: 0; /* Garante que o rodapé de input não encolha */
 }
 
 #input-wrapper {
@@ -112,7 +127,6 @@ body {
     display: flex; 
     align-items: center; 
     position: relative;
-    /* Não precisa de padding-right, pois os botões estão DENTRO */
     padding-right: 0; 
 }
 
@@ -121,14 +135,13 @@ body {
     min-height: 50px; 
     max-height: 150px; 
     padding: 15px; 
-    /* CRÍTICO: Espaço para os DOIS botões internos */
-    padding-right: 100px; 
+    padding-right: 100px; /* Espaço para os DOIS botões internos */
     
     border: 1px solid var(--color-border);
     background-color: var(--color-chat-bg); 
     color: var(--color-ia-text);
     
-    border-radius: 25px; /* Arredondado, como nas imagens */
+    border-radius: 25px; 
     resize: none; 
     overflow-y: auto;
     font-size: 1em;
@@ -144,6 +157,7 @@ body {
     padding: 5px 10px;
     background-color: var(--color-aviso-bg);
     border-top: 1px solid #3a3a3a;
+    flex-shrink: 0; /* Garante que o aviso não encolha */
 }
 
 /* 7. BOTÕES (ÍCONES DENTRO DO INPUT) */
@@ -155,25 +169,22 @@ body {
     align-items: center;
     justify-content: center;
     border: none;
-    border-radius: 50%; /* OBRIGATÓRIO: Circulo */
+    border-radius: 50%; 
     cursor: pointer;
     font-size: 1.1em;
     transition: all 0.1s;
     top: 50%;
     transform: translateY(-50%); 
     
-    /* Padrão para Ícones Internos */
     background-color: transparent; 
     color: var(--color-text-secondary); 
 }
 
 #microphone-btn {
-    /* Microfone fica DEPOIS do avião */
     right: 50px; 
 }
 
 #enviar-btn {
-    /* Botão de Enviar (Avião) fica na EXTREMA DIREITA (DENTRO do input) */
     right: 5px; 
     background-color: var(--color-highlight); 
     color: var(--color-text-light);
@@ -181,30 +192,19 @@ body {
     font-size: 1.3em;
 }
 
-/* Ajustes de estado (mantidos) */
+/* Estilos de Botão e Estados (mantidos) */
 #enviar-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background-color: var(--color-border); 
     color: var(--color-text-secondary);
 }
-
-#microphone-btn:hover:not(.mic-active),
-#enviar-btn:hover:not(:disabled) {
-    opacity: 0.85;
-}
-
-.icon-btn.mic-active {
-    color: red; 
-}
-
-/* 8. Estilo para Botão de Ação dentro da bolha da IA */
+/* ... (outros estilos de botão e de ação) */
 .ia-action-button {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
-
 .ia-action-button .button-link {
     display: inline-flex; 
     align-items: center;
@@ -225,11 +225,9 @@ body {
     width: 100%; 
     max-width: 250px; 
 }
-
 .ia-action-button .button-link:hover {
     background-color: #44682c; 
 }
-
 .ia-action-button .button-link i {
     margin-right: 8px;
 }
