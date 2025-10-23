@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.34 (CORREÇÃO FINAL: Botão Transbordando, Balão IA e Proporção)
+ * style.css - VERSÃO V60.35 (CORREÇÃO FINAL DE BORDAS, ROLAGEM E LOGO)
  */
 
 :root {
@@ -23,7 +23,6 @@
 
 /* 1. LAYOUT GERAL E RESPONSIVIDADE */
 body {
-    /* ... (Restante do body inalterado) */
     font-family: Arial, sans-serif;
     background-color: var(--color-background); 
     display: flex;
@@ -50,22 +49,30 @@ body {
     border-radius: 0; 
 }
 
-/* 2. CABEÇALHO */
+/* 2. CABEÇALHO (LOGO) */
 .chat-header {
-    /* ... (Inalterado) */
     background-color: var(--color-chat-bg); 
     color: var(--color-user-text);
-    padding: 15px 20px; 
+    /* Remove padding lateral, centraliza o conteúdo */
+    padding: 15px 0 10px 0; 
     text-align: center; 
-    font-size: 1.3em; 
-    font-weight: bold;
     border-bottom: none; 
     flex-shrink: 0; 
+    display: flex; /* Permite centralização vertical/horizontal da logo */
+    justify-content: center;
+    align-items: center;
 }
+
+.chat-logo {
+    /* Estilo da sua Logo */
+    max-height: 40px; 
+    width: auto;
+    filter: brightness(1.2); /* Opcional: para logo branca se destacar no fundo escuro */
+}
+
 
 /* 3. ÁREA DE MENSAGENS (CHAT BOX) */
 #chat-box {
-    /* ... (Inalterado) */
     flex-grow: 1;
     padding: 15px 20px;
     overflow-y: auto; 
@@ -74,6 +81,7 @@ body {
     gap: 15px; 
     background-color: var(--color-chat-bg); 
     
+    /* Ocultar barra de rolagem da caixa de chat */
     &::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -102,7 +110,6 @@ body {
     align-self: flex-start;
     background-color: var(--color-ia-bg); 
     color: var(--color-ia-text);
-    /* CRÍTICO: Bordas suaves para o balão da IA */
     border: 1px solid var(--color-border); 
     border-top-left-radius: 4px; 
 }
@@ -110,8 +117,8 @@ body {
 /* 5. ÁREA DE INPUT */
 .chat-input-container {
     background-color: var(--color-background); 
-    /* CRÍTICO: Ajusta o padding inferior para resolver o corte no mobile */
-    padding: 10px 20px 10px; /* Mais equilibrado */
+    /* CRÍTICO: Ajuste final do padding para mobile */
+    padding: 10px 20px 5px; /* Sobe o input um pouco mais */
     display: flex;
     align-items: center; 
     border-top: none; 
@@ -119,7 +126,6 @@ body {
 }
 
 #input-wrapper {
-    /* ... (Inalterado) */
     flex-grow: 1;
     display: flex; 
     align-items: center; 
@@ -128,7 +134,6 @@ body {
 }
 
 #pergunta-input {
-    /* ... (Inalterado) */
     flex-grow: 1;
     min-height: 55px; 
     max-height: 200px; 
@@ -145,6 +150,13 @@ body {
     font-size: 1.1em; 
     box-sizing: border-box; 
     line-height: 1.4;
+
+    /* CRÍTICO: Ocultar a barra de rolagem no campo de pesquisa */
+    &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+    scrollbar-width: none; 
 }
 
 /* 6. AVISO INFERIOR */
@@ -152,8 +164,8 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* CRÍTICO: Garante padding para que a frase não seja cortada e fique no fundo */
-    padding: 5px 20px 10px; /* Padding inferior final no footer */
+    /* CRÍTICO: Ajuste final de padding inferior para garantir que não seja cortado */
+    padding: 5px 20px 10px; 
     background-color: var(--color-aviso-bg); 
     border-top: none; 
     flex-shrink: 0; 
@@ -216,9 +228,9 @@ body {
     cursor: pointer;
     
     transition: background-color 0.2s, opacity 0.2s;
-    /* CRÍTICO: Ajusta o max-width para caber dentro da bolha de 85% */
     width: 100%; 
-    max-width: 280px; /* Reduz ligeiramente para evitar transbordo no mobile */
+    /* CRÍTICO: Reduz o max-width para garantir que caiba no balão de 85% e não transborde */
+    max-width: 250px; 
 }
 .ia-action-button .button-link:hover {
     background-color: #44682c; 
