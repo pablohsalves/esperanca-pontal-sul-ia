@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.10 (Ajuste Final: Altura e Posição do Placeholder)
+ * style.css - VERSÃO V60.11 (Correção Final: Microfone e Avião DENTRO do Input)
  */
 
 /* 1. RESET E VARIAVEIS */
@@ -91,11 +91,16 @@ html, body {
 #pergunta-input {
     flex-grow: 1; 
     
-    /* CRÍTICO V60.10: AUMENTO DA ALTURA E AJUSTE DO TEXTO */
-    padding-top: 30px;    /* Mais padding em cima */
-    padding-bottom: 30px; /* Mais padding embaixo */
+    /* CRÍTICO V60.11: CONTAINER PAI PARA POSICIONAMENTO DOS ÍCONES */
+    position: relative; /* CRÍTICO: Define o input como âncora para os filhos absolutos */
+    
+    /* Aumento da Altura (padding) */
+    padding-top: 30px;
+    padding-bottom: 30px; 
     padding-left: 20px;
-    padding-right: 20px;
+    
+    /* Aumenta padding na direita para não sobrepor os ícones internos */
+    padding-right: 120px; 
     
     border-radius: 28px;
     
@@ -109,20 +114,20 @@ html, body {
     resize: none; 
     max-height: 120px; 
     
-    margin-right: 5px; 
+    margin-right: 0; /* REMOVIDO: margem direita na caixa de input */
     
     line-height: 1.4;
     box-sizing: border-box; 
     transition: box-shadow 0.2s;
 }
 
-/* CRÍTICO V60.10: Posicionamento do Placeholder (Peça à Hope...) */
+/* CRÍTICO V60.11: Posicionamento do Placeholder (Peça à Hope...) */
 /* Para WebKit (Chrome, Safari, Edge) */
 #pergunta-input::-webkit-input-placeholder {
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary); 
     position: absolute;
-    bottom: 5px; /* Move para baixo */
-    right: 20px; /* Alinha à direita */
+    bottom: 5px; /* Posição na parte inferior do input */
+    right: 60px; /* Posição à esquerda do microfone */
     width: auto;
     text-align: right;
     font-size: 0.9em; 
@@ -141,7 +146,7 @@ html, body {
     color: var(--color-text-secondary);
     position: absolute;
     bottom: 5px;
-    right: 20px;
+    right: 60px;
     text-align: right;
     font-size: 0.9em;
 }
@@ -153,6 +158,7 @@ html, body {
 }
 
 /* 7. BOTÕES (ÍCONES - MIC, AVIÃO, STOP) */
+/* Resetamos os estilos e movemos para dentro do Input */
 .icon-btn {
     border: none;
     background-color: transparent; 
@@ -169,14 +175,26 @@ html, body {
     flex-shrink: 0; 
     font-size: 1.2em;
     padding: 0; 
-    margin: 0 0 0 5px; 
+    margin: 0; 
     z-index: 11;
+    
+    /* CRÍTICO V60.11: Posicionamento absoluto DENTRO do input */
+    position: absolute; 
+    bottom: 8px; /* Ajuste vertical */
 }
 
-/* Estilo do botão de envio */
+/* Posicionamento do botão de Envio (o mais à direita) */
 #enviar-btn {
+    right: 10px; /* Posicionado à 10px da borda direita do input */
     background-color: var(--color-send-bg); 
     color: var(--color-text-light);
+}
+
+/* Posicionamento do botão de Microfone (ao lado do Enviar) */
+#microphone-btn {
+    right: 55px; /* Posicionado à 55px da borda direita do input */
+    background-color: transparent; /* Remove o fundo do mic */
+    color: var(--color-text-secondary); /* Cor mais sutil */
 }
 
 /* Estado Desabilitado do botão de envio */
@@ -185,13 +203,6 @@ html, body {
     cursor: not-allowed;
     color: var(--color-text-light); 
     background-color: var(--color-send-bg); 
-}
-
-/* Botão de Microfone */
-#microphone-btn {
-    background-color: transparent; 
-    color: var(--color-text-secondary); 
-    margin-left: 0; 
 }
 
 

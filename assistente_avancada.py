@@ -88,6 +88,7 @@ class Hope:
         return self.conversas[user_id]
 
     def _extrair_links_e_formatar(self, texto):
+        # A implementação desta função foi simplificada, mas pode ser expandida depois.
         return {} 
 
     def chat(self, user_id, mensagem):

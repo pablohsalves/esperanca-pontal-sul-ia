@@ -1,4 +1,4 @@
-// script.js - VERSÃO V60.7 (Lógica UI/UX: Microfone/Enviar/Stop)
+// script.js - VERSÃO V60.11 (Ajuste da Lógica UI/UX)
 
 document.addEventListener('DOMContentLoaded', () => {
     const chatBox = document.getElementById('chat-box');
@@ -15,20 +15,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasText = input.value.trim().length > 0;
         
         if (isThinking) {
-            // Se a IA está pensando, o Microfone deve sumir e o Enviar deve ser o Stop
+            // IA está pensando: O Microfone some e o Enviar se torna o Stop
             microphoneBtn.style.display = 'none';
-            enviarBtn.disabled = false; // Permite clicar para PARAR
+            enviarBtn.style.display = 'flex'; 
+            enviarBtn.disabled = false; 
             enviarBtn.innerHTML = '<i class="fas fa-stop"></i>'; 
             enviarBtn.title = 'Parar Resposta';
         } else if (hasText) {
-            // Se tem texto, o Microfone some e o Enviar é o avião (habilitado)
+            // Tem texto: O Microfone some e o Enviar é o avião (habilitado)
             microphoneBtn.style.display = 'none';
+            enviarBtn.style.display = 'flex'; 
             enviarBtn.disabled = false;
             enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
             enviarBtn.title = 'Enviar Mensagem';
         } else {
-            // Se não tem texto e não está pensando, mostra o Microfone e desabilita o Enviar (avião)
-            microphoneBtn.style.display = 'flex'; // Usamos 'flex' pois é o estilo definido no CSS
+            // Sem texto: Mostra o Microfone e desabilita o Enviar (avião)
+            microphoneBtn.style.display = 'flex'; 
+            enviarBtn.style.display = 'flex'; 
             enviarBtn.disabled = true;
             enviarBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
             enviarBtn.title = 'Digite uma mensagem';
@@ -40,12 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const mensagemDiv = document.createElement('div');
         mensagemDiv.classList.add('mensagem', tipo);
         
-        // Permite o uso de Markdown simples (linhas duplas = parágrafo)
         const htmlContent = texto.replace(/\n\n/g, '<p>').replace(/\n/g, '<br>');
         mensagemDiv.innerHTML = htmlContent;
         chatBox.appendChild(mensagemDiv);
         
-        // Rola automaticamente para baixo após adicionar a mensagem
         chatBox.scrollTop = chatBox.scrollHeight;
         return mensagemDiv;
     }
@@ -72,8 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 5. Ajusta a altura da caixa de texto
     function autoResize() {
-        input.style.height = 'auto'; // Reseta a altura
-        // Define a altura para o scrollHeight, limitado pelo max-height em CSS
+        input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px'; 
     }
 
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Estado de envio
         isThinking = true;
         updateButtonVisibility(); 
-        input.disabled = true; // Desabilita o input enquanto a IA pensa
+        input.disabled = true; 
 
         // 2. Adiciona a mensagem do usuário
         createMessage(userMessage, 'usuario');
@@ -96,8 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 4. Limpa e reseta o input
         input.value = '';
-        autoResize(); // Reseta a altura para uma linha
-        updateButtonVisibility(); // Atualiza novamente, pois o input está vazio
+        autoResize(); 
+        updateButtonVisibility(); 
 
         try {
             const response = await fetch('/api/chat', {
@@ -108,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ mensagem: userMessage }),
             });
 
-            // Se for clicado no Stop (ainda não implementado no backend, mas prepara o front)
             if (!isThinking) return;
 
             const data = await response.json();
@@ -132,21 +131,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // NOTA: A funcionalidade real de "Parar Resposta" (Stop) exige lógica de streaming e interrupção no Backend (Python),
-    // o que é complexo de implementar com a API Gemini de forma simples. O código acima apenas muda o ícone.
-    // Para fins deste projeto, o botão de Stop simplesmente reverte o estado do UI.
-
+    // Lógica de Stop (apenas front-end)
     function stopResponse() {
         if (isThinking) {
             console.log("Comando de Parada de Resposta acionado (apenas UI).");
             
-            // 1. Força a remoção do indicador e reverte o estado
             removeTypingIndicator();
             isThinking = false;
             input.disabled = false;
             updateButtonVisibility();
             
-            // 2. Opcional: Adiciona uma mensagem para feedback visual
             createMessage("A resposta foi interrompida, mas a IA continua pronta para conversar.", 'ia');
             input.focus();
         }

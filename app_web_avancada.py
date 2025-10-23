@@ -1,8 +1,8 @@
-# app_web_avancada.py - V60.9 (Correção de Case Sensitivity e Imports)
+# app_web_avancada.py - V60.9 (Correção de Case Sensitivity e Rota Admin)
 
 import os
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
-import uuid # CRÍTICO: Necessário para gerar IDs de usuário
+import uuid # Necessário para gerar IDs de usuário
 
 # CRÍTICO V60.9: Importa Hope (classe correta), BASE_SYSTEM_INSTRUCTION e carregar_conhecimento_local
 from assistente_avancada import Hope, BASE_SYSTEM_INSTRUCTION, carregar_conhecimento_local 
@@ -11,7 +11,7 @@ from assistente_avancada import Hope, BASE_SYSTEM_INSTRUCTION, carregar_conhecim
 app = Flask(__name__)
 # CRÍTICO: Chave secreta é necessária para usar 'flash' (mensagens de sucesso/erro)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'sua_chave_secreta_padrao_muito_segura')
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' # Adicionei isto para compatibilidade de cookies/sessão
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' # Adicionado para compatibilidade de cookies/sessão
 
 # Inicialização da IA (Hope)
 try:
@@ -62,7 +62,7 @@ def chat():
             'links': {}
         }), 200 
 
-# Rota de Administração de Conhecimento (Funcional)
+# Rota de Administração de Conhecimento
 @app.route('/admin/conhecimento', methods=['GET', 'POST'])
 def admin_conhecimento():
     filepath = "conhecimento_esperancapontalsul.txt"
