@@ -25,6 +25,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center; 
+    /* CRÍTICO: Altura garantida para que o aviso inferior não seja cortado */
     min-height: 100vh;
     height: 100vh;
     margin: 0;
@@ -47,6 +48,7 @@ body {
 
 /* 2. LOGO CENTRALIZADA (NOVO) */
 .central-logo-container {
+    /* Padding topo/fundo para dar espaço à logo */
     padding: 20px 0 10px 0; 
     text-align: center;
     flex-shrink: 0;
@@ -69,6 +71,7 @@ body {
     gap: 15px; 
     background-color: var(--color-chat-bg); 
     
+    /* Ocultar barra de rolagem da caixa de chat */
     &::-webkit-scrollbar {
         width: 0;
         height: 0;
@@ -150,7 +153,7 @@ body {
     font-size: 0.8em;
     color: var(--color-text-secondary);
     text-align: center;
-    /* CRÍTICO: Padding final ajustado para garantir visibilidade */
+    /* CRÍTICO: Aumenta o padding inferior para garantir que a mensagem não seja cortada */
     padding: 5px 20px 15px; 
     background-color: var(--color-aviso-bg); 
     border-top: none; 
