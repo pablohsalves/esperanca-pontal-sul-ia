@@ -1,5 +1,5 @@
 /*
- * style.css - VERSÃO V60.7 (Ajustes FINAIS: UI/UX do Input: Círculo de Destaque, Microfone e Fonte)
+ * style.css - VERSÃO V60.10 (Ajuste Final: Altura e Posição do Placeholder)
  */
 
 /* 1. RESET E VARIAVEIS */
@@ -90,7 +90,13 @@ html, body {
 /* 6. CAMPO DE TEXTO (Contorno e Fonte) */
 #pergunta-input {
     flex-grow: 1; 
-    padding: 22px 20px; 
+    
+    /* CRÍTICO V60.10: AUMENTO DA ALTURA E AJUSTE DO TEXTO */
+    padding-top: 30px;    /* Mais padding em cima */
+    padding-bottom: 30px; /* Mais padding embaixo */
+    padding-left: 20px;
+    padding-right: 20px;
+    
     border-radius: 28px;
     
     border: none;
@@ -98,12 +104,11 @@ html, body {
     background-color: var(--color-bg-input);
     
     color: var(--color-text-light);
-    font-size: 1.2em; /* Fonte aumentada */
+    font-size: 1.2em; 
     
     resize: none; 
     max-height: 120px; 
     
-    /* CRÍTICO V60.7: Reduz margem direita para acomodar os dois botões */
     margin-right: 5px; 
     
     line-height: 1.4;
@@ -111,6 +116,37 @@ html, body {
     transition: box-shadow 0.2s;
 }
 
+/* CRÍTICO V60.10: Posicionamento do Placeholder (Peça à Hope...) */
+/* Para WebKit (Chrome, Safari, Edge) */
+#pergunta-input::-webkit-input-placeholder {
+    color: var(--color-text-secondary);
+    position: absolute;
+    bottom: 5px; /* Move para baixo */
+    right: 20px; /* Alinha à direita */
+    width: auto;
+    text-align: right;
+    font-size: 0.9em; 
+}
+
+/* Para Mozilla Firefox (Não suporta 'position: absolute', só permite alinhamento) */
+#pergunta-input:-moz-placeholder {
+    color: var(--color-text-secondary);
+    text-align: right; /* Alinha à direita */
+    font-size: 0.9em; 
+    opacity: 1; 
+}
+
+/* Para Internet Explorer 10+ */
+#pergunta-input:-ms-input-placeholder {
+    color: var(--color-text-secondary);
+    position: absolute;
+    bottom: 5px;
+    right: 20px;
+    text-align: right;
+    font-size: 0.9em;
+}
+
+/* Foco: Aumentar o Contorno para 2px ao focar */
 #pergunta-input:focus {
     outline: none;
     box-shadow: inset 0 0 0 2px var(--color-highlight); 
@@ -120,7 +156,7 @@ html, body {
 .icon-btn {
     border: none;
     background-color: transparent; 
-    color: var(--color-text-light); /* Cor do ícone */
+    color: var(--color-text-light); 
     
     width: 44px; 
     height: 44px;
@@ -133,18 +169,17 @@ html, body {
     flex-shrink: 0; 
     font-size: 1.2em;
     padding: 0; 
-    margin: 0 0 0 5px; /* Adicionado margem entre botões */
+    margin: 0 0 0 5px; 
     z-index: 11;
 }
 
-/* CRÍTICO V60.7: Estilo do botão de envio */
+/* Estilo do botão de envio */
 #enviar-btn {
-    background-color: var(--color-send-bg); /* Fundo cinza escuro */
+    background-color: var(--color-send-bg); 
     color: var(--color-text-light);
-    /* Mantido 44px de largura/altura */
 }
 
-/* Estado Desabilitado do botão de envio (Quando o campo está vazio) */
+/* Estado Desabilitado do botão de envio */
 #enviar-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -152,13 +187,11 @@ html, body {
     background-color: var(--color-send-bg); 
 }
 
-/* CRÍTICO V60.7: Botão de Microfone (Apenas o ícone, sem fundo) */
+/* Botão de Microfone */
 #microphone-btn {
     background-color: transparent; 
-    color: var(--color-text-secondary); /* Cor mais sutil */
-    
-    /* Posição no lado direito, perto do avião */
-    margin-left: 0; /* Remove a margem negativa do V60.6 */
+    color: var(--color-text-secondary); 
+    margin-left: 0; 
 }
 
 
