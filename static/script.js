@@ -1,4 +1,4 @@
-// script.js - VERSÃO V60.0 (Microfone e Lógica de Chat)
+// script.js - VERSÃO V60.0-FINAL (Tratamento de Erro de "Digitando..." Corrigido)
 
 document.addEventListener('DOMContentLoaded', function() {
     const input = document.getElementById('pergunta-input');
@@ -8,27 +8,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Lógica de Habilitar/Desabilitar Botão Enviar ---
     function updateSendButton() {
+        // ... (código mantido) ...
         if (input.value.trim().length > 0) {
-            enviarBtn.style.display = 'flex'; // Mostra avião
-            microphoneBtn.style.display = 'none'; // Esconde microfone
+            enviarBtn.style.display = 'flex'; 
+            microphoneBtn.style.display = 'none'; 
             enviarBtn.disabled = false;
         } else {
-            enviarBtn.style.display = 'none'; // Esconde avião
-            microphoneBtn.style.display = 'flex'; // Mostra microfone
+            enviarBtn.style.display = 'none'; 
+            microphoneBtn.style.display = 'flex'; 
             enviarBtn.disabled = true;
         }
     }
 
     input.addEventListener('input', updateSendButton);
     input.addEventListener('keydown', function(e) {
-        // Enviar com Shift + Enter ou apenas Enter se não for em dispositivos móveis
+        // ... (código mantido) ...
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             if (input.value.trim().length > 0) {
                 enviarBtn.click();
             }
         }
-        // Ajusta a altura da textarea dinamicamente
         input.style.height = 'auto';
         input.style.height = input.scrollHeight + 'px';
     });
@@ -37,11 +37,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function criarBolha(texto, tipo) {
         const div = document.createElement('div');
         div.classList.add('mensagem', tipo);
-        div.innerHTML = texto;
+        // CRÍTICO: Usar innerText ou textContent se o texto for puro.
+        // Se a IA retornar formatação, usamos innerHTML (como está no seu código)
+        div.innerHTML = texto; 
         chatBox.appendChild(div);
         
-        // CRÍTICO: Auto-scroll para a última mensagem
         chatBox.scrollTop = chatBox.scrollHeight;
+        return div; // Retorna a div para que possa ser atualizada
     }
 
     // --- Lógica Principal de Envio ---
@@ -54,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 2. Limpa o input e atualiza botões
         input.value = '';
-        input.style.height = 'auto'; // Reseta a altura da textarea
+        input.style.height = 'auto'; 
         updateSendButton();
         
         // 3. Adiciona um placeholder de resposta da IA
@@ -68,36 +70,54 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({ pergunta: pergunta })
         })
-        .then(response => response.json())
+        .then(response => {
+            // CRÍTICO: Verifica o status HTTP da resposta do Flask
+            if (!response.ok) {
+                // Se o Flask retornar um erro HTTP (4xx ou 5xx), tratamos aqui
+                throw new Error(`Erro de rede do servidor: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             // 5. Substitui o placeholder pela resposta real
-            iaPlaceholder.innerHTML = data.resposta;
+            // Se o Flask retornar o JSON com a chave 'resposta', exibe
+            if (data && data.resposta) {
+                 iaPlaceholder.innerHTML = data.resposta;
+            } else {
+                // Caso o JSON esteja vazio ou mal-formado (improvável com as últimas correções)
+                iaPlaceholder.innerHTML = 'Desculpe, a IA retornou um formato de resposta inesperado.';
+            }
+           
         })
         .catch(error => {
-            console.error('Erro ao comunicar com a API:', error);
-            iaPlaceholder.innerHTML = 'Desculpe, houve um erro de conexão com o servidor.';
+            // 6. TRATAMENTO DE ERRO CRÍTICO (Resolve o problema do "Digitando...")
+            console.error('Erro ao comunicar com a API ou servidor:', error);
+            
+            // Mensagem de erro amigável, indicando sobrecarga ou falha de conexão
+            iaPlaceholder.innerHTML = 'Desculpe, ocorreu um erro temporário (API sobrecarregada ou falha de rede). Por favor, tente novamente em alguns segundos.';
         });
     }
 
     enviarBtn.addEventListener('click', enviarMensagem);
     
     // --- Lógica do Microfone (Web Speech API) ---
-    // Verifica se o navegador suporta a API de Reconhecimento de Fala
+    // ... (código do microfone mantido) ...
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition;
     let isListening = false;
     
     if (SpeechRecognition) {
+        // ... (código de inicialização e eventos do microfone mantido) ...
         recognition = new SpeechRecognition();
-        recognition.lang = 'pt-BR'; // Define o idioma
-        recognition.interimResults = false; // Retorna apenas o resultado final
+        recognition.lang = 'pt-BR'; 
+        recognition.interimResults = false; 
         recognition.maxAlternatives = 1;
 
         recognition.onstart = function() {
             isListening = true;
             microphoneBtn.querySelector('i').classList.remove('fa-microphone');
-            microphoneBtn.querySelector('i').classList.add('fa-microphone-alt', 'fa-beat-fade'); // Efeito de escuta
-            microphoneBtn.style.color = '#FF4500'; // Cor de gravação (Laranja/Vermelho)
+            microphoneBtn.querySelector('i').classList.add('fa-microphone-alt', 'fa-beat-fade'); 
+            microphoneBtn.style.color = '#FF4500'; 
             input.placeholder = "Escutando... Fale agora.";
         };
 
@@ -113,15 +133,13 @@ document.addEventListener('DOMContentLoaded', function() {
             isListening = false;
             microphoneBtn.querySelector('i').classList.remove('fa-microphone-alt', 'fa-beat-fade');
             microphoneBtn.querySelector('i').classList.add('fa-microphone');
-            microphoneBtn.style.color = ''; // Retorna à cor CSS normal
+            microphoneBtn.style.color = ''; 
             input.placeholder = "Peça à Hope...";
         };
 
         recognition.onerror = function(event) {
             console.error('Erro no reconhecimento de fala:', event.error);
-            // Mensagem de erro sutil
             input.placeholder = "Erro no Microfone. Tente digitar.";
-            // Força o final
             recognition.stop(); 
         };
 
@@ -129,7 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isListening) {
                 recognition.stop();
             } else {
-                // Remove qualquer texto anterior e começa a escutar
                 input.value = ''; 
                 updateSendButton();
                 recognition.start();
@@ -137,13 +154,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
     } else {
-        // Se o navegador não suportar, esconde o botão MIC
         microphoneBtn.style.display = 'none';
         enviarBtn.style.display = 'flex';
-        enviarBtn.disabled = true; // Por segurança, força o usuário a digitar
+        enviarBtn.disabled = true; 
         console.warn('Reconhecimento de fala não suportado neste navegador.');
     }
 
-    // Garante que os botões iniciais estejam corretos ao carregar
     updateSendButton();
 });
