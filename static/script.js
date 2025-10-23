@@ -1,4 +1,4 @@
-// script.js - VERSÃO V60.18 (Processamento de Resposta com Botão de Contato e Voz Direta)
+// script.js - VERSÃO V60.20 (Processamento de Resposta com Botão de Contato e Voz Direta)
 
 document.addEventListener('DOMContentLoaded', () => {
     const chatBox = document.getElementById('chat-box');
@@ -92,12 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. CRÍTICO V60.18: Cria uma bolha de mensagem (agora pode criar botões)
+    // 2. Cria uma bolha de mensagem (agora pode criar botões)
     function createMessage(content, tipo) {
         const mensagemDiv = document.createElement('div');
         mensagemDiv.classList.add('mensagem', tipo);
         
-        // Verifica se o conteúdo é um objeto (resposta estruturada do backend)
+        // Verifica se o conteúdo é um objeto (resposta estruturada do backend: o BOTÃO)
         if (typeof content === 'object' && content.type === 'button') {
             const wrapperDiv = document.createElement('div');
             wrapperDiv.classList.add('ia-action-button');
@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // Se for string ou objeto tipo 'text' (resposta normal da IA)
             const textContent = (typeof content === 'string') ? content : content.resposta;
+            // Processa o Markdown e quebras de linha
             const htmlContent = textContent.replace(/\n\n/g, '<p>').replace(/\n/g, '<br>');
             mensagemDiv.innerHTML = htmlContent;
         }
@@ -208,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Lógica de Stop 
+    // Lógica de Stop (apenas para UI, o backend continua a processar)
     function stopResponse() {
         if (isThinking) {
             console.log("Comando de Parada de Resposta acionado (apenas UI).");

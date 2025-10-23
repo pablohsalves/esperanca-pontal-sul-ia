@@ -1,4 +1,4 @@
-# app_web_avancada.py - VERSÃO V60.18 (Suporte a Botões de Contato)
+# app_web_avancada.py - VERSÃO V60.20 (Completo: Botões, RAG, Correção de Sessão)
 
 import os
 import json
@@ -41,18 +41,48 @@ client = genai.Client()
 
 # Inicialização do aplicativo Flask
 app = Flask(__name__)
-# Chave secreta para gerenciar sessões (necessário para histórico de chat)
+# Chave secreta para gerenciar sessões
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'sua_chave_secreta_padrao_muito_segura') 
 
-# Modelo a ser usado pela IA
-MODEL = 'gemini-2.5-flash'
-SYSTEM_INSTRUCTION = "Você é HOPE, um assistente virtual amigável, prestativo e espiritual. Responda de forma concisa e útil, mantendo um tom de fé e esperança. Nunca mencione que é um modelo de linguagem ou que foi criado pelo Google. Use Markdown para formatar suas respostas, como negrito e listas. Mantenha as respostas curtas."
+# Nome do arquivo de conhecimento
+KNOWLEDGE_FILE = 'conhecimento_esperancapontalsul.txt'
 
-# Configuração da IA para análise de intenção (Um modelo menor para ser rápido)
+def load_knowledge_base():
+    """Carrega o conteúdo do arquivo de conhecimento específico (RAG)."""
+    try:
+        with open(KNOWLEDGE_FILE, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        print(f"AVISO: Arquivo de conhecimento '{KNOWLEDGE_FILE}' não encontrado.")
+        return ""
+    except Exception as e:
+        print(f"Erro ao ler o arquivo de conhecimento: {e}")
+        return ""
+
+# Carrega o conhecimento UMA VEZ ao iniciar o aplicativo
+KNOWLEDGE_CONTENT = load_knowledge_base()
+
+# Modelo e Instrução Base da IA
+MODEL = 'gemini-2.5-flash'
+BASE_SYSTEM_INSTRUCTION = (
+    "Você é HOPE, um assistente virtual amigável, prestativo e espiritual. Responda de forma concisa e útil, "
+    "mantendo um tom de fé e esperança. Nunca mencione que é um modelo de linguagem ou que foi criado pelo Google. "
+    "Use Markdown para formatar suas respostas, como negrito e listas. Mantenha as respostas curtas."
+)
+
+# Combina a instrução base com o conteúdo do arquivo
+FULL_SYSTEM_INSTRUCTION = (
+    BASE_SYSTEM_INSTRUCTION + 
+    "\n\n--- INFORMAÇÕES ADICIONAIS DE CONTEXTO ---\n" +
+    "USE ESTAS INFORMAÇÕES PRIMARIAMENTE para responder perguntas específicas da igreja (horários, eventos, etc.):\n" + 
+    KNOWLEDGE_CONTENT
+)
+
+# Configuração da IA para análise de intenção (para detectar botões)
 INTENT_MODEL = 'gemini-2.5-flash'
 INTENT_SYSTEM_INSTRUCTION = "Você é um classificador de intenções. Sua única tarefa é identificar se a mensagem do usuário pede por 'whatsapp', 'instagram', 'localizacao' (que inclui endereço e mapa), ou 'secretaria'. Se a intenção for clara, responda APENAS com a palavra-chave (ex: 'whatsapp'). Caso contrário, responda APENAS com a palavra-chave 'chat'. Sua resposta deve ser sempre uma única palavra minúscula."
 
-def get_gemini_response(history, user_message, system_instruction=SYSTEM_INSTRUCTION):
+def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_INSTRUCTION):
     """
     Função principal para obter a resposta da IA.
     """
@@ -111,8 +141,8 @@ def home():
     """
     Rota inicial que exibe o chat e inicializa a sessão.
     """
-    # Inicializa o histórico de chat na sessão se não existir
-    if 'chat_history' not in session:
+    # Garante que o histórico de chat na sessão seja uma lista
+    if 'chat_history' not in session or not isinstance(session['chat_history'], list):
         session['chat_history'] = []
         
     # Mensagem de saudação inicial da IA
@@ -134,12 +164,11 @@ def chat_api():
     # 1. Tenta classificar a intenção do usuário
     intent = classify_intent(user_message)
     
-    # 2. Verifica se a intenção é um link de contato
+    # 2. Verifica se a intenção é um link de contato (BOTÃO CLICÁVEL)
     if intent in CONTACT_LINKS:
         link_info = CONTACT_LINKS[intent]
         
         # Cria a resposta estruturada para o Front-end
-        # CRÍTICO: Usa um dicionário com um tipo especial 'button'
         response_data = {
             "type": "button",
             "pre_text": f"Claro! Aqui está o acesso para o setor de {intent.capitalize()}:",
@@ -153,14 +182,23 @@ def chat_api():
         
     # 3. Se não for link de contato, usa a IA para responder normalmente
     else:
-        # Recupera o histórico da sessão (conversão de lista de dicts para lista de types.Content)
+        # Recupera o histórico da sessão
         history_dicts = session.get('chat_history', [])
-        history = [types.Content(**h) for h in history_dicts]
+        
+        # Converte a lista de dicionários para objetos types.Content para a API
+        history = []
+        try:
+            history = [types.Content(**h) for h in history_dicts]
+        except Exception as e:
+            # Caso a sessão esteja corrompida, limpa e inicia novo chat.
+            print(f"Erro ao carregar histórico da sessão: {e}. Reiniciando histórico.")
+            session['chat_history'] = []
+            history = []
 
-        # Obtém a resposta da IA
+        # Obtém a resposta da IA (com o contexto do arquivo embutido)
         ia_response_text = get_gemini_response(history, user_message)
         
-        # Atualiza o histórico de chat na sessão (conversão de volta para lista de dicts)
+        # Atualiza o histórico de chat na sessão
         session['chat_history'] = [h.to_dict() for h in history]
         
         # Retorna a resposta da IA no formato padrão (string)

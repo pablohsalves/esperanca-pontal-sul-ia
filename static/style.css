@@ -1,20 +1,21 @@
 /*
- * style.css - VERSÃO V60.18 (Adicionando estilo para Botões de Contato)
+ * style.css - VERSÃO V60.20 (MODO ESCURO - DARK MODE)
  */
 
 :root {
-    /* Cores ajustadas para o esquema cinza/verde */
-    --color-background: #f0f0f0; /* Fundo do corpo */
-    --color-chat-bg: #ffffff; /* Fundo da caixa de chat */
-    --color-ia-bg: #e0e0e0; /* Fundo da bolha da IA (um cinza claro) */
-    --color-ia-text: #212121; /* Texto da IA */
-    --color-user-bg: #3a7d44; /* Fundo da bolha do usuário (verde escuro) */
-    --color-user-text: #ffffff; /* Texto do usuário */
-    --color-input-bg: #ffffff; /* Fundo da caixa de input */
-    --color-border: #cccccc; /* Borda da caixa de input */
-    --color-text-secondary: #757575; /* Ícones, Placeholder */
-    --color-highlight: #558b2f; /* Cor principal de destaque (verde musgo) */
-    --color-text-light: #ffffff; /* Texto do botão */
+    /* Cores ajustadas para o esquema DARK MODE */
+    --color-background: #1e1e1e; /* Fundo do corpo (Cinza Escuro) */
+    --color-chat-bg: #2e2e2e; /* Fundo da caixa de chat (Cinza Médio) */
+    --color-ia-bg: #3c3c3c; /* Fundo da bolha da IA (Cinza um pouco mais claro) */
+    --color-ia-text: #ffffff; /* Texto da IA (Branco) */
+    --color-user-bg: #4a4a4a; /* Fundo da bolha do usuário (Cinza Escuro para contraste) */
+    --color-user-text: #ffffff; /* Texto do usuário (Branco) */
+    --color-input-bg: #2e2e2e; /* Fundo da caixa de input (Cinza Médio) */
+    --color-border: #505050; /* Borda da caixa de input (Cinza mais visível) */
+    --color-text-secondary: #aaaaaa; /* Ícones, Placeholder (Cinza Claro) */
+    --color-highlight: #558b2f; /* Cor principal de destaque (Verde Musgo - para cabeçalho e botões de ação) */
+    --color-text-light: #ffffff; /* Texto do botão (Branco) */
+    --color-aviso-bg: #262626; /* Fundo do aviso inferior */
 }
 
 /* 1. LAYOUT GERAL */
@@ -30,25 +31,26 @@ body {
 
 .chat-container {
     width: 100%;
-    max-width: 450px; /* Largura máxima para simular tela de celular */
+    max-width: 450px; 
     height: 100vh; 
-    max-height: 800px; /* Altura máxima */
+    max-height: 800px; 
     display: flex;
     flex-direction: column;
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    box-shadow: none; 
     background-color: var(--color-chat-bg);
     overflow: hidden;
 }
 
 /* 2. CABEÇALHO */
 .chat-header {
-    background-color: var(--color-highlight);
+    background-color: var(--color-chat-bg); 
     color: var(--color-user-text);
     padding: 15px;
-    text-align: center;
-    font-size: 1.2em;
+    text-align: left; 
+    font-size: 1.5em;
     font-weight: bold;
+    border-bottom: 1px solid var(--color-border); 
 }
 
 /* 3. ÁREA DE MENSAGENS (CHAT BOX) */
@@ -60,7 +62,7 @@ body {
     flex-direction: column;
     gap: 10px;
     scroll-behavior: smooth;
-    background-color: #f7f7f7; /* Fundo sutil para a área de chat */
+    background-color: var(--color-chat-bg); 
 }
 
 /* 4. ESTILO DAS BOLHAS DE MENSAGEM */
@@ -74,9 +76,11 @@ body {
 
 .mensagem.usuario {
     align-self: flex-end;
-    background-color: var(--color-user-bg);
+    background-color: #2e2e2e; 
     color: var(--color-user-text);
-    border-bottom-right-radius: 4px; /* Ponta triangular */
+    border-radius: 10px; 
+    border-bottom-right-radius: 2px; 
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .mensagem.ia,
@@ -84,16 +88,18 @@ body {
     align-self: flex-start;
     background-color: var(--color-ia-bg);
     color: var(--color-ia-text);
-    border-bottom-left-radius: 4px; /* Ponta triangular */
+    border-radius: 10px;
+    border-bottom-left-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .mensagem p {
-    margin: 0; /* Remove margem padrão de parágrafos */
+    margin: 0; 
 }
 
-/* Estilo para links dentro das bolhas da IA */
+/* Estilo para links e Markdown dentro das bolhas da IA */
 .mensagem.ia a {
-    color: var(--color-highlight);
+    color: #81c784; 
     font-weight: bold;
     text-decoration: none;
 }
@@ -103,11 +109,11 @@ body {
 
 /* 5. ÁREA DE INPUT */
 .chat-input-container {
-    background-color: var(--color-input-bg);
+    background-color: var(--color-chat-bg);
     padding: 10px;
     display: flex;
     align-items: flex-end;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid var(--color-border); 
 }
 
 #input-wrapper {
@@ -115,16 +121,21 @@ body {
     display: flex; 
     align-items: flex-end; 
     position: relative;
-    padding-right: 90px; /* Espaço para o microfone e avião/stop */
+    padding-right: 95px; 
 }
 
 #pergunta-input {
     flex-grow: 1;
-    min-height: 44px; /* Altura mínima para o botão */
-    max-height: 150px; /* Altura máxima (aprox. 6 linhas) */
-    padding: 12px 45px 12px 15px; /* Padding para ícones e alinhamento */
+    min-height: 50px; 
+    max-height: 150px; 
+    padding: 15px; 
+    padding-right: 90px; 
+    
     border: 1px solid var(--color-border);
-    border-radius: 22px; 
+    background-color: var(--color-chat-bg); 
+    color: var(--color-ia-text);
+    
+    border-radius: 25px; 
     resize: none; 
     overflow-y: auto;
     font-size: 1em;
@@ -143,41 +154,42 @@ body {
     color: var(--color-text-secondary);
     text-align: center;
     padding: 5px 10px;
-    background-color: #f0f0f0;
-    border-top: 1px solid #e0e0e0;
+    background-color: var(--color-aviso-bg);
+    border-top: 1px solid #3a3a3a;
 }
 
 /* 7. BOTÕES (ÍCONES - MIC, AVIÃO, STOP) */
 .icon-btn {
     position: absolute;
-    height: 44px; /* Altura do ícone */
-    width: 44px;  /* Largura do ícone */
+    height: 48px; 
+    width: 48px;  
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 1.2em;
+    font-size: 1.3em;
     transition: color 0.1s, background-color 0.1s;
     top: 50%;
-    transform: translateY(-50%); /* Centraliza verticalmente */
+    transform: translateY(-50%); 
 }
 
 #enviar-btn {
-    right: 5px; /* Posição à direita do input-wrapper */
-    background-color: var(--color-highlight);
+    right: 0px; 
+    background-color: var(--color-highlight); 
     color: var(--color-text-light);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
 #enviar-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background-color: var(--color-highlight); /* Mantém a cor */
+    background-color: var(--color-border); 
 }
 
 #microphone-btn {
-    right: 50px; /* Posição à esquerda do botão de envio */
+    right: 48px; 
     background-color: transparent; 
     color: var(--color-text-secondary); 
 }
@@ -188,28 +200,25 @@ body {
 
 /* Estilo quando o microfone está ATIVO */
 .icon-btn.mic-active {
-    color: var(--color-highlight); /* Cor principal de destaque */
-    background-color: rgba(76, 175, 80, 0.1); /* Um leve fundo cinza/verde */
+    color: var(--color-highlight); 
+    background-color: transparent; 
 }
 
-/* CRÍTICO V60.18: Estilo para Botão de Ação dentro da bolha da IA */
+/* 8. Estilo para Botão de Ação dentro da bolha da IA (CRÍTICO para os links) */
 .ia-action-button {
-    /* Estilo do container do texto + botão */
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
 .ia-action-button .button-link {
-    /* Estilo do botão clicável */
-    display: inline-flex; /* Permite ícone e texto */
+    display: inline-flex; 
     align-items: center;
     justify-content: center;
     
     padding: 10px 15px;
     border-radius: 20px;
     
-    /* Cores de Destaque */
     background-color: var(--color-highlight); 
     color: var(--color-text-light); 
     
@@ -219,16 +228,14 @@ body {
     cursor: pointer;
     
     transition: background-color 0.2s, opacity 0.2s;
-    /* Faz o botão ocupar a largura disponível na bolha */
     width: 100%; 
-    max-width: 250px; /* Limita a largura dentro da bolha */
+    max-width: 250px; 
 }
 
 .ia-action-button .button-link:hover {
-    background-color: #4a4d50; /* Um tom um pouco mais escuro no hover */
+    background-color: #44682c; 
 }
 
 .ia-action-button .button-link i {
-    /* Espaçamento do ícone */
     margin-right: 8px;
 }
