@@ -38,7 +38,7 @@ if 'GEMINI_API_KEY' not in os.environ:
 
 # Configuração de Admin BÁSICA
 ADMIN_USER = os.environ.get('ADMIN_USER', 'admin') # Usuário padrão
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'suasenhafacil') # Senha padrão (MUDE ISSO)
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'Eps@1472') # Senha padrão (MUDE ISSO)
 
 client = genai.Client()
 app = Flask(__name__)
