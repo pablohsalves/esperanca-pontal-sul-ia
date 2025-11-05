@@ -1,0 +1,225 @@
+2025-10-22 22:13:37,299 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:13:37,326 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:13:37,326 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:13:40,525 | INFO | 127.0.0.1 - - [22/Oct/2025 22:13:40] "GET / HTTP/1.1" 200 -
+2025-10-22 22:13:41,181 | INFO | 127.0.0.1 - - [22/Oct/2025 22:13:41] "GET /static/script.js?v=20251024 HTTP/1.1" 200 -
+2025-10-22 22:13:41,213 | INFO | 127.0.0.1 - - [22/Oct/2025 22:13:41] "GET /static/style.css?v=20251024 HTTP/1.1" 200 -
+2025-10-22 22:17:14,238 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:17:14,257 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:17:14,257 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:17:17,391 | INFO | 127.0.0.1 - - [22/Oct/2025 22:17:17] "GET / HTTP/1.1" 200 -
+2025-10-22 22:17:17,745 | INFO | 127.0.0.1 - - [22/Oct/2025 22:17:17] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:17:17,769 | INFO | 127.0.0.1 - - [22/Oct/2025 22:17:17] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:17:23,125 | INFO | 127.0.0.1 - - [22/Oct/2025 22:17:23] "GET / HTTP/1.1" 200 -
+2025-10-22 22:17:23,155 | INFO | 127.0.0.1 - - [22/Oct/2025 22:17:23] "[36mGET /static/style.css?v=20251024_v20 HTTP/1.1[0m" 304 -
+2025-10-22 22:17:23,169 | INFO | 127.0.0.1 - - [22/Oct/2025 22:17:23] "[36mGET /static/script.js?v=20251024_v20 HTTP/1.1[0m" 304 -
+2025-10-22 22:17:27,645 | INFO | 127.0.0.1 - - [22/Oct/2025 22:17:27] "GET / HTTP/1.1" 200 -
+2025-10-22 22:17:27,681 | INFO | 127.0.0.1 - - [22/Oct/2025 22:17:27] "[36mGET /static/style.css?v=20251024_v20 HTTP/1.1[0m" 304 -
+2025-10-22 22:17:27,690 | INFO | 127.0.0.1 - - [22/Oct/2025 22:17:27] "[36mGET /static/script.js?v=20251024_v20 HTTP/1.1[0m" 304 -
+2025-10-22 22:20:29,832 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:20:29,850 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:20:29,850 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:20:31,410 | INFO | 127.0.0.1 - - [22/Oct/2025 22:20:31] "GET / HTTP/1.1" 200 -
+2025-10-22 22:20:31,561 | INFO | 127.0.0.1 - - [22/Oct/2025 22:20:31] "[36mGET /static/style.css?v=20251024_v20 HTTP/1.1[0m" 304 -
+2025-10-22 22:20:31,570 | INFO | 127.0.0.1 - - [22/Oct/2025 22:20:31] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:23:54,051 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:23:54,068 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:23:54,069 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:23:56,332 | INFO | 127.0.0.1 - - [22/Oct/2025 22:23:56] "GET / HTTP/1.1" 200 -
+2025-10-22 22:23:56,496 | INFO | 127.0.0.1 - - [22/Oct/2025 22:23:56] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:23:56,521 | INFO | 127.0.0.1 - - [22/Oct/2025 22:23:56] "[36mGET /static/script.js?v=20251024_v20 HTTP/1.1[0m" 304 -
+2025-10-22 22:24:12,296 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:12] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:12,364 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:12] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:12,366 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:12] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:12,786 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-10-22 22:24:14,204 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:14] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:14,267 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:14] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:14,277 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:14] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:14,561 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:14] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-10-22 22:24:15,115 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:15,163 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:15,174 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:15,312 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:15,358 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:15,367 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:15,504 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:15,542 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:15,543 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:15,686 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:15,718 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:15,726 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:15,874 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:15,918 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:15,921 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:15] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,049 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:16,081 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,089 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,216 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:16,270 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,274 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,384 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:16,424 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,430 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,561 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:16,599 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,601 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,729 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:16,762 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,769 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,892 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:16,925 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:16,933 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:16] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,063 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:17,094 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,106 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,226 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:17,271 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,271 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,413 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:17,446 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,454 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,591 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:17,628 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,630 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,761 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:17,795 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,797 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,943 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:17,975 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:17,976 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:17] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,122 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:18,158 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,162 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,292 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:18,332 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,332 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,460 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:18,499 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,544 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,627 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:18,668 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,669 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,809 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:18,841 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,850 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:18,982 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:18] "GET / HTTP/1.1" 200 -
+2025-10-22 22:24:19,014 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:19] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:19,023 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:19] "GET /static/script.js?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:24:19,517 | INFO | 127.0.0.1 - - [22/Oct/2025 22:24:19] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-10-22 22:25:44,750 | ERROR | Placeholder assistente chamado, IA inoperante.
+2025-10-22 22:25:44,750 | INFO | USER: oi | IA: IA Inoperante devido a erro de inicialização.
+2025-10-22 22:25:44,754 | INFO | 127.0.0.1 - - [22/Oct/2025 22:25:44] "POST /api/chat HTTP/1.1" 200 -
+2025-10-22 22:29:35,172 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:29:35,191 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:29:35,191 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:29:38,033 | INFO | 127.0.0.1 - - [22/Oct/2025 22:29:38] "GET / HTTP/1.1" 200 -
+2025-10-22 22:29:38,108 | INFO | 127.0.0.1 - - [22/Oct/2025 22:29:38] "[36mGET /static/style.css?v=20251024_v20 HTTP/1.1[0m" 304 -
+2025-10-22 22:29:38,108 | INFO | 127.0.0.1 - - [22/Oct/2025 22:29:38] "[36mGET /static/script.js?v=20251024_v20 HTTP/1.1[0m" 304 -
+2025-10-22 22:36:31,405 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:36:31,441 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:36:31,441 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:36:34,064 | INFO | 127.0.0.1 - - [22/Oct/2025 22:36:34] "GET / HTTP/1.1" 200 -
+2025-10-22 22:36:34,216 | INFO | 127.0.0.1 - - [22/Oct/2025 22:36:34] "GET /static/style.css?v=20251024_v20 HTTP/1.1" 200 -
+2025-10-22 22:36:34,244 | INFO | 127.0.0.1 - - [22/Oct/2025 22:36:34] "[36mGET /static/script.js?v=20251024_v20 HTTP/1.1[0m" 304 -
+2025-10-22 22:39:50,628 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:39:50,646 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:39:50,646 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:39:51,975 | INFO | 127.0.0.1 - - [22/Oct/2025 22:39:51] "GET / HTTP/1.1" 200 -
+2025-10-22 22:39:52,394 | INFO | 127.0.0.1 - - [22/Oct/2025 22:39:52] "GET /static/style.css?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 22:39:52,428 | INFO | 127.0.0.1 - - [22/Oct/2025 22:39:52] "GET /static/script.js?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 22:39:57,545 | ERROR | Placeholder assistente chamado, IA inoperante.
+2025-10-22 22:39:57,546 | INFO | USER: oi | IA: IA Inoperante devido a erro de inicialização.
+2025-10-22 22:39:57,547 | INFO | 127.0.0.1 - - [22/Oct/2025 22:39:57] "POST /api/chat HTTP/1.1" 200 -
+2025-10-22 22:40:28,627 | ERROR | Placeholder assistente chamado, IA inoperante.
+2025-10-22 22:40:28,627 | INFO | USER: oi | IA: IA Inoperante devido a erro de inicialização.
+2025-10-22 22:40:28,628 | INFO | 127.0.0.1 - - [22/Oct/2025 22:40:28] "POST /api/chat HTTP/1.1" 200 -
+2025-10-22 22:47:06,107 | INFO | 127.0.0.1 - - [22/Oct/2025 22:47:06] "GET / HTTP/1.1" 200 -
+2025-10-22 22:47:06,156 | INFO | 127.0.0.1 - - [22/Oct/2025 22:47:06] "[36mGET /static/script.js?v=20251022_v25 HTTP/1.1[0m" 304 -
+2025-10-22 22:47:06,156 | INFO | 127.0.0.1 - - [22/Oct/2025 22:47:06] "GET /static/style.css?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 22:48:56,087 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:48:56,119 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:48:56,119 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:48:57,859 | INFO | 127.0.0.1 - - [22/Oct/2025 22:48:57] "GET / HTTP/1.1" 200 -
+2025-10-22 22:48:57,959 | INFO | 127.0.0.1 - - [22/Oct/2025 22:48:57] "GET /static/style.css?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 22:48:57,987 | INFO | 127.0.0.1 - - [22/Oct/2025 22:48:57] "[36mGET /static/script.js?v=20251022_v25 HTTP/1.1[0m" 304 -
+2025-10-22 22:50:43,259 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:50:43,277 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:50:43,277 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:50:46,387 | INFO | 127.0.0.1 - - [22/Oct/2025 22:50:46] "GET / HTTP/1.1" 200 -
+2025-10-22 22:50:46,463 | INFO | 127.0.0.1 - - [22/Oct/2025 22:50:46] "GET /static/style.css?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 22:50:46,490 | INFO | 127.0.0.1 - - [22/Oct/2025 22:50:46] "[36mGET /static/script.js?v=20251022_v25 HTTP/1.1[0m" 304 -
+2025-10-22 22:56:32,252 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 22:56:32,268 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 22:56:32,269 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 22:56:40,126 | INFO | 127.0.0.1 - - [22/Oct/2025 22:56:40] "GET / HTTP/1.1" 200 -
+2025-10-22 22:56:40,230 | INFO | 127.0.0.1 - - [22/Oct/2025 22:56:40] "GET /static/style.css?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 22:56:40,231 | INFO | 127.0.0.1 - - [22/Oct/2025 22:56:40] "GET /static/script.js?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 22:57:07,900 | ERROR | Placeholder assistente chamado, IA inoperante.
+2025-10-22 22:57:07,901 | INFO | USER: oi | IA: IA Inoperante devido a erro de inicialização.
+2025-10-22 22:57:07,904 | INFO | 127.0.0.1 - - [22/Oct/2025 22:57:07] "POST /api/chat HTTP/1.1" 200 -
+2025-10-22 23:01:57,650 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 23:01:57,672 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 23:01:57,672 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 23:02:01,019 | INFO | 127.0.0.1 - - [22/Oct/2025 23:02:01] "GET / HTTP/1.1" 200 -
+2025-10-22 23:02:01,085 | INFO | 127.0.0.1 - - [22/Oct/2025 23:02:01] "GET /static/style.css?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 23:02:01,108 | INFO | 127.0.0.1 - - [22/Oct/2025 23:02:01] "GET /static/script.js?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 23:05:24,936 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 23:05:24,954 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 23:05:24,954 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 23:05:26,691 | INFO | 127.0.0.1 - - [22/Oct/2025 23:05:26] "GET / HTTP/1.1" 200 -
+2025-10-22 23:05:26,746 | INFO | 127.0.0.1 - - [22/Oct/2025 23:05:26] "GET /static/style.css?v=20251022_v25 HTTP/1.1" 200 -
+2025-10-22 23:05:26,763 | INFO | 127.0.0.1 - - [22/Oct/2025 23:05:26] "[36mGET /static/script.js?v=20251022_v25 HTTP/1.1[0m" 304 -
+2025-10-22 23:07:40,219 | CRITICAL | ERRO CRÍTICO: Falha ao inicializar o ParceiroDeFeAvancado. 'URL'
+2025-10-22 23:07:40,236 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.94:5000
+2025-10-22 23:07:40,237 | INFO | [33mPress CTRL+C to quit[0m
+2025-10-22 23:07:42,809 | INFO | 127.0.0.1 - - [22/Oct/2025 23:07:42] "GET / HTTP/1.1" 200 -
+2025-10-22 23:07:43,216 | INFO | 127.0.0.1 - - [22/Oct/2025 23:07:43] "GET /static/script.js?v=20251022_v31 HTTP/1.1" 200 -
+2025-10-22 23:07:43,217 | INFO | 127.0.0.1 - - [22/Oct/2025 23:07:43] "GET /static/style.css?v=20251022_v31 HTTP/1.1" 200 -
+2025-10-22 23:07:52,535 | ERROR | Placeholder assistente chamado, IA inoperante.
+2025-10-22 23:07:52,537 | INFO | USER: oi | IA: IA Inoperante devido a erro de inicialização.
+2025-10-22 23:07:52,537 | INFO | 127.0.0.1 - - [22/Oct/2025 23:07:52] "POST /api/chat HTTP/1.1" 200 -
+2025-10-22 23:07:58,843 | ERROR | Placeholder assistente chamado, IA inoperante.
+2025-10-22 23:07:58,844 | INFO | USER: oi | IA: IA Inoperante devido a erro de inicialização.
+2025-10-22 23:07:58,845 | INFO | 127.0.0.1 - - [22/Oct/2025 23:07:58] "POST /api/chat HTTP/1.1" 200 -
+2025-10-22 23:08:04,153 | ERROR | Placeholder assistente chamado, IA inoperante.
+2025-10-22 23:08:04,154 | INFO | USER: tudo bem? | IA: IA Inoperante devido a erro de inicialização.
+2025-10-22 23:08:04,155 | INFO | 127.0.0.1 - - [22/Oct/2025 23:08:04] "POST /api/chat HTTP/1.1" 200 -

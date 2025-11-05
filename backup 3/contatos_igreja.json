@@ -1,0 +1,22 @@
+{
+    "whatsapp": {
+        "url": "https://wa.me/5562998765432",
+        "texto": "Falar no WhatsApp",
+        "classe": "whatsapp"
+    },
+    "localizacao": {
+        "url": "https://maps.app.goo.gl/exemplo_do_seu_mapa_aqui",
+        "texto": "Localização no Mapa",
+        "classe": "localizacao"
+    },
+    "instagram": {
+        "url": "https://instagram.com/esperancapontalsul",
+        "texto": "Instagram Oficial",
+        "classe": "instagram"
+    },
+    "cultos": {
+        "url": "/#horarios",
+        "texto": "Ver Horários de Culto",
+        "classe": "cultos"
+    }
+}

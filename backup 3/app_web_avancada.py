@@ -1,11 +1,8 @@
-# app_web_avancada.py - VERSÃO V60.48 (Bcrypt para Admin)
+# app_web_avancada.py - VERSÃO V60.47 (Suporte a *Negrito* e Admin Restaurado)
 
 import os
 import json
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, flash
-
-# Importação do Bcrypt para segurança
-import bcrypt # <<< ADICIONADO BCrypt
 
 # Importação do Google GenAI
 from google import genai
@@ -20,7 +17,7 @@ CONTACT_LINKS = {
     },
     "instagram": {
         "text": "Ver nosso Instagram",
-        "url": "https://www.instagram.com/seuperfil",
+        "url": "https://www.instagram.com/esperancapontalsul",
         "icon": "fab fa-instagram"
     },
     "localizacao": {
@@ -39,13 +36,9 @@ CONTACT_LINKS = {
 if 'GEMINI_API_KEY' not in os.environ:
     raise ValueError("A variável de ambiente GEMINI_API_KEY não está configurada.")
 
-# Configuração de Admin SEGURA (Usando HASH)
-# ⚠️ IMPORTANTE: SUBSTITUA ESTE HASH PELO SEU HASH REAL DO BCrypt! 
-# Este HASH de exemplo corresponde à senha 'suasenhafacil'
-FALLBACK_HASH = b'$2b$12$YX534jsnUF5o7dREGvON4.dnNoIQgSVN6gPAX8jJn58qYuJwCHj8y'
-
-ADMIN_USER = os.environ.get('ADMIN_USER', 'admin_esperanca') 
-ADMIN_PASSWORD_HASH = os.environ.get('ADMIN_PASSWORD_HASH', FALLBACK_HASH.decode('utf-8')) 
+# Configuração de Admin BÁSICA
+ADMIN_USER = os.environ.get('ADMIN_USER', 'admin') # Usuário padrão
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'Eps@1472') # Senha padrão (MUDE ISSO)
 
 client = genai.Client()
 app = Flask(__name__)
@@ -106,6 +99,7 @@ def update_system_instruction():
 
 update_system_instruction() # Chama para inicializar
 
+# ... (o restante das funções get_gemini_response e classify_intent permanecem iguais) ...
 def get_gemini_response(history, user_message, system_instruction=FULL_SYSTEM_INSTRUCTION):
     """
     Função principal para obter a resposta da IA.
@@ -179,31 +173,20 @@ def knowledge_status():
             "content_length": 0
         })
 
-# Rota para Login (AGORA COM BCrypt para segurança)
+# Rota para Login (Necessária para proteger /admin/conhecimento)
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
         
-        # 1. Obter o Hash do ambiente/fallback
-        hash_armazenado = ADMIN_PASSWORD_HASH.encode('utf-8')
-        
-        # 2. Obter a senha enviada e Codificá-la
-        senha_enviada = password.encode('utf-8')
-
-        # 3. VERIFICAÇÃO SEGURA: Compara usuário e verifica a senha usando bcrypt
-        # Utilizamos try/except caso o hash_armazenado esteja mal formatado (evita crash)
-        try:
-            if username == ADMIN_USER and bcrypt.checkpw(senha_enviada, hash_armazenado):
-                session['logged_in'] = True
-                flash("Login realizado com sucesso!", "message")
-                return redirect(url_for('admin_conhecimento'))
-            else:
-                flash("Credenciais inválidas. Tente novamente.", "error")
-        except ValueError:
-            flash("Erro de formato de senha. Verifique o HASH no ambiente.", "error")
-        
+        if username == ADMIN_USER and password == ADMIN_PASSWORD:
+            session['logged_in'] = True
+            flash("Login realizado com sucesso!", "message")
+            return redirect(url_for('admin_conhecimento'))
+        else:
+            flash("Credenciais inválidas. Tente novamente.", "error")
+            
     return render_template("admin_login.html")
 
 

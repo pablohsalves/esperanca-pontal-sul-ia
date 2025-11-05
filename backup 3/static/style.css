@@ -1,0 +1,255 @@
+/*
+ * style.css - VERSÃO V60.52 (CORREÇÃO DO CORTE HORIZONTAL DO INPUT)
+ */
+
+:root {
+    --color-background: #1B1C1D; 
+    --color-ia-bg: var(--color-background); 
+    --color-chat-bg: var(--color-background); 
+    --color-ia-text: #ffffff; 
+    --color-user-bg: #4A4A4A; 
+    --color-user-text: #ffffff; 
+    --color-input-bg: var(--color-background); 
+    --color-border: #505050; 
+    --color-text-secondary: #aaaaaa; 
+    --color-highlight: #558B2F; 
+    --color-text-light: #ffffff; 
+    --color-aviso-bg: var(--color-background); 
+    --color-icon-bg: #4A4A4A; 
+}
+
+/* 1. LAYOUT GERAL E RESPONSIVIDADE */
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--color-background); 
+    display: flex;
+    justify-content: center;
+    /* Centraliza verticalmente o chat-container. */
+    align-items: center; 
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    /* Usa 100% da altura da viewport */
+    height: 100vh; 
+    overflow: hidden; 
+}
+
+.chat-container {
+    width: 100%;
+    max-width: 650px; 
+    /* Reduz a altura máxima para que ele possa flutuar ao centro. */
+    height: 95vh; 
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: none; 
+    background-color: var(--color-chat-bg); 
+    /* Garante que o container inteiro fique visível */
+    overflow: hidden; 
+    border-radius: 0; 
+}
+
+/* 2. LOGO CENTRALIZADA (Topo da Caixa de Chat, mas a Caixa está no Centro da Tela) */
+.central-logo-container {
+    /* Aumenta o padding vertical para dar mais espaço */
+    padding: 25px 0 15px 0; 
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.central-logo {
+    max-height: 50px; 
+    width: auto;
+    filter: brightness(1.2); 
+    margin-bottom: 10px;
+}
+
+/* 3. ÁREA DE MENSAGENS (CHAT BOX) */
+#chat-box {
+    flex-grow: 1;
+    padding: 15px 20px;
+    overflow-y: auto; 
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+    background-color: var(--color-chat-bg); 
+    
+    /* Ocultar barra de rolagem da caixa de chat */
+    &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+    scrollbar-width: none; 
+}
+
+/* 4. ESTILO DAS BOLHAS DE MENSAGEM */
+.mensagem {
+    padding: 12px 18px; 
+    border-radius: 20px; 
+    max-width: 85%;
+    box-shadow: none; 
+    font-size: 1.05em; 
+}
+
+.mensagem.usuario {
+    align-self: flex-end;
+    background-color: var(--color-user-bg); 
+    color: var(--color-user-text);
+    border-top-right-radius: 4px; 
+}
+
+.mensagem.ia,
+#typing-indicator {
+    align-self: flex-start;
+    background-color: var(--color-ia-bg); 
+    color: var(--color-ia-text);
+    border: 1px solid var(--color-border); 
+    border-top-left-radius: 4px; 
+}
+
+/* 5. ÁREA DE INPUT */
+.chat-input-container {
+    background-color: var(--color-background); 
+    /* AJUSTE V60.52: Reintroduz o padding horizontal para alinhamento e mantém o espaçamento reduzido */
+    padding: 10px 20px 5px; 
+    display: flex;
+    align-items: center; 
+    border-top: none; 
+    flex-shrink: 0; 
+}
+
+#chat-form {
+    width: 100%; 
+}
+
+#input-wrapper {
+    flex-grow: 1;
+    display: flex; 
+    align-items: center; 
+    position: relative;
+    padding-right: 0; 
+    width: 100%; 
+    /* AJUSTE V60.52: Remove o padding horizontal. Ele está no container pai. */
+    padding: 0; 
+}
+
+#pergunta-input {
+    flex-grow: 1;
+    min-height: 55px; 
+    max-height: 200px; 
+    
+    padding: 15px 20px; 
+    padding-right: 100px; 
+    
+    border: 1px solid var(--color-border); 
+    background-color: var(--color-input-bg); 
+    color: var(--color-ia-text);
+    
+    border-radius: 30px; 
+    resize: none; 
+    overflow-y: auto;
+    font-size: 1.2em; 
+    box-sizing: border-box; 
+    line-height: 1.4;
+    width: 100%; 
+
+    /* Ocultar a barra de rolagem no campo de pesquisa */
+    &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+    scrollbar-width: none; 
+}
+
+/* 6. AVISO INFERIOR */
+.aviso-inferior {
+    font-size: 0.8em;
+    color: var(--color-text-secondary);
+    text-align: center;
+    /* AJUSTES V60.51/V60.52: Espaçamento reduzido e padding horizontal para alinhar com o chat/input */
+    padding: 10px 20px 70px; 
+    background-color: var(--color-aviso-bg); 
+    border-top: none; 
+    flex-shrink: 0; 
+}
+
+/* SOLUÇÃO PARA MOBILE (100vh) */
+@media screen and (max-width: 650px) {
+    body {
+        align-items: center;
+        padding-bottom: 5px; 
+    }
+    .chat-container {
+        height: -webkit-fill-available;
+        max-height: none; 
+        min-height: 90vh;
+    }
+}
+
+
+/* 7. BOTÕES (ÍCONES DENTRO DO INPUT) */
+.icon-btn {
+    position: absolute;
+    height: 40px; 
+    width: 40px;  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%; 
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: all 0.1s;
+    top: 50%;
+    transform: translateY(-50%); 
+    
+    background-color: transparent; 
+    color: var(--color-text-secondary); 
+}
+
+#microphone-btn {
+    right: 55px; 
+    background-color: transparent;
+    color: var(--color-text-secondary);
+}
+
+#enviar-btn {
+    right: 10px; 
+    background-color: transparent; 
+    color: var(--color-highlight); 
+    box-shadow: none; 
+    font-size: 1.4em; 
+}
+
+/* Estilo para Botão de Ação dentro da bolha da IA */
+.ia-action-button {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.ia-action-button .button-link {
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
+    
+    padding: 12px 18px;
+    border-radius: 25px;
+    
+    background-color: var(--color-highlight); 
+    color: var(--color-text-light); 
+    
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.05em;
+    cursor: pointer;
+    
+    transition: background-color 0.2s, opacity 0.2s;
+    width: 100%; 
+    max-width: 250px; 
+}
+.ia-action-button .button-link:hover {
+    background-color: #44682c; 
+}
+.ia-action-button .button-link i {
+    margin-right: 10px;
+}

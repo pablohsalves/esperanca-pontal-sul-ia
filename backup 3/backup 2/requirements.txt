@@ -1,0 +1,5 @@
+flask
+google-genai
+python-dotenv
+gunicorn
+pydantic # (Necessário para a serialização robusta que implementamos)
